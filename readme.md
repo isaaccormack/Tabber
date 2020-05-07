@@ -27,7 +27,7 @@ Just to feel out the app, a couple requirements are given below.
 - Ability to create an account
     - A user is able to save their recorded licks with tablature
     - _*maybe_ A user is able to play the tabs back through a different instrument (ie. synth tones, piano, etc.)
-- Ability to share tabs between users
+- Ability to share tabs between users (Share links or direct to user)
 - Ability to export tabs to pdf
 - _*maybe_ Ability to upload licks to be tabbed in a variety of formats 
 
@@ -47,6 +47,7 @@ Just some easy ones.
 
 ### As a Guitar Player, I want to:
 1. Tab a famous guitar lick so I can send it to my friend to help him learn the lick.
+2. Share my lick publically so everyone can hear it
 
 ### As a Beginner, I want to:
 1. Use a _pretty_ website so all my friends will be jealous.
