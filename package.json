@@ -3,8 +3,9 @@
   "version": "0.0.1",
   "description": "Play licks, get tabs.",
   "scripts": {
-    "start": "tsc && node dist/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "tsc && node bin/www",
+    "dev": "nodemon -e js bin/www",
+    "test": "tsc && nyc mocha test/**/*.js --exit"
   },
   "repository": {
     "type": "git",
@@ -18,13 +19,23 @@
   "devDependencies": {
     "@types/koa": "^2.0.45",
     "@types/koa-bodyparser": "^4.2.0",
-    "@types/koa-router": "^7.0.27",
+    "@types/koa-logger": "^3.1.1",
+    "@types/koa-router": "^7.4.1",
     "@types/node": "^9.6.5",
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "chai-string": "^1.5.0",
+    "mocha": "^7.2.0",
+    "nodemon": "^2.0.4",
+    "nyc": "^15.0.1",
     "typescript": "^2.8.1"
   },
   "dependencies": {
+    "class-validator": "^0.12.2",
     "koa": "^2.5.0",
     "koa-bodyparser": "^4.2.0",
+    "koa-helmet": "^5.2.0",
+    "koa-logger": "^3.2.1",
     "koa-router": "^7.4.0",
     "mysql": "^2.15.0",
     "typeorm": "^0.2.0"

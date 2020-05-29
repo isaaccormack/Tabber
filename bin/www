@@ -1,0 +1,50 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+
+var appModule = require("../dist/index");
+var dbModule = require("../dist/database/dbclient");
+
+/**
+ * Initialize database before creating HTTP server.
+ */
+
+dbModule.initDb(err => {
+
+  /* We can only run the app if we have a working database. */
+  if (err) {
+    console.log("Failed to connect to database. Cannot start the app.");
+    throw err;
+  }
+  console.log("Successfully connected to database. Starting app.");
+
+  /* Create the Express server object. */
+  var app = appModule.startApp()
+
+  /* Get port from environment and listen. */
+  var port = normalizePort(process.env.PORT || "3000");
+  app.listen(port);
+  console.log("Listening on port " + port);
+});
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+
+function normalizePort(val) {
+  var port = parseInt(val, 10);
+
+  if (isNaN(port)) {
+    // named pipe
+    return val;
+  }
+
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+
+  return false;
+}
