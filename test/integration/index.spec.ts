@@ -1,4 +1,6 @@
 import request from 'supertest'
+import { Connection } from 'typeorm';
+import Koa from 'koa'
 
 describe('Integration: Home page', () => {
 
@@ -7,8 +9,8 @@ describe('Integration: Home page', () => {
     // connected to more than once when running many test files.
     var dbModule = require("../../src/database/dbclient");
     var appModule = require("../../src/index");
-    let app
-    let db
+    let app: Koa
+    let db: Connection
 
     beforeAll((done) => {
 
@@ -24,18 +26,17 @@ describe('Integration: Home page', () => {
     });
 
     afterAll((done) => {
-        app.close()
         db.close().then(done())
     });
     
     it('should say "Hello World!"', async () => {
-        const response: request.Response = await request(app).get('/')
+        const response: request.Response = await request(app.callback()).get('/')
 
         expect(response.status).toBe(200);
         expect(response.text).toBe('Hello World!');
     });
     it('should give a 404', async () => {
-        const response: request.Response = await request(app).get('/404')
+        const response: request.Response = await request(app.callback()).get('/404')
         
         expect(response.status).toBe(404);
         expect(response.text).toBe('Not Found');

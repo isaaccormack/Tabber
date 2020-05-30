@@ -7,7 +7,7 @@ import { unprotectedRouter } from "./routes/unprotected";
 import { protectedRouter } from "./routes/protected";
 
 // do more types of testing then clean this up
-export function startApp(): any {
+export function startApp(): Koa {
   const app: Koa = new Koa()
 
   // Logs all endpoint requests 
@@ -40,11 +40,5 @@ export function startApp(): any {
 
   // So modify your code so that when you're testing (for example by setting an environment variable and looking for that), you're not calling the listen() method. This should resolve it and let you run your tests in parallel.
 
-
-  /* Get port from environment and listen. */
-  var port: number = +(process.env.PORT || "3000");
-  const server = app.listen(port);
-  console.log("Listening on port " + port);
-
-  return server
+  return app
 }

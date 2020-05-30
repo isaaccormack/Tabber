@@ -1,12 +1,13 @@
 import request from 'supertest'
 import { Connection } from 'typeorm';
-import { Server } from 'http';
+import Koa from 'koa'
+// import { Server } from 'http';
 
 describe('Integration: Users endpoint', () => {
 
     var dbModule = require("../../src/database/dbclient");
     var appModule = require("../../src/index");
-    let app: Server
+    let app: Koa
     let db: Connection
 
     // should make type or use type interface that exists in app
@@ -27,6 +28,7 @@ describe('Integration: Users endpoint', () => {
             if (err) throw err
 
             db = conn
+            // app = appModule.startApp().listen(3000)
             app = appModule.startApp()
             done()
         })
@@ -34,18 +36,18 @@ describe('Integration: Users endpoint', () => {
     });
 
     afterAll((done) => {
-        app.close()
+        // app.close()
         db.close().then(done())
     });
     
     it('should send back array of users', async () => {
-        const response: request.Response = await request(app).get('/api/users')
+        const response: request.Response = await request(app.callback()).get('/api/users')
 
         expect(response.status).toBe(200);
         expect(response.body.length).toBeGreaterThanOrEqual(0)
     });
     it('should be able to create new user', async () => {
-        const response: request.Response = await request(app).post('/api/users').send(newUser)
+        const response: request.Response = await request(app.callback()).post('/api/users').send(newUser)
 
         expect(response.status).toBe(201);
         expect(response.body.name).toEqual(newUser.name)
@@ -55,7 +57,7 @@ describe('Integration: Users endpoint', () => {
         console.log("from create: " + id)
     });
     it('should be able to get existing user by id', async () => {
-        const response: request.Response = await request(app).get('/api/users/' + id)
+        const response: request.Response = await request(app.callback()).get('/api/users/' + id)
         
         expect(response.status).toBe(200);
         expect(response.body.name).toEqual(newUser.name)
@@ -64,12 +66,12 @@ describe('Integration: Users endpoint', () => {
         console.log("from get: " + response.body.id)
     });
     it('should be able to delete the newly created user', async () => {
-        const response: request.Response = await request(app).delete('/api/testusers/' + id)
+        const response: request.Response = await request(app.callback()).delete('/api/testusers/' + id)
         
         expect(response.status).toBe(204);
     });
     it('should not be able to get delete a user which doesnt exist', async () => {
-        const response: request.Response = await request(app).delete('/api/users/' + 0)
+        const response: request.Response = await request(app.callback()).delete('/api/users/' + 0)
         
         expect(response.status).toBe(400);
     });

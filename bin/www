@@ -23,6 +23,8 @@ dbModule.initDb(err => {
   /* Create the Express server object. */
   var app = appModule.startApp()
 
-  // need to start app here
-
+  /* Get port from environment and listen. */
+  var port = +(process.env.PORT || "3000");
+  app.listen(port);
+  console.log("Listening on port " + port);
 });
