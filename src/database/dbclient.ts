@@ -1,5 +1,4 @@
 import {createConnection, Connection} from "typeorm"
-import assert from "assert";
 
 let db: Connection;
   
@@ -28,13 +27,4 @@ export function initDb(callback: (err: Error | null, db: Connection) => void): v
   // is this blocking? ie. is this going to work?
   createConnection().then((conn: Connection) => onConnected(conn))
     .catch((err) => callback(err, undefined))
-}
-
-/**
- * Synchronously returns the (singular) database connection.
- * Requires initDb() to have been called first.
- */
-export function getDb(): Connection {
-  assert.ok(db, "Db has not been initialized. Call initDb first.");
-  return db;
 }

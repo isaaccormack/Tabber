@@ -7,13 +7,13 @@
     "database": "tabber",
     "synchronize": true,
     "entities": [
-      "dist/entity/*.js"
+      "dist/src/entity/*.js"
     ],
     "subscribers": [
-      "dist/subscriber/*.js"
+      "dist/src/subscriber/*.js"
     ],
     "migrations": [
-      "dist/migration/*.js"
+      "dist/src/migration/*.js"
     ],
     "cli": {
       "entitiesDir": "dist/entity",

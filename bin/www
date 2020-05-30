@@ -4,8 +4,8 @@
  * Module dependencies.
  */
 
-var appModule = require("../dist/index");
-var dbModule = require("../dist/database/dbclient");
+var appModule = require("../dist/src/index");
+var dbModule = require("../dist/src/database/dbclient");
 
 /**
  * Initialize database before creating HTTP server.
@@ -23,28 +23,6 @@ dbModule.initDb(err => {
   /* Create the Express server object. */
   var app = appModule.startApp()
 
-  /* Get port from environment and listen. */
-  var port = normalizePort(process.env.PORT || "3000");
-  app.listen(port);
-  console.log("Listening on port " + port);
+  // need to start app here
+
 });
-
-/**
- * Normalize a port into a number, string, or false.
- */
-
-function normalizePort(val) {
-  var port = parseInt(val, 10);
-
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
-
-  if (port >= 0) {
-    // port number
-    return port;
-  }
-
-  return false;
-}

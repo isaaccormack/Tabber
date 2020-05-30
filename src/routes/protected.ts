@@ -11,7 +11,7 @@ protectedRouter.get("/users/:id", user.getUser);
 protectedRouter.post("/users", user.createUser);
 protectedRouter.put("/users/:id", user.updateUser);
 protectedRouter.delete("/users/:id", user.deleteUser);
-protectedRouter.delete("/testusers", user.deleteTestUsers);
+protectedRouter.delete("/testusers/:id", user.deleteTestUser);
 
 export { protectedRouter };
 
