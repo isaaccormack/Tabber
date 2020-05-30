@@ -21,7 +21,7 @@ export default function Navigation() {
     console.log(loginText)
     const [loginUrl, setLoginURL] = useState("");
     useEffect(() => {
-        fetch("/login/url")
+        fetch("/api/loginUrl")
             .then(response => response.text())
             .then(data => setLoginURL(data));
     }, [loginUrl])

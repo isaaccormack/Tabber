@@ -5,7 +5,8 @@
   "scripts": {
     "start": "tsc && node bin/www",
     "dev": "nodemon -e js bin/www",
-    "jest": "tsc && nyc jest dist/test/**/*.spec.js"
+    "jest": "tsc && nyc jest dist/test/**/*.spec.js",
+    "update-views": "(cd ../tabber-webapp && npm run build)"
   },
   "repository": {
     "type": "git",
@@ -34,13 +35,20 @@
     "typescript": "^3.9.1"
   },
   "dependencies": {
+    "@types/jwt-decode": "^2.2.1",
+    "bufferutil": "^4.0.1",
+    "canvas": "^2.6.1",
     "class-validator": "^0.12.2",
+    "googleapis": "^51.0.0",
+    "jwt-decode": "^2.2.0",
     "koa": "^2.5.0",
     "koa-bodyparser": "^4.2.0",
     "koa-helmet": "^5.2.0",
     "koa-logger": "^3.2.1",
     "koa-router": "^7.4.0",
+    "koa-static": "^5.0.0",
     "mysql": "^2.15.0",
-    "typeorm": "^0.2.0"
+    "typeorm": "^0.2.0",
+    "utf-8-validate": "^5.0.2"
   }
 }

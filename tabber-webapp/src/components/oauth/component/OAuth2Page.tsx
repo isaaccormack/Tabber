@@ -11,7 +11,7 @@ export default function(props: any) {
 
     const authorizationCode = qs.parse(props.location.search)["code"]
     useEffect(() => {
-        fetch("/token?code="+authorizationCode)
+        fetch("/api/token?code="+authorizationCode)
             .then(response => response.text())
             .then(data => {
                 dispatch(UpdateUser(data));

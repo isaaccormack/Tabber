@@ -1,7 +1,12 @@
 import Koa from "koa"
+import Router from 'koa-router';
 import bodyParser from "koa-bodyparser";
 import helmet from "koa-helmet";
-import logger from 'koa-logger'
+import logger from 'koa-logger';
+import serve from 'koa-static';
+import path from 'path';
+import fs from 'fs';
+
 
 import { unprotectedRouter } from "./routes/unprotected";
 import { protectedRouter } from "./routes/protected";
@@ -9,6 +14,7 @@ import { protectedRouter } from "./routes/protected";
 // do more types of testing then clean this up
 export function startApp(): any {
   const app: Koa = new Koa()
+  const router: Router = new Router();
 
   // Logs all endpoint requests 
   app.use(logger());
@@ -32,6 +38,15 @@ export function startApp(): any {
   // These routes are protected by the JWT middleware, also include middleware to respond with "Method Not Allowed - 405".
   app.use(protectedRouter.routes()).use(protectedRouter.allowedMethods());
 
+  //Distribute views if no api routes are matched
+  app.use(serve("./views/build"));
+
+  router.get('*', async (ctx,err) => {
+    const html = fs.readFileSync(path.resolve('./views/build/index.html'));
+    ctx.type = 'html';
+    ctx.body = html;
+  });
+  app.use(router.routes());
 
   // actually cant start the app from inside here, need to do it externally as it breaks tests, will fix later
   // from https://github.com/visionmedia/supertest/issues/568
