@@ -4,4 +4,5 @@ dist/
 .nyc_output/
 npm-debug.log
 views/*
+!views/.gitkeep
 keys/*
