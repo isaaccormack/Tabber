@@ -12,19 +12,18 @@ let db: Connection;
  */
 
 export function initDb(callback: (err: Error | null, db: Connection) => void): void {
+    if (db) {
+        return callback(new Error("Cannot initialize database twice"), undefined);
+    }
 
-  if (db) {
-    return callback(new Error("Cannot initialize database twice"), undefined);
-  }
+    function onConnected(conn: Connection) {
+        db = conn;
 
-  // handle databse initialization
-  function onConnected(conn: Connection) {
-    db = conn
-    // set the db name or do this in the test so that we are using a test database
-    callback(null, db)
-  }
+        // do any necessary database initialization here
 
-  // is this blocking? ie. is this going to work?
-  createConnection().then((conn: Connection) => onConnected(conn))
-    .catch((err) => callback(err, undefined))
+        callback(null, db)
+    }
+
+    createConnection().then((conn: Connection) => onConnected(conn))
+        .catch(err => callback(err, db))
 }

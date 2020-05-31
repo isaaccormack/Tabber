@@ -2,13 +2,10 @@ import request from 'supertest'
 import { Connection } from 'typeorm';
 import Koa from 'koa'
 
-describe('Integration: Home page', () => {
+import * as appModule from "../../src/index";
+import * as dbModule from "../../src/database/dbclient";
 
-    // Putting dbModule in here means that dbModule is deleted
-    // between "decribe()'s". This ensures the database is not
-    // connected to more than once when running many test files.
-    var dbModule = require("../../src/database/dbclient");
-    var appModule = require("../../src/index");
+describe('Integration: Home page', () => {
     let app: Koa
     let db: Connection
 

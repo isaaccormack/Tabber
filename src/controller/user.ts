@@ -4,7 +4,7 @@ import { Context } from "koa";
 
 import { User } from "../entity/user";
 
-export default class UserController {
+export class UserController {
 
     /**
      * GET /users
@@ -12,8 +12,6 @@ export default class UserController {
      * Find all users.
      */
     public static async getUsers(ctx: Context): Promise<void> {
-
-        console.log("IN GET USERS")
 
         // get a user repository to perform operations with user
         const userRepository: Repository<User> = getManager().getRepository(User);

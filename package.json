@@ -5,7 +5,9 @@
   "scripts": {
     "start": "tsc && node bin/www",
     "dev": "nodemon -e js bin/www",
-    "jest": "tsc && nyc jest dist/test/**/*.spec.js"
+    "jest": "tsc && jest --coverage dist/test/**/*.spec.js",
+    "unit-jest": "tsc && jest --coverage dist/test/entity/*.spec.js dist/test/controller/*.spec.js",
+    "integration-jest": "tsc && jest --coverage dist/test/integration/*.spec.js"
   },
   "repository": {
     "type": "git",
@@ -28,13 +30,12 @@
     "@types/supertest": "^2.0.9",
     "jest": "^26.0.1",
     "nodemon": "^2.0.4",
-    "nyc": "^15.0.1",
     "sinon": "^9.0.2",
     "supertest": "^4.0.2",
     "typescript": "^3.9.1"
   },
   "dependencies": {
-    "class-validator": "^0.12.2",
+    "class-validator": "^0.12.0",
     "koa": "^2.5.0",
     "koa-bodyparser": "^4.2.0",
     "koa-helmet": "^5.2.0",

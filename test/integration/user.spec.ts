@@ -1,42 +1,34 @@
 import request from 'supertest'
 import { Connection } from 'typeorm';
 import Koa from 'koa'
-// import { Server } from 'http';
+
+import * as appModule from "../../src/index";
+import * as dbModule from "../../src/database/dbclient";
+import { mockUser } from '../interfaces/mockUser';
 
 describe('Integration: Users endpoint', () => {
-
-    var dbModule = require("../../src/database/dbclient");
-    var appModule = require("../../src/index");
     let app: Koa
     let db: Connection
 
-    // should make type or use type interface that exists in app
-    // currently cant delete user without going into db, so just
-    // increment number on email to ensure unique email everytime
-    // NOT DOING THIS WILL CAUSE TESTS TO FAIL
-    const newUser = {
+    const newUser: mockUser = {
         name: 'john',
-        email: 'john@doe.com' // MUST increment this every test currently
+        email: 'john@doe.com'
     }
 
     let id: Number
 
     beforeAll((done) => {
-
         // can wire in testdb if so inclined
         dbModule.initDb((err, conn) => {
             if (err) throw err
 
             db = conn
-            // app = appModule.startApp().listen(3000)
             app = appModule.startApp()
             done()
         })
-
     });
 
     afterAll((done) => {
-        // app.close()
         db.close().then(done())
     });
     
