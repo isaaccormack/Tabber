@@ -7,7 +7,8 @@
         "dev": "nodemon -e js bin/www",
         "jest": "tsc && jest --coverage dist/test/**/*.spec.js",
         "unit-jest": "tsc && jest --coverage dist/test/entity/*.spec.js dist/test/controller/*.spec.js",
-        "integration-jest": "tsc && jest --coverage dist/test/integration/*.spec.js"
+        "integration-jest": "tsc && jest --coverage dist/test/integration/*.spec.js",
+        "update-views": "(cd ../webapp && npm run build)"
     },
     "repository": {
         "type": "git",
@@ -41,6 +42,7 @@
         "koa-helmet": "^5.2.0",
         "koa-logger": "^3.2.1",
         "koa-router": "^7.4.0",
+        "koa-static": "^5.0.0",
         "mysql": "^2.15.0",
         "typeorm": "^0.2.0"
     }

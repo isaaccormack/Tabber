@@ -27,16 +27,17 @@ describe('Integration: Home page', () => {
     });
     
     it('should say "Hello World!"', async () => {
-        const response: request.Response = await request(app.callback()).get('/')
+        const response: request.Response = await request(app.callback()).get('/api/helloworld')
 
         expect(response.status).toBe(200);
         expect(response.text).toBe('Hello World!');
     });
-    it('should give a 404', async () => {
-        const response: request.Response = await request(app.callback()).get('/404')
-        
-        expect(response.status).toBe(404);
-        expect(response.text).toBe('Not Found');
+
+    it('should say render an html page"', async () => {
+        const response: request.Response = await request(app.callback()).get('/')
+
+        expect(response.status).toBe(200);
+        expect(response.text).toContain('<!doctype html>');
     });
 });
 
