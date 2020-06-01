@@ -1,0 +1,17 @@
+:root {
+    /* Global colours */
+    --background-dark: #12142C;
+    --background-light: #B5BBFF;
+    --pink: #EF3BFF;
+    --blue: #5335E8;
+    --purple: #5b5e80;
+    --red: #CB0202;
+
+    /* Global fonts */
+    --font-header:'Damion', cursive;
+    --font-body: 'Roboto', sans-serif;
+    --font-color-light: #FFFFFF;
+    --font-size-large: 48px;
+    --font-size-medium: 24px;
+    --font-size-small: 16px;
+}
