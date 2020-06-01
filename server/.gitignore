@@ -3,3 +3,8 @@ node_modules/
 dist/
 coverage/
 npm-debug.log
+
+views/*
+!views/.gitkeep
+keys/*
+!keys/.gitkeep
