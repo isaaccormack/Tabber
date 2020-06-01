@@ -1,9 +1,0 @@
-@import "mainstyles.css";
-
-.app {
-  background-color: var(--background-dark);
-  min-height: 100vh;
-  color: var(--font-color-light);
-  font-size: 16px;
-  font-family: var(--font-body);
-}
