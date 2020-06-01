@@ -6,18 +6,22 @@
     "password": "helloworld",
     "database": "tabber",
     "synchronize": true,
+    "controllers": [
+        "dist/src/controller/*.js"
+    ],
     "entities": [
-      "dist/src/entity/*.js"
+        "dist/src/entity/*.js"
     ],
     "subscribers": [
-      "dist/src/subscriber/*.js"
+        "dist/src/subscriber/*.js"
     ],
     "migrations": [
-      "dist/src/migration/*.js"
+        "dist/src/migration/*.js"
     ],
     "cli": {
-      "entitiesDir": "dist/src/entity",
-      "migrationsDir": "dist/src/migration",
-      "subscribersDir": "dist/src/subscriber"
+        "controllerDir": "dist/src/controller",
+        "entitiesDir": "dist/src/entity",
+        "migrationsDir": "dist/src/migration",
+        "subscribersDir": "dist/src/subscriber"
     }
-  } 
+} 

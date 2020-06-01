@@ -124,7 +124,6 @@ export class UserController {
             ctx.status = 201;
             ctx.body = user;
         }
-
     }
 
     /**

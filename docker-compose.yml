@@ -2,17 +2,17 @@ version: '3'
 
 services:
 
-  core:
+    core:
     build: .
     ports:
-      - "3000:3000"
+        - "3000:3000"
     volumes:
-      - .:/src
+        - .:/src
 
-  # mysql-dev:
-  #   image: mysql:8.0.17
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: helloworld
-  #     MYSQL_DATABASE: tabber
-  #   ports:
-  #     - "3308:3306"
+    # mysql-dev:
+    # image: mysql:8.0.17
+    # environment:
+    #     MYSQL_ROOT_PASSWORD: helloworld
+    #     MYSQL_DATABASE: tabber
+    # ports:
+    #     - "3308:3306"
