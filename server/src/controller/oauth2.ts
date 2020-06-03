@@ -1,5 +1,5 @@
-import {BaseContext} from "koa";
-import {google} from 'googleapis';
+import {Context} from "koa";
+import * as googleApis from "googleapis";
 import * as jwt from "jsonwebtoken";
 
 // @ts-ignore // typescript can't find this but it works...
@@ -8,7 +8,7 @@ import {User} from "../entity/user";
 import {getManager, Repository} from "typeorm";
 
 
-const oauth2Client = new google.auth.OAuth2(
+const oauth2Client = new googleApis.google.auth.OAuth2(
     keys.YOUR_CLIENT_ID,
     keys.YOUR_CLIENT_SECRET,
     keys.YOUR_REDIRECT_URL
@@ -26,7 +26,7 @@ export default class OAuth2Controller {
      *
      * Get google cloud endpoint for OAuth2
      */
-    public static async loginUrl(ctx: BaseContext): Promise<void> {
+    public static async loginUrl(ctx: Context): Promise<void> {
         ctx.body = oauth2Client.generateAuthUrl({
             scope: scopes
         });
@@ -39,9 +39,9 @@ export default class OAuth2Controller {
      */
     //todo: jwt verification intermediate step
     //todo: make POST operation
-    public static async tokenExchange(ctx: BaseContext): Promise<void> {
+    public static async tokenExchange(ctx: Context): Promise<void> {
         const oauthCode = ctx.query["code"];
-        const {tokens} = await oauth2Client.getToken(oauthCode)
+        const {tokens} = await oauth2Client.getToken(oauthCode);
         OAuth2Controller.setCookies(ctx, tokens);
         const ticket = await OAuth2Controller.verifyToken(tokens.id_token);
         const user: User = await OAuth2Controller.getOrCreateUser(ticket.payload)
