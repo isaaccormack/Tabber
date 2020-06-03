@@ -13,7 +13,7 @@ export const authValidator = async (ctx, next) => {
                 ctx.state.user = user;
                 ctx.state.isAuthenticated = true;
             } else {
-                ctx.isAuthenticated = false;
+                ctx.state.isAuthenticated = false;
             }
         } else {
             ctx.state.isAuthenticated = false;
