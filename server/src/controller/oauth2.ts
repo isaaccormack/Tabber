@@ -44,6 +44,7 @@ export default class OAuth2Controller {
         OAuth2Controller.setCookies(ctx, tokens);
         const ticket: LoginTicket = await OAuth2Controller.verifyToken(tokens.id_token);
         const user: User = await OAuth2Controller.getOrCreateUser(ticket.getPayload())
+        if (user === null) ctx.response.status = 500;
         ctx.body = user.name;
     }
 
@@ -69,10 +70,14 @@ export default class OAuth2Controller {
         );
         // create user is doesn't exist
         if (!user) {
-            user = new User();
-            user.email = payload.email;
-            user.name = payload.given_name;
-            user = await userRepository.save(user);
+            try {
+                user = new User();
+                user.email = payload.email;
+                user.name = payload.given_name;
+                user = await userRepository.save(user);
+            } catch {
+                return null;
+            }
         }
         return user;
     }
