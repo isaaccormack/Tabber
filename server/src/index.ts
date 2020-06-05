@@ -28,8 +28,6 @@ export function startApp(): Koa {
     // Enable bodyParser with default options
     app.use(bodyParser());
 
-    app.use(authValidator);
-
     // these routes are NOT protected by the JWT middleware, also include middleware to respond with "Method Not Allowed - 405".
     app.use(unprotectedRouter.routes()).use(unprotectedRouter.allowedMethods());
 
@@ -40,6 +38,8 @@ export function startApp(): Koa {
     // something about registering routes here, ie create new routes class
 
     // These routes are protected by the JWT middleware, also include middleware to respond with "Method Not Allowed - 405".
+    app.use(authValidator);
+
     app.use(protectedRouter.routes()).use(protectedRouter.allowedMethods());
 
     //Distribute views if no api routes are matched

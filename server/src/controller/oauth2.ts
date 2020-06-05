@@ -2,7 +2,6 @@ import {Context} from "koa";
 import * as googleApis from "googleapis";
 import * as jwt from "jsonwebtoken";
 
-// @ts-ignore // typescript can't find this but it works...
 import * as keys from "../../keys/keys.json";
 import {User} from "../entity/user";
 import {getManager, Repository} from "typeorm";
@@ -19,7 +18,6 @@ const scopes = [
     'https://www.googleapis.com/auth/userinfo.profile'
 ];
 
-//todo: this whole file needs a lot of improvement
 export default class OAuth2Controller {
 
     /**
