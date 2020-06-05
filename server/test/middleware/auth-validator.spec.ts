@@ -18,6 +18,9 @@ describe('Unit test: User endpoint', () => {
 
     const next = function(){return;};
     const mockTicket = {
+        getPayload(): any | undefined {
+            return this.payload;
+        },
         payload: {
             email: "someEmail@email.com",
             given_name: "firstname",

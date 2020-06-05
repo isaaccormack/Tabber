@@ -2,6 +2,7 @@ import { createSandbox, SinonSandbox, spy } from 'sinon'
 import {createMockContext, createMockCookies} from '@shopify/jest-koa-mocks';
 import OAuth2Controller from "../../src/controller/oauth2";
 import * as googleApis from "googleapis";
+import { LoginTicket } from "google-auth-library";
 import * as typeorm from "typeorm";
 import {User} from "../../src/entity/user";
 
@@ -26,6 +27,9 @@ describe('Unit test: User endpoint', () => {
     }
 
     const mockTicket = {
+        getPayload(): any | undefined {
+            return this.payload;
+        },
         payload: {
             email: "someEmail@email.com",
             given_name: "firstname",

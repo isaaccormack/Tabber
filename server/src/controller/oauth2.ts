@@ -6,6 +6,7 @@ import * as jwt from "jsonwebtoken";
 import * as keys from "../../keys/keys.json";
 import {User} from "../entity/user";
 import {getManager, Repository} from "typeorm";
+import { LoginTicket, TokenPayload } from "google-auth-library";
 
 
 const oauth2Client = new googleApis.google.auth.OAuth2(
@@ -43,12 +44,12 @@ export default class OAuth2Controller {
         const oauthCode = ctx.query["code"];
         const {tokens} = await oauth2Client.getToken(oauthCode);
         OAuth2Controller.setCookies(ctx, tokens);
-        const ticket = await OAuth2Controller.verifyToken(tokens.id_token);
-        const user: User = await OAuth2Controller.getOrCreateUser(ticket.payload)
+        const ticket: LoginTicket = await OAuth2Controller.verifyToken(tokens.id_token);
+        const user: User = await OAuth2Controller.getOrCreateUser(ticket.getPayload())
         ctx.body = user.name;
     }
 
-    public static async verifyToken(idToken: string): Promise<any> {
+    public static async verifyToken(idToken: string): Promise<LoginTicket> {
         try {
             return await oauth2Client.verifyIdToken({
                 idToken: idToken,
@@ -59,7 +60,7 @@ export default class OAuth2Controller {
         }
     }
 
-    public static async getOrCreateUser(payload: any): Promise<User> {
+    public static async getOrCreateUser(payload: TokenPayload): Promise<User> {
         const userRepository: Repository<User> = getManager().getRepository(User);
         // get user
         let user: User = await userRepository.findOne(
