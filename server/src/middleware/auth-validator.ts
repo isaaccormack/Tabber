@@ -17,3 +17,11 @@ export const authValidator = async (ctx, next) => {
     }
     await next();
 }
+
+export async function isAuthenticated(ctx, next) {
+    if (ctx.state.isAuthenticated) {
+        await next();
+    } else {
+        ctx.response.status = 401;
+    }
+}

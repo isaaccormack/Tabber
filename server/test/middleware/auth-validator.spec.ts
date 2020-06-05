@@ -1,6 +1,6 @@
 import {createMockContext, createMockCookies} from "@shopify/jest-koa-mocks";
 import { createSandbox, SinonSandbox, spy } from 'sinon'
-import {authValidator} from "../../src/middleware/auth-validator";
+import {authValidator, isAuthenticated} from "../../src/middleware/auth-validator";
 import OAuth2Controller from "../../src/controller/oauth2";
 
 
@@ -16,7 +16,7 @@ describe('Unit test: User endpoint', () => {
         sandbox.restore()
     })
 
-    const next = function(){return;};
+    const next = function(){};
     const mockTicket = {
         getPayload(): any | undefined {
             return this.payload;
@@ -82,5 +82,22 @@ describe('Unit test: User endpoint', () => {
         expect(ctx.state.isAuthenticated).toBe(false);
     })
 
+    it('should SET response status = 401', async () => {
+        const ctx = createMockContext();
+        ctx.state.isAuthenticated = false;
+
+        await isAuthenticated(ctx, next);
+        expect(ctx.response.status).toBe(401);
+    })
+
+    // todo: this test needs to be improved to spy next() to see if called
+    it('should CALL the next function', async () => {
+        const ctx = createMockContext();
+        ctx.state.isAuthenticated = true;
+
+        await isAuthenticated(ctx, next);
+
+        expect(ctx.response.status).toEqual(404);
+    })
 
 })
