@@ -44,8 +44,11 @@ export default class OAuth2Controller {
         OAuth2Controller.setCookies(ctx, tokens);
         const ticket: LoginTicket = await OAuth2Controller.verifyToken(tokens.id_token);
         const user: User = await OAuth2Controller.getOrCreateUser(ticket.getPayload())
-        if (user === null) ctx.response.status = 500;
-        ctx.body = user.name;
+        if (user === null) {
+            ctx.response.status = 500;
+        } else {
+            ctx.body = user.name;
+        }
     }
 
     public static async verifyToken(idToken: string): Promise<LoginTicket> {
@@ -70,10 +73,10 @@ export default class OAuth2Controller {
         );
         // create user is doesn't exist
         if (!user) {
+            user = new User();
+            user.email = payload.email;
+            user.name = payload.given_name;
             try {
-                user = new User();
-                user.email = payload.email;
-                user.name = payload.given_name;
                 user = await userRepository.save(user);
             } catch {
                 return null;

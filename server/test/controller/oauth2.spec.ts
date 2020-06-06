@@ -27,7 +27,7 @@ describe('Unit test: User endpoint', () => {
     }
 
     const mockTicket = {
-        getPayload(): any | undefined {
+        getPayload(): any {
             return this.payload;
         },
         payload: {

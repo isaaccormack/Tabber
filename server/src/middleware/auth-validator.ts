@@ -1,8 +1,9 @@
 import OAuth2Controller from "../controller/oauth2";
 import {User} from "../entity/user";
 import { LoginTicket } from "google-auth-library";
+import {Context} from "koa";
 
-export const authValidator = async (ctx, next) => {
+export const authValidator = async (ctx: Context, next: Function) => {
     const idToken = ctx.cookies.get("ti");
     ctx.state.isAuthenticated = false;
     if (idToken) {
@@ -18,7 +19,7 @@ export const authValidator = async (ctx, next) => {
     await next();
 }
 
-export async function isAuthenticated(ctx, next) {
+export async function isAuthenticated(ctx: Context, next: Function) {
     if (ctx.state.isAuthenticated) {
         await next();
     } else {
