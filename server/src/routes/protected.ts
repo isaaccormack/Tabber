@@ -18,6 +18,7 @@ protectedRouter.delete("/testusers/:id", UserController.deleteTestUser);
 
 // Lick routes
 protectedRouter.get("/licks/:id", LickController.getLick);
+protectedRouter.get("/licks/audio/:id", LickController.getLickAudio);
 protectedRouter.post("/licks", LickController.createLick);
 protectedRouter.put("/licks/:id", LickController.updateLick);
 protectedRouter.delete("/licks/:id", LickController.deleteLick);
