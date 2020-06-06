@@ -1,10 +1,12 @@
 import Router from "koa-router";
 import { UserController } from "../controller/user";
 import { LickController } from "../controller/lick";
+import { isAuthenticated } from "../middleware/auth-validator";
 
 const protectedRouter: Router = new Router();
 
 protectedRouter.prefix("/api")
+protectedRouter.use(isAuthenticated);
 
 // User routes
 protectedRouter.get("/users", UserController.getUsers);
