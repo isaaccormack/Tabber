@@ -19,3 +19,7 @@
 .OrIcon {
     width: 400px;
 }
+
+#upload {
+    display: none;
+}
