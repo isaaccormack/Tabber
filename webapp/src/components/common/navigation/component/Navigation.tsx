@@ -1,14 +1,18 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
 import './Navigation.css';
 import RootState from "../../../../store/root-state";
-import {useSelector} from "react-redux";
-
+import {useDispatch, useSelector} from "react-redux";
+import {useHistory} from "react-router";
+import {DeleteUser} from "../../user/actions/UserActions";
 
 export default function Navigation() {
+
+    const history = useHistory();
+    const dispatch = useDispatch();
 
     const pathname = window.location.pathname;
     let createClassName = "";
@@ -16,15 +20,17 @@ export default function Navigation() {
     if (pathname === "/") createClassName="selected";
     else listenClassName ="selected";
 
-    let loginText = useSelector((state: RootState) => state.navigationState.user);
-    if (loginText === undefined) loginText = "Login";
-    console.log(loginText)
-    const [loginUrl, setLoginURL] = useState("");
-    useEffect(() => {
-        fetch("/api/loginUrl")
-            .then(response => response.text())
-            .then(data => setLoginURL(data));
-    }, [loginUrl])
+    let loginText = useSelector((state: RootState) => state.userState.user);
+    if (loginText === undefined) loginText = "";
+
+    // Simple redirection to login page, needs to be changed use cookies later
+    if (pathname !== "/login" && loginText === "") history.push("/login");
+
+    const logout = () => {
+        dispatch(DeleteUser());
+        history.push("/login");
+        localStorage.clear();
+    }
 
     return (
         <Container fluid>
@@ -35,7 +41,7 @@ export default function Navigation() {
                     </div>
                 </Col>
                 <Col xs={{offset: 7}}>
-                    <a className="accountInfo" href={loginUrl}>
+                    <a className="accountInfo" onClick={logout} href={""}>
                         {loginText}
                     </a>
                 </Col>

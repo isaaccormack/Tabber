@@ -2,7 +2,7 @@ import React, {useEffect} from 'react';
 import {useHistory} from "react-router";
 import * as qs from 'query-string';
 import {useDispatch} from "react-redux";
-import {UpdateUser} from "../../common/navigation/actions/NavigationActions";
+import {UpdateUser} from "../../common/user/actions/UserActions";
 
 export default function(props: any) {
 
