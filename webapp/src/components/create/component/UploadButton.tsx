@@ -12,7 +12,9 @@ export default function UploadButton() {
                     "Content-Type": "audio"
                 },
                 body: file[0]
-            }).then()
+            }).then((response) => {
+                console.log(response);
+            })
         }
     }
 
