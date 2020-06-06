@@ -6,6 +6,13 @@ import * as appModule from "../../src/index";
 import * as dbModule from "../../src/database/dbclient";
 import { mockUser } from '../interfaces/mockUser';
 
+import * as keys from "../../keys/keys.json";
+const identityToken = keys.YOUR_TEST_IDENTITY_TOKEN;
+
+if (!identityToken) {
+    console.log("MUST INSERT IDENTITY TOKEN FOR INTEGRATION TESTING");
+}
+
 describe('Integration: Users endpoint', () => {
     let app: Koa
     let db: Connection
@@ -33,13 +40,18 @@ describe('Integration: Users endpoint', () => {
     });
     
     it('should send back array of users', async () => {
-        const response: request.Response = await request(app.callback()).get('/api/users')
+        const response: request.Response = await request(app.callback())
+            .get('/api/users')
+            .set("Cookie", "ti="+identityToken);
 
         expect(response.status).toBe(200);
         expect(response.body.length).toBeGreaterThanOrEqual(0)
     });
     it('should be able to create new user', async () => {
-        const response: request.Response = await request(app.callback()).post('/api/users').send(newUser)
+        const response: request.Response = await request(app.callback())
+            .post('/api/users')
+            .send(newUser)
+            .set("Cookie", "ti="+identityToken);
 
         expect(response.status).toBe(201);
         expect(response.body.name).toEqual(newUser.name)
@@ -49,7 +61,9 @@ describe('Integration: Users endpoint', () => {
         console.log("from create: " + id)
     });
     it('should be able to get existing user by id', async () => {
-        const response: request.Response = await request(app.callback()).get('/api/users/' + id)
+        const response: request.Response = await request(app.callback())
+            .get('/api/users/' + id)
+            .set("Cookie", "ti="+identityToken);
         
         expect(response.status).toBe(200);
         expect(response.body.name).toEqual(newUser.name)
@@ -58,12 +72,16 @@ describe('Integration: Users endpoint', () => {
         console.log("from get: " + response.body.id)
     });
     it('should be able to delete the newly created user', async () => {
-        const response: request.Response = await request(app.callback()).delete('/api/testusers/' + id)
+        const response: request.Response = await request(app.callback())
+            .delete('/api/testusers/' + id)
+            .set("Cookie", "ti="+identityToken);
         
         expect(response.status).toBe(204);
     });
     it('should not be able to get delete a user which doesnt exist', async () => {
-        const response: request.Response = await request(app.callback()).delete('/api/users/' + 0)
+        const response: request.Response = await request(app.callback())
+            .delete('/api/users/' + 0)
+            .set("Cookie", "ti="+identityToken);
         
         expect(response.status).toBe(400);
     });
