@@ -1,6 +1,7 @@
 import Router from "koa-router";
 import { UserController } from "../controller/user";
 import {isAuthenticated} from "../middleware/auth-validator";
+import { LickController } from "../controller/lick";
 
 const protectedRouter: Router = new Router();
 
@@ -14,5 +15,11 @@ protectedRouter.post("/users", UserController.createUser);
 protectedRouter.put("/users/:id", UserController.updateUser);
 protectedRouter.delete("/users/:id", UserController.deleteUser);
 protectedRouter.delete("/testusers/:id", UserController.deleteTestUser);
+
+// Lick routes
+protectedRouter.get("/licks/:id", LickController.getLick);
+protectedRouter.post("/licks", LickController.createLick);
+protectedRouter.put("/licks/:id", LickController.updateLick);
+protectedRouter.delete("/licks/:id", LickController.deleteLick);
 
 export { protectedRouter };
