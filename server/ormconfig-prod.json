@@ -1,0 +1,27 @@
+{
+    "type": "mysql",
+    "host": "localhost",
+    "port": 3306,
+    "username": "tabberadmin",
+    "password": "ykJtU46Qk44yQCP8jZQ4RGcY4JXFgR6f",
+    "database": "tabber",
+    "synchronize": true,
+    "controllers": [
+        "dist/src/controller/*.js"
+    ],
+    "entities": [
+        "dist/src/entity/*.js"
+    ],
+    "subscribers": [
+        "dist/src/subscriber/*.js"
+    ],
+    "migrations": [
+        "dist/src/migration/*.js"
+    ],
+    "cli": {
+        "controllerDir": "dist/src/controller",
+        "entitiesDir": "dist/src/entity",
+        "migrationsDir": "dist/src/migration",
+        "subscribersDir": "dist/src/subscriber"
+    }
+} 
