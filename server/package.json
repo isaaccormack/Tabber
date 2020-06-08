@@ -4,7 +4,7 @@
     "description": "Play licks, get tabs.",
     "scripts": {
         "start": "tsc && node bin/www",
-        "build": "tsc",
+        "build": "(cd ../webapp && npm run build) && tsc",
         "dev": "nodemon -e js bin/www",
         "jest": "tsc && jest --coverage dist/test/**/*.spec.js",
         "unit-jest": "tsc && jest --coverage dist/test/entity/*.spec.js dist/test/controller/*.spec.js dist/test/middleware/*.spec.js",

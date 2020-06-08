@@ -2,10 +2,9 @@ version: '3'
 
 services:
     tabber-app:
-        image: mrvernonliu/tabber:0.0.1
+        image: tabber:0.0.1
         ports:
             - "3000:3000"
-        network_mode: "host"
 
     # mysql-dev:
     # image: mysql:8.0.17
