@@ -8,3 +8,4 @@ views/*
 !views/.gitkeep
 keys/*
 !keys/.gitkeep
+.env
