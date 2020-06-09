@@ -5,11 +5,3 @@ services:
         image: tabber:0.0.1
         ports:
             - "3000:3000"
-
-    # mysql-dev:
-    # image: mysql:8.0.17
-    # environment:
-    #     MYSQL_ROOT_PASSWORD: helloworld
-    #     MYSQL_DATABASE: tabber
-    # ports:
-    #     - "3308:3306"
