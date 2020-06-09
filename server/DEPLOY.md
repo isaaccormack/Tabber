@@ -6,7 +6,7 @@ Pre-docker steps
 
 Run these one your local machine
 1. npm run build
-2. docker built -t tabber:0.0.1 .
+2. docker build -t tabber:0.0.1 .
 3. docker-compose up
 
 
