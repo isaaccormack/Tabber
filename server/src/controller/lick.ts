@@ -1,7 +1,6 @@
 import { validate, ValidationError } from "class-validator";
 import { getManager, Repository, Not, Equal, Like } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
-<<<<<<< HEAD
 import { Context, Request } from "koa";
 import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
@@ -44,65 +43,6 @@ function validateAudioFile(audioFile: any): Error | null {
 
 
 export class LickController {
-=======
-import { Context } from "koa";
-import { Lick } from "../entity/lick";
-import { User } from "../entity/user";
-const fs = require('fs').promises;
-
-const lickAudioDirectory: string = "uploads";
-
-export class LickController {
-
-    /**
-     * POST /api/licks
-     *
-     * Upload new lick to be processed and have a tab generated.
-     */
-    public static async createLick(ctx: Context): Promise<void> {
-
-        // get a lick repository to perform operations with licks
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-
-        // save the audio to a file (with a randomly-generated ID)
-        const audio: any = ctx.request.body;
-        const audioFileLocation: string = this.getNewAudioFileUri();
-        // TODO: fix this. not sure why this is an issue; fs.writeFile is supposed to have a promise-based variation
-        await fs.writeFile(audioFileLocation, audio);
-
-        // get current date for uploading
-        const currentDateTime = new Date();
-
-        // build up lick entity to be saved
-        const lickToBeSaved: Lick = new Lick();
-        lickToBeSaved.name = "Lick from " + currentDateTime.toISOString();
-        lickToBeSaved.description = "";
-        lickToBeSaved.dateUploaded = currentDateTime;
-        lickToBeSaved.audioFileLocation = audioFileLocation; // audio file location doesn't need to be returned to frontend (but is anyway)
-        lickToBeSaved.audioLength = 0;
-        lickToBeSaved.tab = "TBD";
-        lickToBeSaved.tuning = "TBD";
-        lickToBeSaved.isPublic = false;
-        lickToBeSaved.owner = ctx.state.user;
-        lickToBeSaved.sharedWith = [];
-
-        // validate lick entity
-        const errors: ValidationError[] = await validate(lickToBeSaved); // errors is an array of validation errors
-
-        if (errors.length > 0) {
-            // return BAD REQUEST status code and errors array
-            ctx.status = 400;
-            ctx.body = errors;
-        } else {
-            // save the lick
-            const lick = await lickRepository.save(lickToBeSaved);
-            // return CREATED status code and the created lick
-            ctx.status = 201;
-            ctx.body = lick;
-        }
-
-    }
->>>>>>> 6f7c7b0e1408334d1ef2ebb852ae54d3384f715f
 
     /**
      * GET /api/licks/{id}
@@ -167,7 +107,6 @@ export class LickController {
     }
 
     /**
-<<<<<<< HEAD
      * POST /api/licks
      *
      * Upload new lick to be processed and have a tab generated.
@@ -239,8 +178,6 @@ export class LickController {
 
 
     /**
-=======
->>>>>>> 6f7c7b0e1408334d1ef2ebb852ae54d3384f715f
      * PUT /api/licks/{id}
      *
      * Update a lick by id.
@@ -250,10 +187,6 @@ export class LickController {
         return;
     }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 6f7c7b0e1408334d1ef2ebb852ae54d3384f715f
     /**
      * DELETE /api/licks/{id}
      *
@@ -292,12 +225,4 @@ export class LickController {
     private static canUserModify(user: User, lick: Lick): boolean {
         return lick.owner == user;
     }
-<<<<<<< HEAD
-=======
-
-    // Get a new unique location for an audio file
-    private static getNewAudioFileUri(): string {
-        return lickAudioDirectory + "/" + uuidv4();
-    }
->>>>>>> 6f7c7b0e1408334d1ef2ebb852ae54d3384f715f
 }

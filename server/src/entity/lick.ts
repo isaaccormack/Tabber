@@ -2,11 +2,6 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTabl
 import { Length } from "class-validator";
 import { User } from "./user";
 
-<<<<<<< HEAD
-// should Lick be plural so db table is licks not lick?
-
-=======
->>>>>>> 6f7c7b0e1408334d1ef2ebb852ae54d3384f715f
 @Entity()
 export class Lick {
     @PrimaryGeneratedColumn()
