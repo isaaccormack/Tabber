@@ -1,7 +1,12 @@
 import Router from "koa-router";
 import { UserController } from "../controller/user";
+<<<<<<< HEAD
 import {isAuthenticated} from "../middleware/auth-validator";
 import { LickController } from "../controller/lick";
+=======
+import { LickController } from "../controller/lick";
+import { isAuthenticated } from "../middleware/auth-validator";
+>>>>>>> 6f7c7b0e1408334d1ef2ebb852ae54d3384f715f
 
 const protectedRouter: Router = new Router();
 
