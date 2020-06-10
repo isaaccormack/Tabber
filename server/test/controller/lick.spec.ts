@@ -218,7 +218,7 @@ describe('Unit test: Lick endpoint', () => {
         await LickController.createLick(ctx)
         
         expect(ctx.status).toBe(400)
-        expect(ctx.body.length).toBeGreaterThanOrEqual(1)
+        expect(ctx.body.errors.length).toBeGreaterThanOrEqual(1)
     })
     it('should NOT create lick with invalid file', async () => {
         const ctx: any = createMockContext();
@@ -226,7 +226,7 @@ describe('Unit test: Lick endpoint', () => {
         await LickController.createLick(ctx)
         
         expect(ctx.status).toBe(400)
-        expect(ctx.body).toContain(" No file sent");
+        expect(ctx.body.errors.error).toContain(" No file sent");
     })
 
 

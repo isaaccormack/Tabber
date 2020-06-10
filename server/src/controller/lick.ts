@@ -40,12 +40,12 @@ export class LickController {
         // get a lick repository to perform operations with licks
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
 
-        // load lick by id
-        const lick: Lick | undefined = await lickRepository.findOne(+ctx.params.id || 0);
+        // attempt to find the lick by id and load its user
+        const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner']});
 
         if (lick) {
             // verify user has permissions
-            const isPermitted = this.canUserAccess(ctx.state.user, lick);
+            const isPermitted = LickController.canUserAccess(ctx.state.user, lick);
             if (isPermitted) {
                 // return OK status code and loaded lick object
                 ctx.status = 200;
@@ -53,12 +53,12 @@ export class LickController {
             } else {
                 // return FORBIDDEN status code
                 ctx.status = 403;
-                ctx.body = "You do not have permission to access this lick";
+                ctx.body = { errors: {error: "Error: You do not have permission to access this lick."}}
             }
         } else {
             // return a BAD REQUEST status code and error message
             ctx.status = 400;
-            ctx.body = "The lick you are trying to retrieve doesn't exist";
+            ctx.body = { errors: {error: "Error: The lick you are trying to retrieve doesn't exist."}}
         }
     }
 
@@ -75,6 +75,8 @@ export class LickController {
 
         if (lick) {
             // verify user has permissions
+            // const user: User | undefined = await lickRepository.find({ relations: ["user"] });
+
             const isPermitted = this.canUserAccess(ctx.state.user, lick);
             if (isPermitted) {
                 // return OK status code and loaded audio file
@@ -83,12 +85,12 @@ export class LickController {
             } else {
                 // return FORBIDDEN status code
                 ctx.status = 403;
-                ctx.body = "You do not have permission to access this lick";
+                ctx.body = { errors: {error: "Error: You do not have permission to access the audio for this lick."}}
             }
         } else {
             // return a BAD REQUEST status code and error message
             ctx.status = 400;
-            ctx.body = "The lick you are trying to retrieve doesn't exist";
+            ctx.body = { errors: {error: "Error: The audio for the lick you are trying to retrieve doesn't exist."}}
         }
     }
 
@@ -99,12 +101,14 @@ export class LickController {
      */
     public static async createLick(ctx: any): Promise<void> {
 
+        // can't use 'this' for some reason in this context, work around by using 'LickController' instead
+
         const audioFile = ctx.request.files.file;
         
-        const err: Error = this.validateAudioFile(audioFile);
+        const err: Error = LickController.validateAudioFile(audioFile); 
         if (err) {
             ctx.status = 400;
-            ctx.body = err.message;
+            ctx.body = { errors: {error: err.message}}
             return
         }
 
@@ -125,31 +129,31 @@ export class LickController {
         
         if (errors.length > 0) {
             ctx.status = 400;
-            ctx.body = errors;
+            ctx.body = { errors };
             return
         } 
         
         try {
-            lickToBeSaved.audioFileLocation = await this.saveAudioFile(audioFile);
+            lickToBeSaved.audioFileLocation = await LickController.saveAudioFile(audioFile);
         } catch (err) {
             ctx.status = 500;
-            ctx.body = err.message;
+            ctx.body = { errors: {error: err.message}}
             return
         }
         
         try {
             lickToBeSaved.audioLength = await audioDuration.getAudioDurationInSeconds(lickToBeSaved.audioFileLocation)
         } catch (err) {
-            await this.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
+            await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
             ctx.status = 500;
-            ctx.body = "Error: Cant get length of audio file.";
+            ctx.body = { errors: {error: "Error: Cant get length of audio file."}}
             return
         }
 
         if (lickToBeSaved.audioLength > 60) { // lick is too long
-            await this.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
+            await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
             ctx.status = 400;
-            ctx.body = "Error: Audio file is longer than 60 seconds.";
+            ctx.body = { errors: {error: "Error: Audio file is longer than 60 seconds."}}
             return
         }
 
@@ -197,12 +201,12 @@ export class LickController {
         if (!lickToRemove) {
             // return a BAD REQUEST status code and error message
             ctx.status = 400;
-            ctx.body = "The lick you are trying to delete doesn't exist";
+            ctx.body = { errors: {error: "Error: The lick you are trying to delete doesn't exist."}}
         } else if (ctx.state.user !== lickToRemove.owner) {
             // check user's token id and owner id are the same
             // if not, return a FORBIDDEN status code and error message
             ctx.status = 403;
-            ctx.body = "A lick can only be deleted by its owner";
+            ctx.body = { errors: {error: "Error: A lick can only be deleted by its owner."}}
         } else {
             // the lick is there so can be removed
             await lickRepository.remove(lickToRemove);
@@ -258,6 +262,9 @@ export class LickController {
     // TODO: test whether these comparisons work correctly & are a reasonably efficient way to do things
     private static canUserAccess(user: User, lick: Lick): boolean {
         // TODO: fix the shared with validation when implementing that functionality
+        // console.log(lick.owner)
+        // console.log(user)
+         // note: will have to change query to get sharedWith attribute of lick
         return lick.isPublic || lick.owner.id == user.id || lick.sharedWith.indexOf(user) !== -1;
     }
 
