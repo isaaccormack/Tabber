@@ -27,6 +27,22 @@ interface FileContext extends Context {
     request: FileRequest;
 }
 
+<<<<<<< HEAD
+=======
+// audioFile should be of some file type or multipart/formdata type
+function validateAudioFile(audioFile: any): Error | null {
+    
+    if (!audioFile) return new Error("Error: No file sent.")
+    if (!audioFile.size) return new Error("Error: File is empty.")
+    
+    // decide on supported types later
+    const supportedTypes: string[] = ["audio/mpeg", "audio/wav", "audio/mp4"]
+    if (!supportedTypes.includes(audioFile.type)) return new Error("Error: Mimetype is not supported.")
+    
+    return null;
+}
+
+>>>>>>> 52d308a6ac3ded789b61fd19ad543b3a38369cb8
 
 export class LickController {
 
@@ -181,7 +197,10 @@ export class LickController {
         return;
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 52d308a6ac3ded789b61fd19ad543b3a38369cb8
     /**
      * DELETE /api/licks/{id}
      *
