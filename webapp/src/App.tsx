@@ -20,7 +20,7 @@ function App() {
           <Navigation />
           <Switch>
             <Route exact path="/" component={CreatePage} />
-              <Route exact path="/create/upload" component={UploadPage} />
+            <Route exact path="/create/upload" component={UploadPage} />
             <Route exact path="/create" component={CreatePage} />
             <Route exact path="/oauth" component={OAuth2Page} />
             <Route exact path="/login" component={LoginPage} />
