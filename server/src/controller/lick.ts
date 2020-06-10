@@ -37,7 +37,8 @@ export class LickController {
      */
     public static async getLick(ctx: Context): Promise<void> {
 
-        // get a lick repository to perform operations with licks
+        // check if lick is public, else check if user authenticated before going further
+        
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
 
         // attempt to find the lick by id and load its user
@@ -49,6 +50,9 @@ export class LickController {
             if (isPermitted) {
                 // return OK status code and loaded lick object
                 ctx.status = 200;
+
+                // could do some manipulation to lick.owner here so not everyone can see all attributes of owner
+                // abide by front end requirements and implement later
                 ctx.body = lick;
             } else {
                 // return FORBIDDEN status code
@@ -71,17 +75,17 @@ export class LickController {
 
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
 
-        const lick: Lick | undefined = await lickRepository.findOne(+ctx.params.id || 0);
+        // attempt to find the lick by id and load its user
+        const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner']});
 
         if (lick) {
             // verify user has permissions
-            // const user: User | undefined = await lickRepository.find({ relations: ["user"] });
-
-            const isPermitted = this.canUserAccess(ctx.state.user, lick);
+            const isPermitted = LickController.canUserAccess(ctx.state.user, lick);
             if (isPermitted) {
                 // return OK status code and loaded audio file
                 ctx.status = 200;
-                ctx.body = await fs.readFile(lick.audioFileLocation);
+                const readFile = util.promisify(fs.readFile);
+                ctx.body = await readFile(lick.audioFileLocation);
             } else {
                 // return FORBIDDEN status code
                 ctx.status = 403;
@@ -121,7 +125,7 @@ export class LickController {
         lickToBeSaved.dateUploaded = new Date();
         lickToBeSaved.tab = ""; // initally empty, tab not generated yet
         lickToBeSaved.tuning = body.tuning;
-        lickToBeSaved.isPublic = body.isPublic;
+        lickToBeSaved.isPublic = body.isPublic == "true" ? true : false;
         lickToBeSaved.owner = ctx.state.user;
         lickToBeSaved.sharedWith = []; // TODO - list of shared with users will be sent from client upon lick creation
         
@@ -195,14 +199,14 @@ export class LickController {
         // get a lick repository to perform operations with licks
         const lickRepository = getManager().getRepository(Lick);
 
-        // find the lick by specified id
-        const lickToRemove: Lick | undefined = await lickRepository.findOne(+ctx.params.id || 0);
+        // attempt to find the lick by id and load its user
+        const lickToRemove: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner']});
 
         if (!lickToRemove) {
             // return a BAD REQUEST status code and error message
             ctx.status = 400;
             ctx.body = { errors: {error: "Error: The lick you are trying to delete doesn't exist."}}
-        } else if (ctx.state.user !== lickToRemove.owner) {
+        } else if (ctx.state.user.id !== lickToRemove.owner.id) {
             // check user's token id and owner id are the same
             // if not, return a FORBIDDEN status code and error message
             ctx.status = 403;
@@ -262,10 +266,10 @@ export class LickController {
     // TODO: test whether these comparisons work correctly & are a reasonably efficient way to do things
     private static canUserAccess(user: User, lick: Lick): boolean {
         // TODO: fix the shared with validation when implementing that functionality
-        // console.log(lick.owner)
-        // console.log(user)
-         // note: will have to change query to get sharedWith attribute of lick
-        return lick.isPublic || lick.owner.id == user.id || lick.sharedWith.indexOf(user) !== -1;
+        // note: will have to change query to get sharedWith attribute of lick
+        // doesn't handle shared with
+        return lick.isPublic || (user && (user.id == lick.owner.id));
+        // return lick.isPublic || lick.owner.id == user.id || lick.sharedWith.indexOf(user)? !== -1;
     }
 
     private static canUserModify(user: User, lick: Lick): boolean {

@@ -31,11 +31,11 @@ export function startApp(): Koa {
     // Enable bodyParser with default options
     app.use(bodyParser());
 
+    // Middleware to parse jwt token and initialize ctx.state
+    app.use(authValidator); // must run this before unprotected routes as ctx.state.user must be accessed in some routes
+
     // These routes do NOT require the user to be authenticated
     app.use(unprotectedRouter.routes()).use(unprotectedRouter.allowedMethods());
-
-    // Middleware to parse jwt token and initialize ctx.state
-    app.use(authValidator);
 
     // These routes require the user to be authenticated
     app.use(protectedRouter.routes()).use(protectedRouter.allowedMethods());

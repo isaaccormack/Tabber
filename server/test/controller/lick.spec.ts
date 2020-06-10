@@ -4,22 +4,10 @@ import {createMockContext } from '@shopify/jest-koa-mocks';
 import { User } from "../../src/entity/user";
 import { LickController } from '../../src/controller/lick'
 import { Lick } from '../../src/entity/lick';
-import { Context, Request } from 'koa'
-import { Files } from "koa2-formidable";
-
-// import * as audioDuration from 'get-audio-duration'; // for stubbing purposes
 
 const audioDuration = require('get-audio-duration')
 
-// need to move these interfaces somewhere
-// files must be added to Request interface
-interface FileRequest extends Request {
-    files?: Files;
-}
-
-interface FileContext extends Context {
-    request: FileRequest;
-}
+// import * as audioDuration from 'get-audio-duration'; // for stubbing purposes
 
 describe('Unit test: Lick endpoint', () => {
     let sandbox: SinonSandbox
@@ -40,16 +28,6 @@ describe('Unit test: Lick endpoint', () => {
         sandbox.restore()
     })
 
-    // DONT test any of the shared with, do that when implementing sharing
-
-    // test get lick by id
-
-    // test get lick audio
-
-    // test create lick
-
-    // test delete lick
-
     /**
      * Test getLick()
      */
@@ -59,30 +37,22 @@ describe('Unit test: Lick endpoint', () => {
 
         stubGetLickRepository({ findOne: function() { return fakeLick } });
 
-        let params = {
-            id: 1
-        }
         const ctx = createMockContext();
-        ctx.params = params
+        ctx.params = {}
         await LickController.getLick(ctx)
         
         expect(ctx.status).toBe(200)
         expect(ctx.body).toBe(fakeLick)
     })
     it('should NOT GET lick by id if lick doesnt exist', async () => {
-        const fakeLick: Lick = new Lick()
-
         stubGetLickRepository({ findOne: function() { return undefined } });
 
-        // no id specified
-        let params = {
-        }
         const ctx = createMockContext();
-        ctx.params = params
+        ctx.params = {}
         await LickController.getLick(ctx)
         
         expect(ctx.status).toBe(400)
-        expect(ctx.body).toContain("doesn't exist")
+        expect(ctx.body.errors.error).toContain("doesn't exist")
     })
     it('should GET private lick by id if user owns lick', async () => {
         const lickOwner: User = new User()
@@ -94,11 +64,8 @@ describe('Unit test: Lick endpoint', () => {
 
         stubGetLickRepository({ findOne: function() { return fakeLick } });
 
-        let params = {
-            id: 1
-        }
         const ctx = createMockContext();
-        ctx.params = params
+        ctx.params = {}
         ctx.state.user = lickOwner;
         await LickController.getLick(ctx)
         
@@ -118,43 +85,31 @@ describe('Unit test: Lick endpoint', () => {
 
         stubGetLickRepository({ findOne: function() { return fakeLick } });
 
-        let params = {
-            id: 1
-        }
         const ctx = createMockContext();
-        ctx.params = params
+        ctx.params = {}
         ctx.state.user = lickQuerier;
         await LickController.getLick(ctx)
         
         expect(ctx.status).toBe(403)
-        expect(ctx.body).toContain("do not have permission")
+        expect(ctx.body.errors.error).toContain("do not have permission")
+    })
+    it('should NOT GET private lick by id when user isnt logged in', async () => {
+        const fakeLick: Lick = new Lick()
+        fakeLick.isPublic = false;
+
+        stubGetLickRepository({ findOne: function() { return fakeLick } });
+
+        const ctx = createMockContext();
+        ctx.params = {}
+        await LickController.getLick(ctx)
+        
+        expect(ctx.status).toBe(403)
+        expect(ctx.body.errors.error).toContain("You do not have permission")
     })
     /**
      * Test getLickAudio()
      */
-    it('should GET public lick audio by id', async () => {
-        const fakeLick: Lick = new Lick()
-        fakeLick.isPublic = true;
-
-        // need to stub fs.readFile
-
-        // going to need an integration test to really test this, but just happy path stuff
-
-        // stop here and write integration tests to ensure the functionality actually works before writing unit tests for it
-
-        stubGetLickRepository({ findOne: function() { return fakeLick } });
-
-        let params = {
-            id: 1
-        }
-        const ctx = createMockContext();
-        ctx.params = params
-        await LickController.getLick(ctx)
-        
-        expect(ctx.status).toBe(200)
-        expect(ctx.body).toBe(fakeLick)
-    })
-
+    // Integration tests covers this enough
     /**
      * Test createLick()
      */
@@ -228,10 +183,63 @@ describe('Unit test: Lick endpoint', () => {
         expect(ctx.status).toBe(400)
         expect(ctx.body.errors.error).toContain(" No file sent");
     })
-
-
     /**
      * Test deleteLick()
      */
+    it('should DELETE lick by id from owner', async () => {
+        const lickOwner: User = new User()
+        lickOwner.id = 1 // must set id
 
+        const fakeLick: Lick = new Lick()
+        fakeLick.isPublic = false;
+        fakeLick.owner = lickOwner;
+        fakeLick.sharedWith = [];
+
+        stubGetLickRepository({
+            findOne: function() { return fakeLick },
+            remove: function() { return null }
+        });
+
+        const ctx = createMockContext();
+        ctx.state.user = lickOwner;
+        ctx.params = {}
+        await LickController.deleteLick(ctx)
+        
+        expect(ctx.status).toBe(204)
+        // should put a spy here to see if remove was called
+    })
+    it('should NOT DELETE lick by id if user isnt owner', async () => {
+        const lickOwner: User = new User()
+        lickOwner.id = 1 // must set id
+
+        const lickDeleter: User = new User()
+        lickOwner.id = 2 // must set id
+
+        const fakeLick: Lick = new Lick()
+        fakeLick.isPublic = false;
+        fakeLick.owner = lickOwner;
+        fakeLick.sharedWith = [];
+
+        stubGetLickRepository({ findOne: function() { return fakeLick } });
+
+        const ctx = createMockContext();
+        ctx.state.user = lickDeleter;
+        ctx.params = {}
+        await LickController.deleteLick(ctx)
+        
+        expect(ctx.status).toBe(403)
+        expect(ctx.body.errors.error).toContain("can only be deleted by its owner")
+    })
+    it('should NOT DELETE lick which doesnt exist', async () => {
+        stubGetLickRepository({
+            findOne: function() { return undefined },
+            remove: function() { return null }
+        });
+        const ctx = createMockContext();
+        ctx.params = {}
+        await LickController.deleteLick(ctx)
+        
+        expect(ctx.status).toBe(400)
+        expect(ctx.body.errors.error).toContain("doesn't exist")
+    })
 })
