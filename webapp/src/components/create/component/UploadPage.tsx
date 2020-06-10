@@ -20,12 +20,12 @@ export default function UploadPage() {
         setResponseStatus(0);
         if (file) {
             const form = new FormData();
+            form.append("file", file[0]);
             form.append("name", "placeholder name");
             form.append("tuning", "standard");
             form.append("isPublic", "false");
-            form.append("file", file[0]);
 
-            fetch("/api/lick",{
+            fetch("/api/licks",{
                 method: "POST",
                 body: form
             }).then((response) => {
