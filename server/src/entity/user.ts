@@ -20,7 +20,7 @@ export class User {
     @IsEmail()
     email: string;
 
-    @OneToMany(type => Lick, lick => lick.owner)
+    @OneToMany(type => Lick, lick => lick.owner) // shouldnt this be lick.owner => lick?
     licks: Lick[];
 
     @ManyToMany(type => Lick, lick => lick.sharedWith)

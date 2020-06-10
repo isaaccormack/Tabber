@@ -1,15 +1,13 @@
 import { validate, ValidationError } from "class-validator";
 import { getManager, Repository, Not, Equal, Like } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
-<<<<<<< HEAD
 import { Context, Request } from "koa";
 import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
-// const fs = require('fs').promises;
-const fs = require('fs')
-// import fs from "fs-promises"
-
 import { Files } from "koa2-formidable";
+const fs = require('fs');
+import * as util from 'util';
+import * as audioDuration from 'get-audio-duration';
 
 
 const lickAudioDirectory: string = "uploads";
@@ -29,80 +27,8 @@ interface FileContext extends Context {
     request: FileRequest;
 }
 
-// audioFile should be of some file type or multipart/formdata type
-function validateAudioFile(audioFile: any): Error | null {
-    
-    if (!audioFile) return new Error("Error: No file sent.")
-    if (!audioFile.size) return new Error("Error: File is empty.")
-    
-    // decide on supported types later
-    const supportedTypes: string[] = ["audio/mpeg", "audio/wav", "audio/mp4"]
-    if (!supportedTypes.includes(audioFile.type)) return new Error("Error: Mimetype is not supported.")
-    
-    return null;
-}
-
 
 export class LickController {
-=======
-import { Context } from "koa";
-import { Lick } from "../entity/lick";
-import { User } from "../entity/user";
-const fs = require('fs').promises;
-
-const lickAudioDirectory: string = "uploads";
-
-export class LickController {
-
-    /**
-     * POST /api/licks
-     *
-     * Upload new lick to be processed and have a tab generated.
-     */
-    public static async createLick(ctx: Context): Promise<void> {
-
-        // get a lick repository to perform operations with licks
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-
-        // save the audio to a file (with a randomly-generated ID)
-        const audio: any = ctx.request.body;
-        const audioFileLocation: string = this.getNewAudioFileUri();
-        // TODO: fix this. not sure why this is an issue; fs.writeFile is supposed to have a promise-based variation
-        await fs.writeFile(audioFileLocation, audio);
-
-        // get current date for uploading
-        const currentDateTime = new Date();
-
-        // build up lick entity to be saved
-        const lickToBeSaved: Lick = new Lick();
-        lickToBeSaved.name = "Lick from " + currentDateTime.toISOString();
-        lickToBeSaved.description = "";
-        lickToBeSaved.dateUploaded = currentDateTime;
-        lickToBeSaved.audioFileLocation = audioFileLocation; // audio file location doesn't need to be returned to frontend (but is anyway)
-        lickToBeSaved.audioLength = 0;
-        lickToBeSaved.tab = "TBD";
-        lickToBeSaved.tuning = "TBD";
-        lickToBeSaved.isPublic = false;
-        lickToBeSaved.owner = ctx.state.user;
-        lickToBeSaved.sharedWith = [];
-
-        // validate lick entity
-        const errors: ValidationError[] = await validate(lickToBeSaved); // errors is an array of validation errors
-
-        if (errors.length > 0) {
-            // return BAD REQUEST status code and errors array
-            ctx.status = 400;
-            ctx.body = errors;
-        } else {
-            // save the lick
-            const lick = await lickRepository.save(lickToBeSaved);
-            // return CREATED status code and the created lick
-            ctx.status = 201;
-            ctx.body = lick;
-        }
-
-    }
->>>>>>> 6f7c7b0e1408334d1ef2ebb852ae54d3384f715f
 
     /**
      * GET /api/licks/{id}
@@ -167,80 +93,85 @@ export class LickController {
     }
 
     /**
-<<<<<<< HEAD
      * POST /api/licks
      *
      * Upload new lick to be processed and have a tab generated.
      */
-    public static async createLick(ctx: FileContext, next: Function): Promise<void> {
+    public static async createLick(ctx: any): Promise<void> {
 
-        const audioFile: any = ctx.request.files.file;
-        const err: Error = validateAudioFile(audioFile);
+        const audioFile = ctx.request.files.file;
+        
+        const err: Error = this.validateAudioFile(audioFile);
         if (err) {
             ctx.status = 400;
             ctx.body = err.message;
             return
         }
 
-        // save the audio to a file with a randomly generated uuid
-        const audioFileLocation: string = getNewAudioFileUri();
+        const body = ctx.request.body;
+
+        // add user specified attributes to lick to be validated
+        const lickToBeSaved: Lick = new Lick();
+        lickToBeSaved.name = ctx.request.body.name;
+        lickToBeSaved.description = body.description ? body.description : "";
+        lickToBeSaved.dateUploaded = new Date();
+        lickToBeSaved.tab = ""; // initally empty, tab not generated yet
+        lickToBeSaved.tuning = body.tuning;
+        lickToBeSaved.isPublic = body.isPublic;
+        lickToBeSaved.owner = ctx.state.user;
+        lickToBeSaved.sharedWith = []; // TODO - list of shared with users will be sent from client upon lick creation
         
-        // create read and write streams to save file
-        const readStream = fs.createReadStream(audioFile.path);
-        const writeStream = fs.createWriteStream(audioFileLocation);
+        const errors: ValidationError[] = await validate(lickToBeSaved);
         
-        // asynchronously read from sent file and write to local file
+        if (errors.length > 0) {
+            ctx.status = 400;
+            ctx.body = errors;
+            return
+        } 
+        
         try {
-            for await (const chunk of readStream) {
-                const err: Error = await writeStream.write(chunk);
-                if (err) throw err;
-            }
-        } catch (e) {
+            lickToBeSaved.audioFileLocation = await this.saveAudioFile(audioFile);
+        } catch (err) {
             ctx.status = 500;
-            ctx.body = e.message;
+            ctx.body = err.message;
+            return
+        }
+        
+        try {
+            lickToBeSaved.audioLength = await audioDuration.getAudioDurationInSeconds(lickToBeSaved.audioFileLocation)
+        } catch (err) {
+            await this.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
+            ctx.status = 500;
+            ctx.body = "Error: Cant get length of audio file.";
             return
         }
 
-        // get a lick repository to perform operations with licks
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-
-        // get current date for uploading
-        const currentDateTime = new Date();
-
-        // build up lick entity to be saved
-        const lickToBeSaved: Lick = new Lick();
-        lickToBeSaved.name = "Lick from " + currentDateTime.toISOString();
-        lickToBeSaved.description = "";
-        lickToBeSaved.dateUploaded = currentDateTime;
-        lickToBeSaved.audioFileLocation = audioFileLocation; // audio file location doesn't need to be returned to frontend (but is anyway)
-        lickToBeSaved.audioLength = 0;
-        lickToBeSaved.tab = "TBD";
-        lickToBeSaved.tuning = "TBD";
-        lickToBeSaved.isPublic = false;
-        lickToBeSaved.owner = ctx.state.user;
-        lickToBeSaved.sharedWith = [];
-
-        // validate lick entity
-        const errors: ValidationError[] = await validate(lickToBeSaved); // errors is an array of validation errors
-
-        if (errors.length > 0) { // should probably delete the locally saved file in this case
-            // return BAD REQUEST status code and errors array
+        if (lickToBeSaved.audioLength > 60) { // lick is too long
+            await this.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
             ctx.status = 400;
-            ctx.body = errors;
-        } else {
-            // save the lick
-            const lick = await lickRepository.save(lickToBeSaved); // does this ever return some kind of error?
-            // return CREATED status code and the created lick
-            ctx.status = 201;
-            ctx.body = lick;
+            ctx.body = "Error: Audio file is longer than 60 seconds.";
+            return
         }
 
+        // finally, save the lick to the database
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        const lick = await lickRepository.save(lickToBeSaved);
+
+        ctx.status = 201;
+        ctx.body = lick;
+    }
+
+    private static async attemptToDeleteFile(filePath: string): Promise<void> {
+        const deleteFile = util.promisify(fs.unlink);
+        try {
+            await deleteFile(filePath);
+        } catch (e) {
+            console.error(e)
+        }
     }
 
 
     /**
-=======
->>>>>>> 6f7c7b0e1408334d1ef2ebb852ae54d3384f715f
      * PUT /api/licks/{id}
      *
      * Update a lick by id.
@@ -250,10 +181,7 @@ export class LickController {
         return;
     }
 
-<<<<<<< HEAD
 
-=======
->>>>>>> 6f7c7b0e1408334d1ef2ebb852ae54d3384f715f
     /**
      * DELETE /api/licks/{id}
      *
@@ -284,20 +212,57 @@ export class LickController {
         }
     }
 
+    /**
+     * HELPERS
+     */
+    // audioFile should be of some file type or multipart/formdata type
+    // would be cleaner just to have an AudioFile entity which links to lick and validate it that way
+    private static validateAudioFile(audioFile: any): Error | null {
+    
+        if (!audioFile) return new Error("Error: No file sent.")
+        if (!audioFile.size) return new Error("Error: File is empty.")
+        if (audioFile.size > 25000000) return new Error("Error: File must be less than 25MB.")
+        
+        // decide on supported types later
+        const supportedTypes: string[] = ["audio/mpeg", "audio/wav", "audio/mp4"]
+        if (!supportedTypes.includes(audioFile.type)) return new Error("Error: Mimetype is not supported.")
+        
+        return null;
+    }
+
+    private static async saveAudioFile(audioFile: any): Promise<string> {
+
+        // save the audio to a file with a randomly generated uuid
+        const audioFileLocation: string = getNewAudioFileUri();
+        
+        // create read and write streams to save file
+        const readStream = fs.createReadStream(audioFile.path);
+        const writeStream = fs.createWriteStream(audioFileLocation);
+        
+        // asynchronously read from sent file and write to local file
+        for await (const chunk of readStream) {
+            const err: Error = await writeStream.write(chunk);
+            if (err) {
+                // try to delete file created, if any was
+                try {
+                    await fs.unlink(audioFileLocation);
+                } catch (e) {
+                    // let this fail silently, already in the midst of an exception
+                }
+                throw err;
+            }
+        }
+
+        return audioFileLocation;
+    }
+
     // TODO: test whether these comparisons work correctly & are a reasonably efficient way to do things
     private static canUserAccess(user: User, lick: Lick): boolean {
-        return lick.isPublic || lick.owner == user || lick.sharedWith.indexOf(user) !== -1;
+        // TODO: fix the shared with validation when implementing that functionality
+        return lick.isPublic || lick.owner.id == user.id || lick.sharedWith.indexOf(user) !== -1;
     }
 
     private static canUserModify(user: User, lick: Lick): boolean {
         return lick.owner == user;
     }
-<<<<<<< HEAD
-=======
-
-    // Get a new unique location for an audio file
-    private static getNewAudioFileUri(): string {
-        return lickAudioDirectory + "/" + uuidv4();
-    }
->>>>>>> 6f7c7b0e1408334d1ef2ebb852ae54d3384f715f
 }
