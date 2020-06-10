@@ -31,6 +31,7 @@ export default function UploadPage() {
             }).then((response) => {
                 setResponseStatus(response.status);
                 if (response.status === 201) {
+                    alert("SUCCESS! TODO: navigate to edit page");
                     console.log("Success: TODO: navigate to edit page");
                     history.push("/create");
                     // TODO: add response to redux, delete old file

@@ -2,6 +2,6 @@ version: '3'
 
 services:
     tabber-app:
-        image: tabber:0.0.1
+        image: tabber:0.0.2
         ports:
             - "3000:3000"
