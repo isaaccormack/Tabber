@@ -1,20 +1,20 @@
 import React from "react";
 import Upload from '../icons/Upload.svg';
 import "./CreatePage.css";
+import {UpdateFile} from "../actions/FileActions";
+import {useDispatch} from "react-redux";
+import {useHistory} from "react-router";
 
 
 export default function UploadButton() {
+
+    const dispatch = useDispatch();
+    const history = useHistory();
+
     const onFileSelect = (file: FileList | null) => {
         if (file) {
-            fetch("/api/lick",{
-                method: "POST",
-                headers: {
-                    "Content-Type": "audio"
-                },
-                body: file[0]
-            }).then((response) => {
-                console.log(response);
-            })
+            dispatch(UpdateFile(file));
+            history.push("/create/upload");
         }
     }
 
