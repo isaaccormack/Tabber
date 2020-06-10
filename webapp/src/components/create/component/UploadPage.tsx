@@ -19,12 +19,15 @@ export default function UploadPage() {
     const sendFile = useCallback(() => {
         setResponseStatus(0);
         if (file) {
+            const form = new FormData();
+            form.append("name", "placeholder name");
+            form.append("tuning", "standard");
+            form.append("isPublic", "false");
+            form.append("file", file[0]);
+
             fetch("/api/lick",{
                 method: "POST",
-                headers: {
-                    "Content-Type": "audio"
-                },
-                body: file[0]
+                body: form
             }).then((response) => {
                 setResponseStatus(response.status);
                 if (response.status === 201) {
