@@ -53,7 +53,6 @@ describe('Integration: Licks endpoint', () => {
      */
     it('should be able to POST new lick with valid data', async () => {
         const audioFilePath = testDataDir + '700KB_mp3_file_27s.mp3';
-
         const tokenParams = jwtDecode(identityToken);
 
         const response: request.Response = await request(app.callback())
@@ -77,6 +76,9 @@ describe('Integration: Licks endpoint', () => {
             // doesn't work since user schema isnt consistant with database
             // expect(response.body.owner.name).toBe(tokenParams.name);
             expect(response.body.owner.email).toBe(tokenParams.email);
+
+            // should check here that file was actually created, but endpoint is async, so tough to do
+            // expect(fs.existsSync(testDataDir + response.body.audioFilePath)).toBe(true);
 
             privateID = response.body.id // set id for later tests
     });
@@ -235,11 +237,14 @@ describe('Integration: Licks endpoint', () => {
     });
     it('should be able to DELETE newly created lick by id as owner', async () => {
         const deleteResponse: request.Response = await request(app.callback())
-            .delete('/api/licks/' + privateID)
-            .set("Cookie", "ti="+identityToken);
-
-        expect(deleteResponse.status).toBe(204);
+        .delete('/api/licks/' + privateID)
+        .set("Cookie", "ti="+identityToken);
         
+        expect(deleteResponse.status).toBe(204);
+
+        // should check here that file was actually deleted, but endpoint is async, so tough to do
+        // expect(fs.existsSync(testDataDir + deleteResponse.body.audioFilePath)).toBe(false);
+
         // ensure that lick with id doesn't exist anymore
         const getResponse: request.Response = await request(app.callback())
             .delete('/api/licks/' + privateID)

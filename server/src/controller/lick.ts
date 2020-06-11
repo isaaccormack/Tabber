@@ -163,10 +163,15 @@ export class LickController {
 
         // finally, save the lick to the database
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-        const lick = await lickRepository.save(lickToBeSaved);
+        const lick: Lick | undefined = await lickRepository.save(lickToBeSaved);
 
-        ctx.status = 201;
-        ctx.body = lick;
+        if (!lick) {
+            ctx.status = 500;
+            ctx.body = { errors: {error: "Error: Cant save lick to database."}}
+        } else {
+            ctx.status = 201;
+            ctx.body = lick;
+        }
     }
 
     private static async attemptToDeleteFile(filePath: string): Promise<void> {
@@ -196,6 +201,8 @@ export class LickController {
      */
     public static async deleteLick(ctx: Context): Promise<void> {
 
+        // this should actually delete the lick from the file system
+
         // get a lick repository to perform operations with licks
         const lickRepository = getManager().getRepository(Lick);
 
@@ -212,10 +219,28 @@ export class LickController {
             ctx.status = 403;
             ctx.body = { errors: {error: "Error: A lick can only be deleted by its owner."}}
         } else {
+            // first try to delete the file
+            const deleteFile = util.promisify(fs.unlink);
+            try {
+                await deleteFile(lickToRemove.audioFileLocation);
+            } catch (err) {
+                // if err isnt that there is no file to be deleted, then a real error occurred
+                if (err.code != 'ENOENT') {
+                    ctx.status = 500;
+                    ctx.body = { errors: {error: "Error: Cant unlink lick from file system."}}
+                    return
+                }
+            }
+
             // the lick is there so can be removed
-            await lickRepository.remove(lickToRemove);
-            // return a NO CONTENT status code
-            ctx.status = 204;
+            const removedLick: Lick | undefined = await lickRepository.remove(lickToRemove);
+            if (!removedLick) {
+                ctx.status = 500;
+            } else {
+                // return a NO CONTENT status code
+                ctx.status = 204;
+                ctx.body = removedLick;
+            }
         }
     }
 
