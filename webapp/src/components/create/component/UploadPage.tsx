@@ -53,7 +53,7 @@ export default function UploadPage() {
             return (
                 <UploadPageLoadingAnimation />
             )
-        } if (responseStatus === 403) {
+        } if (responseStatus === 401) {
             dispatch(DeleteUser());
             history.push("/login");
             localStorage.clear();
