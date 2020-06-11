@@ -77,8 +77,8 @@ describe('Integration: Licks endpoint', () => {
             // expect(response.body.owner.name).toBe(tokenParams.name);
             expect(response.body.owner.email).toBe(tokenParams.email);
 
-            // should check here that file was actually created, but endpoint is async, so tough to do
-            // expect(fs.existsSync(testDataDir + response.body.audioFilePath)).toBe(true);
+            // expect file to be created
+            expect(fs.existsSync(response.body.audioFileLocation)).toBe(true);
 
             privateID = response.body.id // set id for later tests
     });
@@ -235,15 +235,15 @@ describe('Integration: Licks endpoint', () => {
         expect(response.status).toBe(400);
         expect(response.body.errors.error).toContain("doesn't exist");
     });
-    it('should be able to DELETE newly created lick by id as owner', async () => {
+    it('should be able to DELETE private lick by id as owner', async () => {
         const deleteResponse: request.Response = await request(app.callback())
         .delete('/api/licks/' + privateID)
         .set("Cookie", "ti="+identityToken);
         
         expect(deleteResponse.status).toBe(204);
 
-        // should check here that file was actually deleted, but endpoint is async, so tough to do
-        // expect(fs.existsSync(testDataDir + deleteResponse.body.audioFilePath)).toBe(false);
+        // expect file to be deleted
+        expect(fs.existsSync(deleteResponse.body.audioFileLocation)).toBe(false);
 
         // ensure that lick with id doesn't exist anymore
         const getResponse: request.Response = await request(app.callback())
@@ -356,6 +356,24 @@ describe('Integration: Licks endpoint', () => {
             .delete('/api/licks/' + privateID)
 
         expect(deleteResponse.status).toBe(401);
+    });
+    it('should be able to DELETE public lick by id as owner', async () => {
+        const deleteResponse: request.Response = await request(app.callback())
+        .delete('/api/licks/' + publicID)
+        .set("Cookie", "ti="+identityToken);
+        
+        expect(deleteResponse.status).toBe(204);
+
+        // expect file to be deleted
+        expect(fs.existsSync(deleteResponse.body.audioFileLocation)).toBe(false);
+
+        // ensure that lick with id doesn't exist anymore
+        const getResponse: request.Response = await request(app.callback())
+            .delete('/api/licks/' + privateID)
+            .set("Cookie", "ti="+identityToken);
+
+        expect(getResponse.status).toBe(400);
+        expect(getResponse.body.errors.error).toContain("doesn't exist");
     });
 
 });
