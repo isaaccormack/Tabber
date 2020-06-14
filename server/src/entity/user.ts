@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany } from "typeorm";
 import { Length, IsEmail } from "class-validator";
+import { Lick } from "./lick";
 
 @Entity()
 export class User {
@@ -18,10 +19,10 @@ export class User {
     @Length(5, 100)
     @IsEmail()
     email: string;
-}
 
-export const userSchema = {
-    id: { type: "number", required: true, example: 1 },
-    name: { type: "string", required: true, example: "Javier" },
-    email: { type: "string", required: true, example: "avileslopez.javier@gmail.com" }
-};
+    @OneToMany(type => Lick, lick => lick.owner) // shouldnt this be lick.owner => lick?
+    licks: Lick[];
+
+    @ManyToMany(type => Lick, lick => lick.sharedWith)
+    sharedWithMe: Lick[];
+}

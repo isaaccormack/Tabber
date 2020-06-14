@@ -1,11 +1,14 @@
-import {BaseContext} from "koa";
-import {google} from 'googleapis';
+import {Context} from "koa";
+import * as googleApis from "googleapis";
 import * as jwt from "jsonwebtoken";
 
-// @ts-ignore // typescript can't find this but it works...
 import * as keys from "../../keys/keys.json";
+import {User} from "../entity/user";
+import {getManager, Repository} from "typeorm";
+import { LoginTicket, TokenPayload } from "google-auth-library";
 
-const oauth2Client = new google.auth.OAuth2(
+
+const oauth2Client = new googleApis.google.auth.OAuth2(
     keys.YOUR_CLIENT_ID,
     keys.YOUR_CLIENT_SECRET,
     keys.YOUR_REDIRECT_URL
@@ -15,7 +18,6 @@ const scopes = [
     'https://www.googleapis.com/auth/userinfo.profile'
 ];
 
-//todo: this whole file needs a lot of improvement
 export default class OAuth2Controller {
 
     /**
@@ -23,7 +25,7 @@ export default class OAuth2Controller {
      *
      * Get google cloud endpoint for OAuth2
      */
-    public static async loginUrl(ctx: BaseContext): Promise<void> {
+    public static async loginUrl(ctx: Context): Promise<void> {
         ctx.body = oauth2Client.generateAuthUrl({
             scope: scopes
         });
@@ -36,12 +38,51 @@ export default class OAuth2Controller {
      */
     //todo: jwt verification intermediate step
     //todo: make POST operation
-    public static async tokenExchange(ctx: BaseContext): Promise<void> {
+    public static async tokenExchange(ctx: Context): Promise<void> {
         const oauthCode = ctx.query["code"];
-        const {tokens} = await oauth2Client.getToken(oauthCode)
-        const id_token: any = jwt.decode(tokens.id_token); //todo: make interface
+        const {tokens} = await oauth2Client.getToken(oauthCode);
         OAuth2Controller.setCookies(ctx, tokens);
-        ctx.body = id_token.given_name;
+        const ticket: LoginTicket = await OAuth2Controller.verifyToken(tokens.id_token);
+        const user: User = await OAuth2Controller.getOrCreateUser(ticket.getPayload())
+        if (user === null) {
+            ctx.response.status = 500;
+        } else {
+            ctx.body = user.name;
+        }
+    }
+
+    public static async verifyToken(idToken: string): Promise<LoginTicket> {
+        try {
+            return await oauth2Client.verifyIdToken({
+                idToken: idToken,
+                audience: keys.YOUR_CLIENT_ID
+            });
+        } catch {
+            return null;
+        }
+    }
+
+    public static async getOrCreateUser(payload: TokenPayload): Promise<User> {
+        const userRepository: Repository<User> = getManager().getRepository(User);
+        // get user
+        let user: User = await userRepository.findOne(
+            {
+                where:
+                    {email: payload.email}
+            }
+        );
+        // create user is doesn't exist
+        if (!user) {
+            user = new User();
+            user.email = payload.email;
+            user.name = payload.given_name;
+            try {
+                user = await userRepository.save(user);
+            } catch {
+                return null;
+            }
+        }
+        return user;
     }
 
     private static setCookies(ctx, tokens) {

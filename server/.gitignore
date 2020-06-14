@@ -8,3 +8,7 @@ views/*
 !views/.gitkeep
 keys/*
 !keys/.gitkeep
+uploads/*
+!uploads/.gitkeep
+.env
+**/ormconfig-prod.json

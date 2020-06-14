@@ -3,10 +3,10 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 
 import Record from '../icons/Record.svg';
-import Upload from '../icons/Upload.svg';
 import OrIcon from "../icons/OrIcon.svg";
 
 import './CreatePage.css';
+import UploadButton from "./UploadButton";
 
 export default function CreatePage() {
 
@@ -21,7 +21,7 @@ export default function CreatePage() {
             </Row>
             <br />
             <Row>
-                <img src={Upload} className='uploadButton' alt='upload button' />
+               <UploadButton />
             </Row>
         </Container>
     );
