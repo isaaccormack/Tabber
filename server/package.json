@@ -32,6 +32,7 @@
         "@types/node": "^9.6.56",
         "@types/supertest": "^2.0.9",
         "@types/uuid": "^8.0.0",
+        "@types/wav": "^1.0.0",
         "jest": "^26.0.1",
         "jest-serial-runner": "^1.1.0",
         "jwt-decode": "^2.2.0",
@@ -44,6 +45,7 @@
         "bufferutil": "^4.0.1",
         "canvas": "^2.6.1",
         "class-validator": "^0.12.0",
+        "csv-parse": "^4.10.1",
         "get-audio-duration": "^2.0.2-beta.0",
         "googleapis": "^51.0.0",
         "koa": "^2.5.0",
@@ -55,8 +57,10 @@
         "koa-static": "^5.0.0",
         "koa2-formidable": "^1.0.2",
         "mysql": "^2.15.0",
+        "shelljs": "^0.8.4",
         "typeorm": "^0.2.0",
         "utf-8-validate": "^5.0.2",
-        "uuid": "^8.1.0"
+        "uuid": "^8.1.0",
+        "wav": "^1.0.2"
     }
 }

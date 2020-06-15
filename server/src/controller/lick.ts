@@ -9,6 +9,7 @@ import * as util from 'util';
 import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
 import { UserController } from './user'
+import tabLick from "./tab-tmp";
 
 export class LickController {
 
@@ -84,6 +85,7 @@ export class LickController {
             ctx.status = 201; // CREATED
             ctx.body = lick;
         }
+        await tabLick(lick); // TODO: use node worker
     }
 
     /**
