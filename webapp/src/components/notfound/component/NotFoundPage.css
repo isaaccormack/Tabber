@@ -1,6 +1,6 @@
 @import "../../../mainstyles.css";
 
 .notFound {
-    font-size: var(--font-size-large);
+    font-size: var(--font-size-8);
     font-family: var(--font-header);
 }

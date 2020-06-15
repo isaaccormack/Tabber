@@ -38,7 +38,9 @@ function App() {
                             <Redirect to="/create" />
                         </Route>
                         <Route exact path="/404" component={NotFoundPage} />
-                        <Route path="*" component={NotFoundPage} />
+                        <Route path="*">
+                            <Redirect to="/404" />
+                        </Route>
                     </Switch>
                 </Container>
             </div>
