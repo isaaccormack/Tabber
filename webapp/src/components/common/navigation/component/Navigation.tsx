@@ -9,6 +9,12 @@ import {useDispatch, useSelector} from "react-redux";
 import {useHistory} from "react-router";
 import {DeleteUser} from "../../user/actions/UserActions";
 
+import AccountIcon from "../icons/account.svg";
+import CreateIcon from "../icons/create.svg";
+import LibraryIcon from "../icons/library.svg";
+import SharedIcon from "../icons/shared.svg";
+import LogoutIcon from "../icons/logout.svg";
+
 interface SelectorInterface {
     accountSelector: string
     createSelector: string
@@ -49,19 +55,19 @@ export default function Navigation() {
                         Tabber
                     </Row>
                     <Row className="nav-selection" id={accountSelector} onClick={()=>{history.push("/account")}}>
-                        Account
+                        <img src={AccountIcon} className="icon" alt="account" /> Account
                     </Row>
                     <Row className="nav-selection" id={createSelector} onClick={()=>{history.push("/create")}}>
-                        Create
+                        <img src={CreateIcon} className="icon" alt="create" /> Create
                     </Row>
                     <Row className="nav-selection" id={librarySelector} onClick={()=>{history.push("/library")}}>
-                        Library
+                        <img src={LibraryIcon} className="icon" alt="library" /> Library
                     </Row>
                     <Row className="nav-selection bottom" id={sharedSelector} onClick={()=>{history.push("/shared")}}>
-                        Shared
+                        <img src={SharedIcon} className="icon" alt="shared" /> Shared
                     </Row>
                     <Row className="nav-selection" onClick={logout}>
-                        Logout
+                        <img src={LogoutIcon} className="icon" alt="logout" /> Logout
                     </Row>
                 </Col>
             </Row>

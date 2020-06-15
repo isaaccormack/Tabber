@@ -3,23 +3,29 @@
 .logo {
     font-family: var(--font-header);
     color: var(--font-color-light);
-    font-size: var(--font-size-large);
+    font-size: var(--font-size-8);
     margin-bottom: 50%;
 }
 
 #selected {
-    color: red;
+    filter: brightness(50%) sepia(1) hue-rotate(309deg) saturate(10);
     pointer-events: none;
+}
+
+.icon {
+    margin-right: 5px;
+    height: 30px;
 }
 
 .nav-selection {
     font-family: var(--font-body);
-    font-size: var(--font-size-medium);
+    font-size: var(--font-size-3);
     color: var(--font-color-light);
+    margin-bottom: 10px;
 }
 
 .nav-selection:hover {
-    color: blue;
+    filter: brightness(50%) sepia(1) hue-rotate(180deg) saturate(10);
     cursor: pointer;
 }
 

@@ -7,6 +7,10 @@
     justify-content: center;
 }
 
+.button:hover {
+    filter: saturate(2);
+}
+
 .recordButton {
     width: 128px;
 }
