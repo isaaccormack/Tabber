@@ -11,7 +11,7 @@ import UploadButton from "./UploadButton";
 export default function CreatePage() {
 
     return(
-        <Container className="createPageBody">
+        <Container className="createPageBody centered">
             <Row>
                 <img src={Record} className='recordButton' alt='record button' />
             </Row>

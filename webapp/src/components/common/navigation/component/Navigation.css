@@ -1,29 +1,34 @@
 @import '../../../../mainstyles.css';
 
-.topbarRow {
-    padding-top: 4px;
-}
-
-.accountInfo {
-    position: absolute;
-    bottom: 16px;
-    font-size: var(--font-size-small);
-}
-
-.toolSelection {
-    font-size: var(--font-size-medium);
-    font-family: var(--font-header);
-    text-align: center;
-}
-
 .logo {
     font-family: var(--font-header);
     color: var(--font-color-light);
     font-size: var(--font-size-large);
+    margin-bottom: 50%;
 }
 
-.selected {
-    width: 70px;
-    border-bottom: 3px solid var(--red);
-    
+#selected {
+    color: red;
+    pointer-events: none;
+}
+
+.nav-selection {
+    font-family: var(--font-body);
+    font-size: var(--font-size-medium);
+    color: var(--font-color-light);
+}
+
+.nav-selection:hover {
+    color: blue;
+    cursor: pointer;
+}
+
+.bottom {
+    margin-bottom: 50%;
+}
+
+.center-align {
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%);
 }
