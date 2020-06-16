@@ -18,7 +18,7 @@ import { Reader } from "wav";
 const crepeOutputDirectory: string = "crepe";
 const readFile = util.promisify(fs.readFile);
 
-interface AudioData {
+class AudioData {
     time: number[];
     frequency: number[];
     confidence: number[];
@@ -62,7 +62,7 @@ async function getData(lick: Lick): Promise<AudioData> {
         }
     }
 
-    let data: AudioData;
+    const data: AudioData = new AudioData();
     data.time = crepeData.time;
     data.frequency = crepeData.frequency;
     data.confidence = crepeData.confidence;
@@ -79,8 +79,7 @@ async function getCrepeOutput(lick: Lick): Promise<any> {
     // inputting into the tensorflow model).
     console.log("running crepe model");
 
-    const crepeFilePath: string = crepeOutputDirectory + path.basename(lick.audioFileLocation) + "-crepe-output.csv"
-    const execString: string = "crepe " + "--output " + crepeFilePath + " --model-capacity full " + lick.audioFileLocation;
+    const execString: string = "crepe " + "--output " + crepeOutputDirectory + " --model-capacity full " + lick.audioFileLocation;
 
     console.log("executing string:");
     console.log(execString);
@@ -88,6 +87,7 @@ async function getCrepeOutput(lick: Lick): Promise<any> {
     await shell.exec(execString);
 
     console.log("crepe output complete for " + lick.audioFileLocation);
+    const crepeFilePath: string = crepeOutputDirectory + "/" + path.basename(lick.audioFileLocation)
 
     console.log("output file: " + crepeFilePath);
     const results: any = await getCrepeCsvData(crepeFilePath);
@@ -102,7 +102,7 @@ async function getAmplitudeData(lick: Lick): Promise<any> {
     // doable. (or, if we could modify crepe to take mp3 or other data formats, then a reader for those)
     console.log("getting wav data");
 
-    const amplitudeFilePath: string = crepeOutputDirectory + path.basename(lick.audioFileLocation) + "-amplitude.csv";
+    const amplitudeFilePath: string = crepeOutputDirectory + "/" + path.basename(lick.audioFileLocation) + "-amplitude.csv";
     const execString: string = "python3 crepe/read_wav.py --input " + lick.audioFileLocation + " --output " + amplitudeFilePath;
 
     console.log("executing string:");
