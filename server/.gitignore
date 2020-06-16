@@ -10,5 +10,7 @@ keys/*
 !keys/.gitkeep
 uploads/*
 !uploads/.gitkeep
+crepe/*
+!crepe/.gitkeep
 .env
 **/ormconfig-prod.json
