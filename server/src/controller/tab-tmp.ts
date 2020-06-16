@@ -19,67 +19,31 @@ const crepeOutputDirectory: string = "crepe";
 const readFile = util.promisify(fs.readFile);
 
 export default async function tabLick(lick: Lick): Promise<void> {
-    console.log("tabbing with crepe.");
+    console.log("tabbing lick with crepe.");
+    console.log(lick);
 
-    //const crepeData: any = await getCrepeOutput(lick);
-    const wavData: any = getWavData(lick);
+    const crepeData: any = await getCrepeOutput(lick);
+    const amplitudeData: any = await getAmplitudeData(lick);
 
+    console.log("done tabbing lick.");
 }
 
-async function getWavData(lick: Lick): Promise<any> {
-    // TODO: figure out how to return a promise with this horrific API.
-    // TODO: figure out how to actually parse an audio file into amplitude data...
-    //       PCM data will probably be easiest (but still nontrivial); there are other
-    //       valid data compression schemes that still are considered valid wav files.
-    const wavFile = fs.createReadStream(lick.audioFileLocation);
-    const reader: any = new Reader();
-    const dataBuffers: Buffer[] = [];
-    let totalResultBuffer: Buffer;
+async function getAmplitudeData(lick: Lick): Promise<any> {
+    // this is pretty sketchy and slow. ideally we transfer this to pure js, or at the very least
+    // merge it with crepe's data analysis so that we don't spawn multiple shells and read the file
+    // multiple times. if we could find an effective .wav file reader, then this would all be thoroughly
+    // doable. (or, if we could modify crepe to take mp3 or other data formats, then a reader for those)
+    console.log("getting wav data");
 
+    const amplitudeFilePath: string = crepeOutputDirectory + path.basename(lick.audioFileLocation) + "-amplitude.csv";
+    const execString: string = "python3 crepe/read_wav.py --input " + lick.audioFileLocation + " --output " + amplitudeFilePath;
 
-    reader.on("end", () => {
-      console.log("reader.on('end')");
-      totalResultBuffer = Buffer.concat(dataBuffers);
-      console.log("total buffer:");
-      console.log(totalResultBuffer);
-    });
+    console.log("amplitude data extraction complete for " + lick.audioFileLocation);
 
-    reader.on("data", (data: Buffer) => {
-      console.log("reader.on('data')");
-      console.log(data);
-      dataBuffers.push(data);
-    });
+    console.log("output file: " + amplitudeFilePath);
+    const results: any = await getAmplitudeCsvData(amplitudeFilePath);
 
-    reader.once('readable', function () {
-      console.log("reader.once('readable')");
-      console.log('WaveHeader Size:\t%d', 12);
-      console.log('ChunkHeader Size:\t%d', 8);
-      console.log('FormatChunk Size:\t%d', reader.subchunk1Size);
-      console.log('RIFF ID:\t%s', reader.riffId);
-      console.log('Total Size:\t%d', reader.chunkSize);
-      console.log('Wave ID:\t%s', reader.waveId);
-      console.log('Chunk ID:\t%s', reader.chunkId);
-      console.log('Chunk Size:\t%d', reader.subchunk1Size);
-      console.log('Compression format is of type: %d', reader.audioFormat);
-      console.log('Channels:\t%d', reader.channels);
-      console.log('Sample Rate:\t%d', reader.sampleRate);
-      console.log('Bytes / Sec:\t%d', reader.byteRate);
-      console.log('BlockAlign:\t%d', reader.blockAlign);
-      console.log('Bits Per Sample Point:\t%d', reader.bitDepth);
-      console.log();
-    });
-
-    reader.once('format', function (format) {
-      console.log("reader.once('format')");
-      console.log(format);
-    });
-
-    console.log("reader:");
-    console.log(reader);
-
-    wavFile.pipe(reader).resume();
-
-    return {};
+    return results;
 }
 
 async function getCrepeOutput(lick: Lick): Promise<any> {
@@ -88,9 +52,10 @@ async function getCrepeOutput(lick: Lick): Promise<any> {
     // convert a bunch of scipy/numpy code into js; most crucially we need to find an effective
     // .wav file reader [crepe uses scipy.wavFile.read()] to get data from the audio file for
     // inputting into the tensorflow model).
-    console.log(lick);
+    console.log("running crepe model");
 
-    const execString: string = "crepe " + "--output " + crepeOutputDirectory + " --model-capacity full " + lick.audioFileLocation;
+    const crepeFilePath: string = crepeOutputDirectory + path.basename(lick.audioFileLocation) + "-crepe-output.csv"
+    const execString: string = "crepe " + "--output " + crepeFilePath + " --model-capacity full " + lick.audioFileLocation;
 
     console.log("executing string:");
     console.log(execString);
@@ -99,28 +64,22 @@ async function getCrepeOutput(lick: Lick): Promise<any> {
 
     console.log("crepe output complete for " + lick.audioFileLocation);
 
-    const outputPath: string = crepeOutputDirectory + "/" + path.parse(lick.audioFileLocation).name;
-    console.log("lick.audioFileLocation: " + lick.audioFileLocation);
-    console.log("outputPath: " + outputPath);
-    const results: any = await getCsvData(outputPath);
+    console.log("output file: " + crepeFilePath);
+    const results: any = await getCrepeCsvData(crepeFilePath);
     console.log("results:");
     console.log(results);
 
     return results;
 }
 
-// Get csv data
-async function getCsvData(outputPath: string): Promise<any> {
+// Get CREPE output csv data
+async function getCrepeCsvData(filePath: string): Promise<any> {
     // Load csv file contents
-    const csvFile = await readFile(outputPath);
-    console.log("csvFile:");
-    console.log(csvFile);
+    const csvFile = await readFile(filePath);
 
     // Read csv file row-by-row
     // Each row will be an object e.g. {time: '0.240', frequency: '440.034', confidence: '0.887045'}
     const parseResults: any[] = parse(csvFile, {columns: true}); // use first (header) line as labels
-    console.log("parseResults:");
-    console.log(parseResults);
 
     // Rotate csv file to produce three arrays: time[], frequency[], and confidence[].
     const time: Number[] = parseResults.map(x => Number(x.time));
@@ -128,6 +87,22 @@ async function getCsvData(outputPath: string): Promise<any> {
     const confidence: Number[] = parseResults.map(x => Number(x.confidence));
 
     return {time, frequency, confidence};
+}
+
+// Get amplitude output csv data
+async function getAmplitudeCsvData(filePath: string): Promise<any> {
+    // Load csv file contents
+    const csvFile = await readFile(filePath);
+
+    // Read csv file row-by-row
+    // Each row will be an object e.g. {time: '0.240', max_amplitude: '358.231005'}
+    const parseResults: any[] = parse(csvFile, {columns: true}); // use first (header) line as labels
+
+    // Rotate csv file to produce two arrays: time[] and maxAmplitude[]
+    const time: Number[] = parseResults.map(x => Number(x.time));
+    const maxAmplitude: Number[] = parseResults.map(x => Number(x.max_amplitude));
+
+    return {time, maxAmplitude};
 }
 
 /*
