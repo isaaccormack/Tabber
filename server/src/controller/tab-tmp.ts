@@ -18,32 +18,57 @@ import { Reader } from "wav";
 const crepeOutputDirectory: string = "crepe";
 const readFile = util.promisify(fs.readFile);
 
+interface AudioData {
+    time: number[];
+    frequency: number[];
+    confidence: number[];
+    peakAmplitude: number[];
+}
+
 export default async function tabLick(lick: Lick): Promise<void> {
     console.log("tabbing lick with crepe.");
     console.log(lick);
 
-    const crepeData: any = await getCrepeOutput(lick);
-    const amplitudeData: any = await getAmplitudeData(lick);
+    const data: AudioData = await getData(lick);
+
+    console.log("final audio data:");
+    console.log(data);
 
     console.log("done tabbing lick.");
 }
 
-async function getAmplitudeData(lick: Lick): Promise<any> {
-    // this is pretty sketchy and slow. ideally we transfer this to pure js, or at the very least
-    // merge it with crepe's data analysis so that we don't spawn multiple shells and read the file
-    // multiple times. if we could find an effective .wav file reader, then this would all be thoroughly
-    // doable. (or, if we could modify crepe to take mp3 or other data formats, then a reader for those)
-    console.log("getting wav data");
+async function getData(lick: Lick): Promise<AudioData> {
+    const crepeData: any = await getCrepeOutput(lick);
+    const amplitudeData: any = await getAmplitudeData(lick);
 
-    const amplitudeFilePath: string = crepeOutputDirectory + path.basename(lick.audioFileLocation) + "-amplitude.csv";
-    const execString: string = "python3 crepe/read_wav.py --input " + lick.audioFileLocation + " --output " + amplitudeFilePath;
+    // Workaround for off-by-one errors in current implementation. This way we can fix that issue
+    // independently of working with the data. However, once we fix the issues with the amplitude
+    // function and crepe function producing inconsistent results (amplitude gives one extra result somehow),
+    // this can be removed.
+    const numCrepeSamples: number = crepeData.time.length;
+    const numAmplitudeSamples: number = amplitudeData.time.length;
+    if (numCrepeSamples != numAmplitudeSamples) {
+        console.log("CREPE and amplitude calculations produced inconsistent number of samples:"
+                    + numCrepeSamples + "," + numAmplitudeSamples);
 
-    console.log("amplitude data extraction complete for " + lick.audioFileLocation);
+        // Grab the shorter one
+        if (numAmplitudeSamples > numCrepeSamples) {
+            amplitudeData.time = amplitudeData.time.slice(0, numCrepeSamples);
+            amplitudeData.peakAmplitude = amplitudeData.peakAmplitude.slice(0, numCrepeSamples);
+        } else {
+            crepeData.time = crepeData.time.slice(0, numAmplitudeSamples);
+            crepeData.frequency = crepeData.frequency.slice(0, numAmplitudeSamples);
+            crepeData.confidence = crepeData.confidence.slice(0, numAmplitudeSamples);
+        }
+    }
 
-    console.log("output file: " + amplitudeFilePath);
-    const results: any = await getAmplitudeCsvData(amplitudeFilePath);
+    let data: AudioData;
+    data.time = crepeData.time;
+    data.frequency = crepeData.frequency;
+    data.confidence = crepeData.confidence;
+    data.peakAmplitude = amplitudeData.peakAmplitude;
 
-    return results;
+    return data;
 }
 
 async function getCrepeOutput(lick: Lick): Promise<any> {
@@ -60,14 +85,35 @@ async function getCrepeOutput(lick: Lick): Promise<any> {
     console.log("executing string:");
     console.log(execString);
 
-    await shell.exec(execString); // "crepe audiofile.wav" produces csv file output
+    await shell.exec(execString);
 
     console.log("crepe output complete for " + lick.audioFileLocation);
 
     console.log("output file: " + crepeFilePath);
     const results: any = await getCrepeCsvData(crepeFilePath);
-    console.log("results:");
-    console.log(results);
+
+    return results;
+}
+
+async function getAmplitudeData(lick: Lick): Promise<any> {
+    // this is pretty sketchy and slow. ideally we transfer this to pure js, or at the very least
+    // merge it with crepe's data analysis so that we don't spawn multiple shells and read the file
+    // multiple times. if we could find an effective .wav file reader, then this would all be thoroughly
+    // doable. (or, if we could modify crepe to take mp3 or other data formats, then a reader for those)
+    console.log("getting wav data");
+
+    const amplitudeFilePath: string = crepeOutputDirectory + path.basename(lick.audioFileLocation) + "-amplitude.csv";
+    const execString: string = "python3 crepe/read_wav.py --input " + lick.audioFileLocation + " --output " + amplitudeFilePath;
+
+    console.log("executing string:");
+    console.log(execString);
+
+    await shell.exec(execString);
+
+    console.log("amplitude data extraction complete for " + lick.audioFileLocation);
+
+    console.log("output file: " + amplitudeFilePath);
+    const results: any = await getAmplitudeCsvData(amplitudeFilePath);
 
     return results;
 }
@@ -100,9 +146,9 @@ async function getAmplitudeCsvData(filePath: string): Promise<any> {
 
     // Rotate csv file to produce two arrays: time[] and maxAmplitude[]
     const time: Number[] = parseResults.map(x => Number(x.time));
-    const maxAmplitude: Number[] = parseResults.map(x => Number(x.max_amplitude));
+    const peakAmplitude: Number[] = parseResults.map(x => Number(x.max_amplitude));
 
-    return {time, maxAmplitude};
+    return {time, peakAmplitude};
 }
 
 /*
