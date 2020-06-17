@@ -52,6 +52,7 @@ function getStringAndFret(note: number): StringFret {
 }
 
 // Get indices of the passed array which are local maxima
+// TODO: improve this to be smoother - only get local maxima which are bigger than multiple prior values
 function getLocalMaximaIndices(values: number[]): number[] {
     // handle edge cases
     if (values.length == 0) return [];
@@ -59,23 +60,61 @@ function getLocalMaximaIndices(values: number[]): number[] {
 
     const indices: number[] = [];
 
-    // handle first index being a local maxima
+    // handle first index being a local maximum
     if (values[0] >= values[1]) {
         indices.push(0);
     }
-    // handle middle values being a local maxima
+    // handle middle values being a local maximum
     for (var i = 1; i < values.length - 1; ++i) {
         // use >= for next value in order to get only the first of equal values
         if (values[i] > values[i - 1] && values[i] >= values[i + 1]) {
             indices.push(i);
         }
     }
-    // handle last index being a local maxima
+    // handle last index being a local maximum
     if (values[values.length-1] > values[values.length-2]) {
         indices.push(values.length-1);
     }
 
     return indices;
+}
+
+// For each value in the input array, returns a pair.
+// The first element in the pair is the number of prior values which
+// the element is larger than or equal to.
+// The second element in the pair is the number of subsequent values which
+// the element is larger than.
+// e.g. with input array [1, 2, 3, 4, 3, 2, 3, 5], the output array is
+// [(0, 0), (1, 0), (2, 0), (3, 3), (0, 1), (0, 0), (2, 0), (7, 0)]
+// This allows us to have a single function that will work for whatever
+// maximum values we need - e.g. if we want to only look at values which
+// are the local maximums of an 8-sample region, or which must be larger
+// than the 3 prior samples and the 6 subsequent samples, and so forth.
+// This implementation is O(n).
+function smoothLocalMaxima(values: number[]): any {
+    const previousValues: number[] = new Array(values.length);
+    const nextValues: number[] = new Array(values.length);
+    const stack: number[] = [];
+
+    for (var i = 0; i < values.length; ++i) {
+        while (stack.length > 0 && values[stack[stack.length-1]] <= values[i]) {
+            const idx = stack.pop();
+            nextValues[idx] = i - idx - 1;
+        }
+        if (stack.length > 0) {
+            const idx = stack[stack.length - 1];
+            previousValues[i] = i - idx - 1;
+        } else {
+            previousValues[i] = i - 1;
+        }
+        stack.push(i);
+    }
+    while (stack.length > 0) {
+        const idx = stack.pop();
+        nextValues[idx] = values.length - idx - 1;
+    }
+
+    return { prev: previousValues, next: nextValues };
 }
 
 export default async function tabLick(lick: Lick): Promise<void> {
