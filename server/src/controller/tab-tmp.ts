@@ -1,22 +1,13 @@
-import { validate, ValidationError } from "class-validator";
-import { getManager, Repository, Not, Equal, Like } from "typeorm";
-import { v4 as uuidv4 } from "uuid";
-import { Context, Request } from "koa";
 import { Lick } from "../entity/lick";
-import { User } from "../entity/user";
-// const fs = require('fs').promises;
-const fs = require('fs')
-const util = require('util')
-// import fs from "fs-promises"
-
-import { Files } from "koa2-formidable";
 import shell from "shelljs";
 import path from "path";
 import parse from "csv-parse/lib/sync";
-import { Reader } from "wav";
+import fs from "fs";
+import util from "util";
+
+const readFile = util.promisify(fs.readFile); // necessary because async readFile seems to be unavailable for some reason
 
 const crepeOutputDirectory: string = "crepe";
-const readFile = util.promisify(fs.readFile);
 
 class AudioData {
     time: number[];
