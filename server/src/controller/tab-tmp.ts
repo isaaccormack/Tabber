@@ -17,7 +17,7 @@ class AudioData {
 }
 
 class StringFret {
-    string_idx: number; // 1-6 (low-high) (I love numeric variables called string! So clear!)
+    stringIdx: number; // 1-6 (low-high) (I love numeric variables called string! So clear!)
     fret: number; // 0-12
 }
 
@@ -45,7 +45,7 @@ function getStringAndFret(note: number): StringFret {
     const tuning: number[] = [64, 59, 55, 50, 45, 40]; // Standard tuning
     for (var i = 0; i < tuning.length; ++i) {
         if (note >= tuning[i]) {
-            return { string_idx: i, fret: note - tuning[i] };
+            return { stringIdx: i, fret: note - tuning[i] };
         }
     }
     throw new Error("Could not determine string and fret of note (note index: " + note + ")");
@@ -117,6 +117,46 @@ function smoothLocalMaxima(values: number[]): any {
     return { prev: previousValues, next: nextValues };
 }
 
+// Generates an actual tab string from a sequence of indices which correspond to the times
+// at which notes were played, and a sequence of notes (in terms of strings & frets) that
+// were played at those times. The lengths of the arrays are equal.
+// Generates a tab with 1 horizontal space per 10 samples (i.e. 100 milliseconds). This has
+// been arbitrarily picked, but should work okay to start - most people aren't playing 10 notes
+// per second, and if they are, it's not clear that we'd be able to tab that correctly anyway.
+// The earliest note in each 10-sample interval takes priority if multiple are found.
+// NOTE: this fails for frets >= 10 (i.e. it can't deal with 2-digit frets - if one is
+//       encountered, it will push the rest of the line to the right by one character.
+// NOTE: this generates the whole thing as one single line, so each guitar-string is separated
+//       by a newline only at the end. this means that for long tabs, displaying it will get ugly.
+function generateTabString(totalSamples: number, peakIndices: number[], peakStringsAndFrets: StringFret[]): string {
+    // this is ugly. feel free to clean it up.  We should probably just make the tab-lines, then replace
+    // values as necessary.
+    const sequenceData: (StringFret|null)[] = new Array(Math.floor(totalSamples / 10)).fill(null);
+    for (var i = 0; i < peakIndices.length; ++i) {
+        const idx: number = peakIndices[i];
+        if (sequenceData[Math.floor(idx / 10)] === null) {
+            sequenceData[Math.floor(idx / 10)] = peakStringsAndFrets[i];
+        }
+    }
+
+    // one data-string per guitar-string. These are joined by newlines after tabbing is complete.
+    const stringTabStrings: string[] = new Array(6).fill("|");
+    for (var i = 0; i < sequenceData.length; ++i) {
+        const stringVal: string[] = new Array(6).fill("-");
+        if (sequenceData[i] !== null) {
+            stringVal[sequenceData[i].stringIdx] = sequenceData[i].fret.toString();
+        }
+        stringVal.map((x, idx) => stringTabStrings[idx] += x);
+    }
+
+    // End each string with | character
+    for (var i = 0; i < stringTabStrings.length; ++i) {
+        stringTabStrings[i] += "|";
+    }
+
+    return stringTabStrings.join("\n");
+}
+
 export default async function tabLick(lick: Lick): Promise<void> {
     console.log("tabbing lick with crepe.");
     console.log(lick);
@@ -140,10 +180,14 @@ export default async function tabLick(lick: Lick): Promise<void> {
                             + peakFrequencies[i] + "\t\t"
                             + data.peakAmplitude[idx] + "\t"
                             + peakNotes[i] + "\t"
-                            + (peakStringsAndFrets[i].string_idx+1) + "\t"
+                            + peakStringsAndFrets[i].stringIdx + "\t"
                             + peakStringsAndFrets[i].fret;
         console.log(str);
     }
+
+    const tab: string = generateTabString(data.time.length, peakIndices, peakStringsAndFrets);
+    console.log("tab:");
+    console.log(tab);
 
     console.log("done tabbing lick.");
 }
