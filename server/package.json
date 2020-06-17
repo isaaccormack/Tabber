@@ -32,7 +32,6 @@
         "@types/node": "^9.6.56",
         "@types/supertest": "^2.0.9",
         "@types/uuid": "^8.0.0",
-        "@types/wav": "^1.0.0",
         "jest": "^26.0.1",
         "jest-serial-runner": "^1.1.0",
         "jwt-decode": "^2.2.0",
@@ -60,7 +59,6 @@
         "shelljs": "^0.8.4",
         "typeorm": "^0.2.0",
         "utf-8-validate": "^5.0.2",
-        "uuid": "^8.1.0",
-        "wav": "^1.0.2"
+        "uuid": "^8.1.0"
     }
 }
