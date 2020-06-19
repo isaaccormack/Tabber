@@ -1,0 +1,7 @@
+@import "../../../mainstyles.css";
+
+.library-title {
+    font-size: var(--font-size-8);
+    font-family: var(--font-header);
+    margin-bottom: 10px;
+}

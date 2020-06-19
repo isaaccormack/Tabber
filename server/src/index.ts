@@ -40,6 +40,10 @@ export function startApp(): Koa {
     // These routes require the user to be authenticated
     app.use(protectedRouter.routes()).use(protectedRouter.allowedMethods());
 
+    router.get('/api/*', async(ctx) => {
+        ctx.response.status = 404;
+    });
+
     // Distribute views if no api routes are matched
     app.use(serve("./views/build"));
 
