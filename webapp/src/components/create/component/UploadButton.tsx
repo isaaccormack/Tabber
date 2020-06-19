@@ -14,7 +14,8 @@ export default function UploadButton() {
     const onFileSelect = (file: FileList | null) => {
         if (file) {
             dispatch(UpdateFile(file));
-            history.push("/create/upload");
+            console.log(file);
+            history.push("/create/description");
         }
     }
 
@@ -25,6 +26,7 @@ export default function UploadButton() {
             </label>
             <input id="upload"
                    type="file"
+                   accept="audio/*"
                    onChange={(e) => onFileSelect(e.target.files)} />
         </div>
     )
