@@ -6,13 +6,9 @@
         "start": "tsc && node bin/www",
         "build": "(cd ../webapp && npm run build) && tsc",
         "dev": "nodemon -e js bin/www",
-        "test": "tsc && jest --coverage dist/test/**/*.spec.js",
         "unit-jest": "tsc && jest --coverage dist/test/entity/*.spec.js dist/test/controller/*.spec.js dist/test/middleware/*.spec.js",
-        "integration-jest": "tsc && jest --coverage dist/test/integration/*.spec.js",
-        "update-views": "(cd ../webapp && npm run build)",
-        "integration-jest-lick": "tsc && jest --coverage dist/test/integration/lick.spec.js",
-        "integration-jest-user": "tsc && jest --coverage dist/test/integration/user.spec.js",
-        "integration-jest-index": "tsc && jest --coverage dist/test/integration/index.spec.js"
+        "integration-jest": "tsc && jest --coverage dist/test/integration/index.spec.js && jest --coverage dist/test/integration/lick.spec.js && jest --coverage dist/test/integration/user.spec.js",
+        "update-views": "(cd ../webapp && npm run build)"
     },
     "repository": {
         "type": "git",
@@ -35,6 +31,7 @@
         "@types/supertest": "^2.0.9",
         "@types/uuid": "^8.0.0",
         "jest": "^26.0.1",
+        "jest-serial-runner": "^1.1.0",
         "jwt-decode": "^2.2.0",
         "nodemon": "^2.0.4",
         "sinon": "^9.0.2",

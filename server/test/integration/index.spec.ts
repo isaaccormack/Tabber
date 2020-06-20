@@ -10,8 +10,6 @@ describe('Integration: Home page', () => {
     let db: Connection
 
     beforeAll((done) => {
-
-        // can wire in testdb if so inclined
         dbModule.initDb((err, conn) => {
             if (err) throw err
 
@@ -19,7 +17,6 @@ describe('Integration: Home page', () => {
             app = appModule.startApp()
             done()
         })
-
     });
 
     afterAll((done) => {

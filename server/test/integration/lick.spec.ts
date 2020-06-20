@@ -33,7 +33,6 @@ describe('Integration: Licks endpoint', () => {
     }
 
     beforeAll((done) => {
-        // can wire in testdb if so inclined
         dbModule.initDb((err, conn) => {
             if (err) throw err
 
