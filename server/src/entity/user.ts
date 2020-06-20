@@ -17,8 +17,10 @@ export class User {
     @Column({ nullable: true })
     picture_URL: string;
     
+    @Column()
     given_name: string;
 
+    @Column()
     family_name: string;
 
     @OneToMany(type => Lick, lick => lick.owner) // shouldnt this be lick.owner => lick?

@@ -47,6 +47,8 @@ describe('Integration: Users endpoint', () => {
 
         expect(response.status).toBe(200);
         expect(response.body.name).toEqual(token.name)
+        expect(response.body.given_name).toEqual(token.given_name)
+        expect(response.body.family_name).toEqual(token.family_name)
         expect(response.body.email).toEqual(token.email)
         expect(response.body.id).toBeGreaterThan(0)
 
@@ -58,7 +60,6 @@ describe('Integration: Users endpoint', () => {
             .set("Cookie", "ti="+identityToken);
         
         expect(response.status).toBe(200);
-        expect(response.body.name).toEqual(token.name)
         expect(response.body.email).toEqual(token.email)
         expect(response.body.id).toEqual(id)
     });
