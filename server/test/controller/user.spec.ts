@@ -2,7 +2,8 @@ import { createSandbox, SinonSandbox, spy } from 'sinon'
 import * as typeorm from 'typeorm'
 import {createMockContext } from '@shopify/jest-koa-mocks';
 import { User } from "../../src/entity/user";
-import { UserController } from '../../src/controller/user'
+import { UserController } from '../../src/controller/user';
+
 
 describe('Unit test: User endpoint', () => {
     let sandbox: SinonSandbox
@@ -64,147 +65,98 @@ describe('Unit test: User endpoint', () => {
         await UserController.getUser(ctx)
 
         expect(ctx.status).toBe(400)
-        expect(ctx.body).toContain("doesn't exist")
+        expect(ctx.body.errors.error).toContain("doesn't exist")
     })
-    it('should create a new user', async () => {
-        const newUser = {
-            name: 'john',
-            email: 'john@doe.com'
+    it('should CREATE new user if no account with email exists', async () => {
+        const payload = {
+            // must contain iss, sub, aud, iat, and exp to match TokenPayload type
+            iss: '',
+            sub: '',
+            aud: '',
+            iat: 0,
+            exp: 0,
+            name: 'john doe',
+            email: 'john@doe.com',
+            picture: 'www.picture.com',
+            given_name: 'john',
+            family_name: 'doe'
         }
 
-        // assume that findOne never finds user with same email and save is successful
+        const userFromPayload: User = {
+            id: 0,
+            name: payload.name,
+            email: payload.email,
+            picture_URL: payload.picture,
+            given_name: payload.given_name,
+            family_name: payload.family_name,
+            licks: [],
+            sharedWithMe: []
+        }
+
         stubGetUserRepository({
-            findOne: function(email: string) { return false },
-            save: function(user: any) { return newUser }
+            findOne: function(email: string) { return false }, // assume no account with email exists
+            save: function(user: any) { return userFromPayload } // assume save successful
         });
 
-        const ctx = createMockContext();
-        ctx.request.body = newUser;
-        await UserController.createUser(ctx)
+        const res = await UserController.getOrCreateUser(payload)
 
-        expect(ctx.status).toBe(201)
-        expect(ctx.body).toEqual(newUser)
+        expect(res).toBe(userFromPayload);
     })
-    it('should not create a new user if user with same email exists', async () => {
-        const newUser = {
-            name: 'john',
-            email: 'john@doe.com'
+    it('should GET user whos email belongs to existing account', async () => {
+        const payload = {
+            // must contain iss, sub, aud, iat, and exp to match TokenPayload type
+            iss: '',
+            sub: '',
+            aud: '',
+            iat: 0,
+            exp: 0,
+            name: 'john doe',
+            email: 'john@doe.com',
+            picture: 'www.picture.com',
+            given_name: 'john',
+            family_name: 'doe'
         }
 
-        // assume that findOne always find user with same email
-        stubGetUserRepository({ findOne: function(email: string) { return true } });
-
-        const ctx = createMockContext();
-        ctx.request.body = newUser;
-        await UserController.createUser(ctx)
-
-        expect(ctx.status).toBe(400)
-        expect(ctx.body).toContain("e-mail address already exists")
-    })
-    it('should not create a new user if user data invalid', async () => {
-        const badNewUser = {
-            name: '',
-            email: 'john@doe.com'
+        const userFromPayload: User = {
+            id: 0,
+            name: payload.name,
+            email: payload.email,
+            picture_URL: payload.picture,
+            given_name: payload.given_name,
+            family_name: payload.family_name,
+            licks: [],
+            sharedWithMe: []
         }
 
-        // no methods on getRepository() are used in this test, but it and  getManager() still must be stubbed 
-        stubGetUserRepository({ });
+        stubGetUserRepository({
+            findOne: function(email: string) { return userFromPayload }, // assume account found with same email
+        });
 
+        const res = await UserController.getOrCreateUser(payload)
 
-        const ctx = createMockContext();
-        ctx.request.body = badNewUser;
-        await UserController.createUser(ctx)
-
-        expect(ctx.status).toBe(400)
-        // expect at least one validation error
-        expect(ctx.body.length).toBeGreaterThan(0)
+        expect(res).toBe(userFromPayload);
     })
-    it('should delete a user by id', async () => {
+    it('should DELETE the currently authenticated user', async () => {
         const user = {
-            name: 'john',
-            email: 'john@doe.com'
+            name: "test"
         }
 
         const state = {
             user: {
-                email: "john@doe.com"
+                id: 1
             }
         }
-        let params = {
-            id: 1
-        }
-
+        
         // assume that findOne always finds user by id
         stubGetUserRepository({
-            findOne: function(id: number) { return user },
-            remove: function(user) { return null }
+            findOne: function() { return user },
+            remove: function() { return name }
         });
 
-        // give dummy function to spy as it provides no mocking functionality
-        const removeSpy = spy({ remove: function() {} }, "remove");
-
         const ctx = createMockContext();
         ctx.state = state;
-        ctx.params = params;
-        await UserController.deleteUser(ctx)
+        await UserController.deleteAuthenticatedUser(ctx)
 
         expect(ctx.status).toBe(204)
-        // expect(removeSpy.calledOnce).toBe(true) THIS DOESNT WORK
-    })
-    it('should not delete a user with invalid id', async () => {
-        const state = {
-            user: {
-                email: "john@doe.com"
-            }
-        }
-        let params = {
-            id: 0
-        }
-
-        // assume that findOne never finds user by id
-        stubGetUserRepository({ findOne: function(id: number) { return undefined } });
-
-        // give dummy function to spy as it provides no mocking functionality
-        const removeSpy = spy({ remove: function() {} }, "remove");
-
-        const ctx = createMockContext();
-        ctx.state = state;
-        ctx.params = params;
-        await UserController.deleteUser(ctx)
-
-        expect(ctx.status).toBe(400)
-        expect(ctx.body).toContain("doesn't exist in the db")
-        expect(removeSpy.notCalled)
-    })
-    it('should not delete a user who is not the currently logged in user', async () => {
-        const user = {
-            name: 'john',
-            email: 'john@doe.com'
-        }
-
-        // different email than user
-        const state = {
-            user: {
-                email: "mark@doe.com"
-            }
-        }
-        let params = {
-            id: 0
-        }
-
-        // assume that findOne never finds user by id
-        stubGetUserRepository({ findOne: function(id: number) { return user } });
-
-        // give dummy function to spy as it provides no mocking functionality
-        const removeSpy = spy({ remove: function() {} }, "remove");
-
-        const ctx = createMockContext();
-        ctx.state = state;
-        ctx.params = params;
-        await UserController.deleteUser(ctx)
-
-        expect(ctx.status).toBe(403)
-        expect(ctx.body).toContain("deleted by himself")
-        expect(removeSpy.notCalled)
     })
 })
