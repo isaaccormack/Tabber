@@ -71,10 +71,8 @@ describe('Integration: Licks endpoint', () => {
             expect(response.body.dateUploaded).toBeDefined();
             expect(response.body.audioLength).toBeCloseTo(lickBody.audioLength, 0);
             expect(response.body.tuning).toBe(lickBody.tuning);
-            expect(response.body.isPublic).toBe(JSON.parse(lickBody.isPublic)); // for some reason this is the string false and on get we get literal false
+            expect(response.body.isPublic).toBe(JSON.parse(lickBody.isPublic));
             expect(response.body.owner).toBeDefined();
-            // doesn't work since user schema isnt consistant with database
-            // expect(response.body.owner.name).toBe(tokenParams.name);
             expect(response.body.owner.email).toBe(tokenParams.email);
 
             // expect file to be created
@@ -122,6 +120,7 @@ describe('Integration: Licks endpoint', () => {
         
         expect(response.status).toBe(400);
         expect(response.body.errors.length).toBeGreaterThan(0);
+        expect(response.body.errors[0].property).toBe('name')
     });
     it('should NOT be able to POST new lick with audio file longer than 60s', async () => {
         const longAudioFilePath = testDataDir + '5MB_mp3_file_132s.mp3';
@@ -156,7 +155,7 @@ describe('Integration: Licks endpoint', () => {
     /**
      * Test getLick()
      */
-    it('should be able to GET lick audio by id', async () => {
+    it('should be able to GET private lick by id as owner', async () => {
         const tokenParams = jwtDecode(identityToken);
 
         const response: request.Response = await request(app.callback())
@@ -172,8 +171,6 @@ describe('Integration: Licks endpoint', () => {
             expect(response.body.tuning).toBe(lickBody.tuning);
             expect(response.body.isPublic).toBe(JSON.parse(lickBody.isPublic));
             expect(response.body.owner).toBeDefined();
-            // doesn't work since user schema isnt consistant with database
-            // expect(response.body.owner.name).toBe(tokenParams.name);
             expect(response.body.owner.email).toBe(tokenParams.email);
     });
     it('should NOT be able to GET lick which doesnt exist', async () => {
@@ -321,11 +318,10 @@ describe('Integration: Licks endpoint', () => {
             expect(response.body.tuning).toBe(lickBody.tuning);
             expect(response.body.isPublic).toBe(!JSON.parse(lickBody.isPublic));
             expect(response.body.owner).toBeDefined();
-            // doesn't work since user schema isnt consistant with database
-            // expect(response.body.owner.name).toBe(tokenParams.name);
 
             // should not be able to see users email as just anyone
             // but should be able to see some attributes of user
+            // when this is changed, test will fail and be updated
             expect(response.body.owner.email).toBe(tokenParams.email);
     });
     it('should NOT be able to GET lick which doesnt exist with user not logged in', async () => {
@@ -339,6 +335,7 @@ describe('Integration: Licks endpoint', () => {
      * Test getLickAudio()
      */
     // DOES NOT actually test whether files are equal, just that file can be received 
+    // Rely on the other getLickAudio test to test that audio is uploaded correctly
     it('should be able to GET private lick audio by id as owner', async () => {
         const response: request.Response = await request(app.callback())
             .get('/api/licks/audio/' + publicID)
@@ -376,5 +373,11 @@ describe('Integration: Licks endpoint', () => {
         expect(getResponse.body.errors.error).toContain("doesn't exist");
     });
 
+    // Shared / multi user tests go here, ie.
+    //   - should be able to get a private lick shared with me
+    //   - should be able to a private lick audio shared with me
+    //   - should not be able delete a lick which user doesnt own
+    //   - shouldnt be able to edit lick user doesnt own
+    
 });
 

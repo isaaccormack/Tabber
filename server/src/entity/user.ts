@@ -21,7 +21,7 @@ export class User {
 
     family_name: string;
 
-    @OneToMany(type => Lick, lick => lick.owner) // shouldnt this be lick.owner => lick?
+    @OneToMany(type => Lick, lick => lick.owner)
     licks: Lick[];
 
     @ManyToMany(type => Lick, lick => lick.sharedWith)

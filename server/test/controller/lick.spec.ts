@@ -1,4 +1,4 @@
-import { createSandbox, SinonSandbox, spy } from 'sinon'
+import { createSandbox, SinonSandbox } from 'sinon'
 import * as typeorm from 'typeorm'
 import {createMockContext } from '@shopify/jest-koa-mocks';
 import { User } from "../../src/entity/user";
@@ -107,9 +107,52 @@ describe('Unit test: Lick endpoint', () => {
         expect(ctx.body.errors.error).toContain("You do not have permission")
     })
     /**
-     * Test getLickAudio()
+     * Test getLickAudio() -> Integration tests cover that audio file is saved / retrieved properly
      */
-    // Integration tests covers this enough
+    it('should NOT GET audio by id if lick doesnt exist', async () => {
+        stubGetLickRepository({ findOne: function() { return undefined } });
+
+        const ctx = createMockContext();
+        ctx.params = {}
+        await LickController.getLickAudio(ctx)
+        
+        expect(ctx.status).toBe(400)
+        expect(ctx.body.errors.error).toContain("doesn't exist")
+    })
+    it('should NOT GET private audio by id if user is not owner of lick and lick is not shared with user', async () => {
+        const lickOwner: User = new User()
+        lickOwner.id = 1 // must set id
+        const lickQuerier: User = new User()
+        lickQuerier.id = 2
+
+        const fakeLick: Lick = new Lick()
+        fakeLick.isPublic = false;
+        fakeLick.owner = lickOwner;
+        fakeLick.sharedWith = [];
+
+        stubGetLickRepository({ findOne: function() { return fakeLick } });
+
+        const ctx = createMockContext();
+        ctx.params = {}
+        ctx.state.user = lickQuerier;
+        await LickController.getLickAudio(ctx)
+        
+        expect(ctx.status).toBe(403)
+        expect(ctx.body.errors.error).toContain("do not have permission")
+    })
+    it('should NOT GET private audio by id when user isnt logged in', async () => {
+        const fakeLick: Lick = new Lick()
+        fakeLick.isPublic = false;
+
+        stubGetLickRepository({ findOne: function() { return fakeLick } });
+
+        const ctx = createMockContext();
+        ctx.params = {}
+        await LickController.getLickAudio(ctx)
+        
+        expect(ctx.status).toBe(403)
+        expect(ctx.body.errors.error).toContain("You do not have permission")
+    })
     /**
      * Test createLick()
      */
@@ -120,6 +163,7 @@ describe('Unit test: Lick endpoint', () => {
         const now: Date = new Date();
         sandbox.useFakeTimers(now.getTime()); // stub new Date() to return now
 
+        // This is what the endpoint will store in the database / is returned
         const fakeLick: Lick = new Lick()
         fakeLick.name = "cool lick";
         fakeLick.description = "good one";
@@ -132,17 +176,18 @@ describe('Unit test: Lick endpoint', () => {
         fakeLick.audioFileLocation = "my/fake/path";
         fakeLick.audioLength = 27;
 
-        sandbox.stub(LickController, "validateAudioFile").returns(null);
-        sandbox.stub(LickController, "saveAudioFile").returns(fakeLick.audioFileLocation);
-        sandbox.stub(audioDuration, "getAudioDurationInSeconds").returns(fakeLick.audioLength);
-        stubGetLickRepository({ save: function() { return fakeLick } });
-
+        // Pass in just the user defined parameters
         let body = {
             name: fakeLick.name,
             description: fakeLick.description,
             tuning: fakeLick.tuning,
             isPublic: fakeLick.isPublic
         }
+
+        sandbox.stub(LickController, "validateAudioFile").returns(null);
+        sandbox.stub(LickController, "saveAudioFile").returns(fakeLick.audioFileLocation);
+        sandbox.stub(audioDuration, "getAudioDurationInSeconds").returns(fakeLick.audioLength);
+        stubGetLickRepository({ save: function() { return fakeLick } });
  
         const ctx: any = createMockContext();
         ctx.request.body = body;
@@ -156,15 +201,41 @@ describe('Unit test: Lick endpoint', () => {
     it('should NOT create lick with no name', async () => {
         const lickOwner: User = new User()
         lickOwner.id = 1 // must set id
-
-        sandbox.stub(LickController, "validateAudioFile").returns(null);
-
+        
         let body = {
             name: "",
             description: "",
             tuning: "standard",
             isPublic: false
         }
+
+        sandbox.stub(LickController, "validateAudioFile").returns(null);
+ 
+        const ctx: any = createMockContext();
+        ctx.request.body = body;
+        ctx.request.files = {};
+        ctx.state.user = lickOwner;
+        await LickController.createLick(ctx)
+
+        expect(ctx.status).toBe(400)
+        expect(ctx.body.errors.length).toBeGreaterThanOrEqual(1)
+        expect(ctx.body.errors[0].property).toBe('name')
+    })
+    it('should NOT create lick when length of audio is longer than max', async () => {
+        const lickOwner: User = new User()
+        lickOwner.id = 1 // must set id
+
+        let body = {
+            name: "another lick",
+            description: "",
+            tuning: "standard",
+            isPublic: false
+        }
+
+        sandbox.stub(LickController, "validateAudioFile").returns(null);
+        sandbox.stub(LickController, "saveAudioFile").returns(null);
+        sandbox.stub(audioDuration, "getAudioDurationInSeconds").returns(1000);
+        sandbox.stub(LickController, "attemptToDeleteFile").returns(null);
  
         const ctx: any = createMockContext();
         ctx.request.body = body;
@@ -173,9 +244,9 @@ describe('Unit test: Lick endpoint', () => {
         await LickController.createLick(ctx)
         
         expect(ctx.status).toBe(400)
-        expect(ctx.body.errors.length).toBeGreaterThanOrEqual(1)
+        expect(ctx.body.errors.error).toContain("Audio file is longer than")
     })
-    it('should NOT create lick with invalid file', async () => {
+    it('should NOT create lick when no file sent', async () => {
         const ctx: any = createMockContext();
         ctx.request.files = {file: null};
         await LickController.createLick(ctx)
@@ -195,9 +266,10 @@ describe('Unit test: Lick endpoint', () => {
         fakeLick.owner = lickOwner;
         fakeLick.sharedWith = [];
 
+        sandbox.stub(LickController, "unlinkAsync").returns(null);
         stubGetLickRepository({
             findOne: function() { return fakeLick },
-            remove: function() { return null }
+            remove: function() { return fakeLick }
         });
 
         const ctx = createMockContext();
@@ -206,7 +278,7 @@ describe('Unit test: Lick endpoint', () => {
         await LickController.deleteLick(ctx)
         
         expect(ctx.status).toBe(204)
-        // should put a spy here to see if remove was called
+        expect(ctx.body).toBe(fakeLick)
     })
     it('should NOT DELETE lick by id if user isnt owner', async () => {
         const lickOwner: User = new User()

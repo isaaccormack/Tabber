@@ -105,8 +105,6 @@ export class LickController {
      */
     public static async createLick(ctx: any): Promise<void> {
 
-        // can't use 'this' for some reason in this context, work around by using 'LickController' instead
-
         const audioFile = ctx.request.files.file;
         
         const err: Error = LickController.validateAudioFile(audioFile); 
@@ -144,7 +142,7 @@ export class LickController {
             ctx.body = { errors: {error: err.message}}
             return
         }
-        
+
         try {
             lickToBeSaved.audioLength = await audioDuration.getAudioDurationInSeconds(lickToBeSaved.audioFileLocation)
         } catch (err) {
@@ -174,15 +172,7 @@ export class LickController {
         }
     }
 
-    private static async attemptToDeleteFile(filePath: string): Promise<void> {
-        const deleteFile = util.promisify(fs.unlink);
-        try {
-            await deleteFile(filePath);
-        } catch (e) {
-            console.error(e)
-        }
-    }
-
+    // get all user licks
 
     /**
      * PUT /api/licks/{id}
@@ -201,8 +191,6 @@ export class LickController {
      */
     public static async deleteLick(ctx: Context): Promise<void> {
 
-        // this should actually delete the lick from the file system
-
         // get a lick repository to perform operations with licks
         const lickRepository = getManager().getRepository(Lick);
 
@@ -220,10 +208,8 @@ export class LickController {
             ctx.body = { errors: {error: "Error: A lick can only be deleted by its owner."}}
         } else {
             // first try to delete the file
-            const deleteFile = util.promisify(fs.unlink);
-            try {
-                await deleteFile(lickToRemove.audioFileLocation);
-            } catch (err) {
+            const err: NodeJS.ErrnoException = await LickController.unlinkAsync(lickToRemove.audioFileLocation);
+            if (err) {
                 // if err isnt that there is no file to be deleted, then a real error occurred
                 if (err.code != 'ENOENT') {
                     ctx.status = 500;
@@ -236,6 +222,7 @@ export class LickController {
             const removedLick: Lick | undefined = await lickRepository.remove(lickToRemove);
             if (!removedLick) {
                 ctx.status = 500;
+                ctx.body = { errors: {error: "Error: Cant remove lick from database."}}
             } else {
                 // return a NO CONTENT status code
                 ctx.status = 204;
@@ -295,6 +282,21 @@ export class LickController {
         // doesn't handle shared with
         return lick.isPublic || (user && (user.id == lick.owner.id));
         // return lick.isPublic || lick.owner.id == user.id || lick.sharedWith.indexOf(user)? !== -1;
+    }
+
+    private static async attemptToDeleteFile(filePath: string): Promise<void> {
+        const deleteFile = util.promisify(fs.unlink);
+        try {
+            await deleteFile(filePath);
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    // Made this a private class function so it could be easily stubbed when testing
+    private static async unlinkAsync(filePath: string) : Promise<NodeJS.ErrnoException> {
+        const deleteFile = util.promisify(fs.unlink);
+        return await deleteFile(filePath);
     }
 
     private static canUserModify(user: User, lick: Lick): boolean {
