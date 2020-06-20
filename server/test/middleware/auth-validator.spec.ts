@@ -1,9 +1,8 @@
 import {createMockContext, createMockCookies} from "@shopify/jest-koa-mocks";
-import { createSandbox, SinonSandbox, spy } from 'sinon'
+import { createSandbox, SinonSandbox } from 'sinon'
 import {authValidator, isAuthenticated} from "../../src/middleware/auth-validator";
 import OAuth2Controller from "../../src/controller/oauth2";
-
-
+import { UserController } from '../../src/controller/user';
 
 describe('Unit test: User endpoint', () => {
     let sandbox: SinonSandbox = createSandbox();
@@ -23,6 +22,7 @@ describe('Unit test: User endpoint', () => {
         },
         payload: {
             email: "someEmail@email.com",
+            name: "firstname lastname",
             given_name: "firstname",
             family_name: "lastname"
         }
@@ -32,54 +32,57 @@ describe('Unit test: User endpoint', () => {
         email: 'john@doe.com'
     }
 
-    it('should SET isAuthenticated=true and user objects', async () => {
+    it('should SET isAuthenticated=true and set state to user object', async () => {
         const ctx = createMockContext();
         ctx.cookies = createMockCookies({
             ti: "someJwtToken"
         });
 
         sandbox.stub(OAuth2Controller, "verifyToken").returns(mockTicket);
-        sandbox.stub(OAuth2Controller, "getOrCreateUser").returns(mockUser);
+        sandbox.stub(UserController, "getOrCreateUser").returns(mockUser);
         await authValidator(ctx, next);
 
         expect(ctx.state.isAuthenticated).toBe(true);
         expect(ctx.state.user).toBe(mockUser);
     })
 
-    it('should SET isAuthenticated=false (no jwt)', async () => {
+    it('should SET isAuthenticated=false if no jwt in cookie', async () => {
         const ctx = createMockContext();
 
         sandbox.stub(OAuth2Controller, "verifyToken").returns(mockTicket);
-        sandbox.stub(OAuth2Controller, "getOrCreateUser").returns(mockUser);
+        sandbox.stub(UserController, "getOrCreateUser").returns(mockUser);
         await authValidator(ctx, next);
 
         expect(ctx.state.isAuthenticated).toBe(false);
+        expect(ctx.state.state).toBe(undefined);
     })
 
-    it('should SET isAuthenticated=false (invalid jwt)', async () => {
+    it('should SET isAuthenticated=false with invalid jwt', async () => {
         const ctx = createMockContext();
         ctx.cookies = createMockCookies({
             ti: "someJwtToken"
         });
 
         sandbox.stub(OAuth2Controller, "verifyToken").returns(undefined);
-        sandbox.stub(OAuth2Controller, "getOrCreateUser").returns(mockUser);
+        sandbox.stub(UserController, "getOrCreateUser").returns(mockUser);
         await authValidator(ctx, next);
 
         expect(ctx.state.isAuthenticated).toBe(false);
+        expect(ctx.state.state).toBe(undefined);
     })
 
-    it('should SET isAuthenticated=false (failed to create user)', async () => {
+    it('should SET isAuthenticated=false if user cant be created', async () => {
         const ctx = createMockContext();
         ctx.cookies = createMockCookies({
             ti: "someJwtToken"
         });
 
         sandbox.stub(OAuth2Controller, "verifyToken").returns(mockTicket);
-        sandbox.stub(OAuth2Controller, "getOrCreateUser").returns(undefined);
+        sandbox.stub(UserController, "getOrCreateUser").returns(undefined);
         await authValidator(ctx, next);
 
         expect(ctx.state.isAuthenticated).toBe(false);
+        expect(ctx.state.state).toBe(undefined);
     })
 
     it('should SET response status = 401', async () => {

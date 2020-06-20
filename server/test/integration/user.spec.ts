@@ -4,7 +4,6 @@ import Koa from 'koa'
 
 import * as appModule from "../../src/index";
 import * as dbModule from "../../src/database/dbclient";
-import { mockUser } from '../interfaces/mockUser';
 
 var jwtDecode = require('jwt-decode');
 

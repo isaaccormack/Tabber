@@ -1,4 +1,4 @@
-import { createSandbox, SinonSandbox, spy } from 'sinon'
+import { createSandbox, SinonSandbox } from 'sinon'
 import * as typeorm from 'typeorm'
 import {createMockContext } from '@shopify/jest-koa-mocks';
 import { User } from "../../src/entity/user";
