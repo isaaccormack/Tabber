@@ -372,9 +372,8 @@ describe('Integration: Licks endpoint', () => {
         expect(getResponse.body.errors.error).toContain("doesn't exist");
     });
 
-    // Shared / multi user tests go here, ie.
-    //   - should be able to get a private lick shared with me
-    //   - should be able to a private lick audio shared with me
+    ////////////////// TESTS WITH MULTI USERS //////////////////
+    // multi user tests go here, ie.
     //   - should not be able delete a lick which user doesnt own
     //   - shouldnt be able to edit lick user doesnt own
     

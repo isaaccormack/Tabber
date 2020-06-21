@@ -13,7 +13,7 @@ export class UserController {
      * 
      * Get data on the currently authenticated user.
      */
-    public static async getAuthenticatedUser(ctx: Context): Promise<void> {
+    public static async getAuthUser(ctx: Context): Promise<void> {
 
         // If this route is reached then its guaranteed that ctx's state
         // has been set with the currently authenticated user
@@ -78,6 +78,7 @@ export class UserController {
         ctx.body = users;
     }
 
+    // For development
     /**
      * GET /users/{id}
      * 
@@ -100,8 +101,38 @@ export class UserController {
             ctx.status = 400;
             ctx.body = { errors: {error: "The user you are trying to retrieve doesn't exist in the db"}}
         }
-
     }
+
+    /**
+     * GET /api/user/licks
+     *
+     * Get users a lick is shared with by id.
+     */
+    public static async getAuthUserLicks(ctx: Context): Promise<void> {
+
+        const userRepository: Repository<User> = getManager().getRepository(User);
+        // will always return the currently authenticated user
+        const authUser: User = await userRepository.findOne({ where: {id: (ctx.state.user.id)}, relations: ['licks']});
+        
+        ctx.status = 200; // OK
+        ctx.body = authUser.licks;
+    }
+
+    /**
+     * GET /api/user/licksSharedWithMe
+     *
+     * Get users a lick is shared with by id.
+     */
+    public static async getLicksSharedWithAuthUser(ctx: Context): Promise<void> {
+
+        const userRepository: Repository<User> = getManager().getRepository(User);
+        // will always return the currently authenticated user
+        const authUser: User= await userRepository.findOne({ where: {id: (ctx.state.user.id)}, relations: ['sharedWithMe']});
+        
+        ctx.status = 200; // OK
+        ctx.body = authUser.sharedWithMe;
+    }
+
 
     // Save this as template for later
     /**
@@ -151,7 +182,7 @@ export class UserController {
      * 
      * Delete the currently authenticated user.
      */
-    public static async deleteAuthenticatedUser(ctx: Context): Promise<void> {
+    public static async deleteAuthUser(ctx: Context): Promise<void> {
 
         const userRepository = getManager().getRepository(User);
 
@@ -168,5 +199,11 @@ export class UserController {
             }
             ctx.status = 204;
         }
+    }
+
+    // HELPERS - used in lick controller right now, can refactor this out to a service layer later
+    public static async getUserByID(id: number): Promise<User> {
+        const userRepository = getManager().getRepository(User);
+        return await userRepository.findOne(id);
     }
 }

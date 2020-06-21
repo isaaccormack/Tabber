@@ -8,7 +8,11 @@
         "dev": "nodemon -e js bin/www",
         "unit-jest": "tsc && jest --coverage dist/test/entity/*.spec.js dist/test/controller/*.spec.js dist/test/middleware/*.spec.js",
         "integration-jest": "tsc && jest --coverage dist/test/integration/index.spec.js && jest --coverage dist/test/integration/lick.spec.js && jest --coverage dist/test/integration/user.spec.js",
-        "update-views": "(cd ../webapp && npm run build)"
+        "update-views": "(cd ../webapp && npm run build)",
+        "unit-jest-lick": "tsc && jest --coverage dist/test/controller/lick.spec.js",
+        "integration-jest-user": "tsc && jest --coverage dist/test/integration/user.spec.js",
+        "integration-jest-userLicks": "tsc && jest --coverage dist/test/integration/userLicks.spec.js",
+        "integration-jest-userSharedLicks": "tsc && jest --coverage dist/test/integration/userSharedLicks.spec.js"
     },
     "repository": {
         "type": "git",

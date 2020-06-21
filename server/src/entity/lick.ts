@@ -42,7 +42,7 @@ export class Lick {
     @ManyToOne(type => User, user => user.licks)
     owner: User;
 
-    @ManyToMany(type => User, user => user.sharedWithMe)
+    @ManyToMany(type => User, user => user.sharedWithMe, { cascade: ["update"] })
     @JoinTable()
     sharedWith: User[];
 }

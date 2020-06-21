@@ -10,14 +10,19 @@ protectedRouter.prefix("/api")
 protectedRouter.use(isAuthenticated);
 
 // User routes
-protectedRouter.get("/user", UserController.getAuthenticatedUser);
-protectedRouter.delete("/user", UserController.deleteAuthenticatedUser);
+protectedRouter.get("/user", UserController.getAuthUser);
+protectedRouter.get("/user/licks", UserController.getAuthUserLicks);
+protectedRouter.get("/user/licksSharedWithMe", UserController.getLicksSharedWithAuthUser);
+protectedRouter.delete("/user", UserController.deleteAuthUser);
 protectedRouter.get("/users", UserController.getUsers);
 protectedRouter.get("/users/:id", UserController.getUser);
 protectedRouter.put("/users/:id", UserController.updateUser);
 
 // Lick routes
 protectedRouter.post("/licks", LickController.createLick);
+protectedRouter.put("/lick/share/:id", LickController.shareLick);
+protectedRouter.put("/lick/unshare/:id", LickController.unshareLick);
+protectedRouter.put("/lick/unfollow/:id", LickController.unfollowLick);
 protectedRouter.put("/licks/:id", LickController.updateLick);
 protectedRouter.delete("/licks/:id", LickController.deleteLick);
 

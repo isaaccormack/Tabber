@@ -42,13 +42,22 @@ describe('Integration: Users endpoint', () => {
         const response: request.Response = await request(app.callback())
         .get('/api/user')
         .set("Cookie", "ti="+identityToken);
-
+        
         expect(response.status).toBe(200);
         expect(response.body.name).toEqual(token.name)
         expect(response.body.email).toEqual(token.email)
         expect(response.body.id).toBeGreaterThan(0)
-
+        
         id = response.body.id;
+    });
+    it('should GET all users', async () => {
+        const response: request.Response = await request(app.callback())
+            .get('/api/users')
+            .set("Cookie", "ti="+identityToken);
+
+        expect(response.status).toBe(200);
+        // since at least the account created above exists
+        expect(response.body.length).toBeGreaterThan(0)
     });
     it('should GET user by id', async () => {
         const response: request.Response = await request(app.callback())
@@ -59,15 +68,6 @@ describe('Integration: Users endpoint', () => {
         expect(response.body.name).toEqual(token.name)
         expect(response.body.email).toEqual(token.email)
         expect(response.body.id).toEqual(id)
-    });
-    it('should GET all users', async () => {
-        const response: request.Response = await request(app.callback())
-            .get('/api/users')
-            .set("Cookie", "ti="+identityToken);
-
-        expect(response.status).toBe(200);
-        // since at least the account created above exists
-        expect(response.body.length).toBeGreaterThan(0)
     });
     it('should DELETE the new user', async () => {
         const response: request.Response = await request(app.callback())

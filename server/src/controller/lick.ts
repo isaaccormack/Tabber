@@ -8,6 +8,7 @@ import { Files } from "koa2-formidable";
 const fs = require('fs');
 import * as util from 'util';
 import * as audioDuration from 'get-audio-duration';
+import { UserController } from './user'
 
 
 const lickAudioDirectory: string = "uploads";
@@ -31,74 +32,6 @@ interface FileContext extends Context {
 export class LickController {
 
     /**
-     * GET /api/licks/{id}
-     *
-     * Get a lick by id.
-     */
-    public static async getLick(ctx: Context): Promise<void> {
-
-        // check if lick is public, else check if user authenticated before going further
-        
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-
-        // attempt to find the lick by id and load its user
-        const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner']});
-
-        if (lick) {
-            // verify user has permissions
-            const isPermitted = LickController.canUserAccess(ctx.state.user, lick);
-            if (isPermitted) {
-                // return OK status code and loaded lick object
-                ctx.status = 200;
-
-                // could do some manipulation to lick.owner here so not everyone can see all attributes of owner
-                // abide by front end requirements and implement later
-                ctx.body = lick;
-            } else {
-                // return FORBIDDEN status code
-                ctx.status = 403;
-                ctx.body = { errors: {error: "Error: You do not have permission to access this lick."}}
-            }
-        } else {
-            // return a BAD REQUEST status code and error message
-            ctx.status = 400;
-            ctx.body = { errors: {error: "Error: The lick you are trying to retrieve doesn't exist."}}
-        }
-    }
-
-    /**
-     * GET /api/licks/audio/{id}
-     *
-     * Get a lick's audio file by lick id.
-     */
-    public static async getLickAudio(ctx: Context): Promise<void> {
-
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-
-        // attempt to find the lick by id and load its user
-        const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner']});
-
-        if (lick) {
-            // verify user has permissions
-            const isPermitted = LickController.canUserAccess(ctx.state.user, lick);
-            if (isPermitted) {
-                // return OK status code and loaded audio file
-                ctx.status = 200;
-                const readFile = util.promisify(fs.readFile);
-                ctx.body = await readFile(lick.audioFileLocation);
-            } else {
-                // return FORBIDDEN status code
-                ctx.status = 403;
-                ctx.body = { errors: {error: "Error: You do not have permission to access the audio for this lick."}}
-            }
-        } else {
-            // return a BAD REQUEST status code and error message
-            ctx.status = 400;
-            ctx.body = { errors: {error: "Error: The audio for the lick you are trying to retrieve doesn't exist."}}
-        }
-    }
-
-    /**
      * POST /api/licks
      *
      * Upload new lick to be processed and have a tab generated.
@@ -109,7 +42,7 @@ export class LickController {
         
         const err: Error = LickController.validateAudioFile(audioFile); 
         if (err) {
-            ctx.status = 400;
+            ctx.status = 400; // BAD REQUEST
             ctx.body = { errors: {error: err.message}}
             return
         }
@@ -130,7 +63,7 @@ export class LickController {
         const errors: ValidationError[] = await validate(lickToBeSaved);
         
         if (errors.length > 0) {
-            ctx.status = 400;
+            ctx.status = 400; // BAD REQUEST
             ctx.body = { errors };
             return
         } 
@@ -138,23 +71,23 @@ export class LickController {
         try {
             lickToBeSaved.audioFileLocation = await LickController.saveAudioFile(audioFile);
         } catch (err) {
-            ctx.status = 500;
+            ctx.status = 500; // SERVER ERROR
             ctx.body = { errors: {error: err.message}}
             return
         }
-
+        
         try {
             lickToBeSaved.audioLength = await audioDuration.getAudioDurationInSeconds(lickToBeSaved.audioFileLocation)
         } catch (err) {
             await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
-            ctx.status = 500;
+            ctx.status = 500; // SERVER ERROR
             ctx.body = { errors: {error: "Error: Cant get length of audio file."}}
             return
         }
 
         if (lickToBeSaved.audioLength > 60) { // lick is too long
             await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
-            ctx.status = 400;
+            ctx.status = 400; // BAD REQUEST
             ctx.body = { errors: {error: "Error: Audio file is longer than 60 seconds."}}
             return
         }
@@ -164,13 +97,291 @@ export class LickController {
         const lick: Lick | undefined = await lickRepository.save(lickToBeSaved);
 
         if (!lick) {
-            ctx.status = 500;
+            ctx.status = 500; // SERVER ERROR
             ctx.body = { errors: {error: "Error: Cant save lick to database."}}
         } else {
-            ctx.status = 201;
+            ctx.status = 201; // CREATED
             ctx.body = lick;
         }
     }
+
+    /**
+     * GET /api/licks/{id}
+     *
+     * Get a lick by id.
+     */
+    public static async getLick(ctx: Context): Promise<void> {
+
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner', 'sharedWith']});
+
+        if (lick) {
+            const isPermitted = LickController.canUserAccess(ctx.state.user, lick);
+            if (isPermitted) {
+                ctx.status = 200; // OK
+
+                // should hide some attributes of lick.owner here, like email, not sure what so save for later
+                ctx.body = lick;
+            } else {
+                ctx.status = 403; // FORBIDDEN
+                ctx.body = { errors: {error: "Error: You do not have permission to access this lick."}}
+            }
+        } else {
+            ctx.status = 400; // BAD REQUEST
+            ctx.body = { errors: {error: "Error: The lick you are trying to retrieve doesn't exist."}}
+        }
+    }
+
+    /**
+     * GET /api/licks/audio/{id}
+     *
+     * Get a lick's audio file by lick id.
+     */
+    public static async getLickAudio(ctx: Context): Promise<void> {
+
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner', 'sharedWith']});
+
+        if (lick) {
+            const isPermitted = LickController.canUserAccess(ctx.state.user, lick);
+            if (isPermitted) {
+                ctx.status = 200; // OK
+                const readFile = util.promisify(fs.readFile);
+                ctx.body = await readFile(lick.audioFileLocation);
+            } else {
+                ctx.status = 403; // FORBIDDEN
+                ctx.body = { errors: {error: "Error: You do not have permission to access the audio for this lick."}}
+            }
+        } else {
+            ctx.status = 400; // BAD REQUEST
+            ctx.body = { errors: {error: "Error: The audio for the lick you are trying to retrieve doesn't exist."}}
+        }
+    }
+
+    // this is just a subset of finding a lick and probably doesnt need to exist
+    // ie. instead just get a lick and look at who its shared with
+    // /**
+    //  * GET /api/licks/sharedWith/{id}
+    //  *
+    //  * Get users a lick is shared with by id.
+    //  */
+    // public static async getUsersLickSharedWith(ctx: Context): Promise<void> {
+
+    //     const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+    //     const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner', 'sharedWith']});
+
+    //     if (lick) {
+    //         const isPermitted = LickController.canUserAccess(ctx.state.user, lick);
+    //         if (isPermitted) {
+    //             ctx.status = 200; // OK
+
+    //             // should hide some attributes of lick.owner here, like email, not sure what so save for later
+    //             ctx.body = lick;
+    //         } else {
+    //             ctx.status = 403; // FORBIDDEN
+    //             ctx.body = { errors: {error: "Error: You do not have permission to see the users this lick is shared with."}}
+    //         }
+    //     } else {
+    //         ctx.status = 400; // BAD REQUEST
+    //         ctx.body = { errors: {error: "Error: The lick you are trying to get the shared with users of doesn't exist."}}
+    //     }
+    // }
+
+    // should include share date in shared with relation
+
+    /**
+     * PUT /api/lick/share/{id}
+     *
+     * Share a lick with another user by id.
+     */
+    public static async shareLick(ctx: Context): Promise<void> {
+
+        const lickID = +ctx.params.id || 0;
+        const userIDToShareWith = ctx.request.body.userID || 0;
+
+        if (userIDToShareWith == ctx.state.user.id) {
+            ctx.status = 400; // BAD REQUEST
+            ctx.body = { errors: {error: "Error: Cannot share a lick with yourself."}}
+            return
+        }
+
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        const lickToBeShared: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['owner', 'sharedWith']});
+
+        if (!lickToBeShared) {
+            ctx.status = 400; // BAD REQUEST
+            ctx.body = { errors: {error: "Error: The lick you are trying to share doesn't exist."}}
+        } else if (ctx.state.user.id !== lickToBeShared.owner.id) {
+            ctx.status = 403; // FORBIDDEN
+            ctx.body = { errors: {error: "Error: A lick can only be shared by its owner."}}
+        } else {
+            const sharedWithUser: User | undefined = await UserController.getUserByID(userIDToShareWith);
+
+            if (!sharedWithUser) {
+                ctx.status = 400; // BAD REQUEST
+                ctx.body = { errors: {error: "Error: The user you are trying to share with doesn't exist in the db"}}
+            } else {
+                if (!lickToBeShared.sharedWith.some(user => user.id === sharedWithUser.id)) {
+                    lickToBeShared.sharedWith.push(sharedWithUser)
+                }
+                // relation cascades on update, so only need to update lick entity
+                const sharedLick: Lick | undefined = await lickRepository.save(lickToBeShared);
+                if (!sharedLick) {
+                    ctx.status = 500; // SERVER ERROR
+                    ctx.body = { errors: {error: "Error: Could not update lick to be shared with user in db"}}
+                } else {
+                    ctx.status = 200; // OK
+                    ctx.body = sharedLick;
+                }
+            }
+        }
+    }
+
+    /**
+     * PUT /api/lick/unshare/{id}
+     *
+     * Unshare a lick with another user by id.
+     */
+    public static async unshareLick(ctx: Context): Promise<void> {
+
+        const lickID = +ctx.params.id || 0;
+
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        const lickToBeUnshared: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['owner', 'sharedWith']});
+        
+        if (!lickToBeUnshared) {
+            ctx.status = 400; // BAD REQUEST
+            ctx.body = { errors: {error: "Error: The lick you are trying to unshare doesn't exist."}}
+        } else if (ctx.state.user.id !== lickToBeUnshared.owner.id) {
+            ctx.status = 403; // FORBIDDEN
+            ctx.body = { errors: {error: "Error: A lick can only be unshared by its owner."}}
+        } else {
+            const userToUnshare: User | undefined = await UserController.getUserByID(+ctx.request.body.userID || 0);
+
+            if (!userToUnshare) {
+                ctx.status = 400; // BAD REQUEST
+                ctx.body = { errors: {error: "Error: The user you are trying to unshare with doesn't exist in the db"}}
+            } else {
+                // filter out user to unshare with by ID
+                // allows a lick to be unshared with user if not shared with in the first place
+                lickToBeUnshared.sharedWith =
+                lickToBeUnshared.sharedWith.filter((user) => {
+                    return user.id !== userToUnshare.id
+                });
+                // relation cascades on update, so only need to update lick entity
+                const unsharedLick: Lick | undefined = await lickRepository.save(lickToBeUnshared);
+                if (!unsharedLick) {
+                    ctx.status = 500; // SERVER ERROR
+                    ctx.body = { errors: {error: "Error: Could not update lick to unshared with user in db"}}
+                } else {
+                    ctx.status = 200; // OK
+                    ctx.body = unsharedLick;
+                }
+            }
+        }
+    }
+
+    /**
+     * PUT /api/lick/unfollow/{id}
+     *
+     * Removes the authenticated user from the list of users the lick is shared with
+     */
+    public static async unfollowLick(ctx: Context): Promise<void> {
+
+        const lickID = +ctx.params.id || 0;
+        const thisUserID = ctx.state.user.id;
+
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        const lickToUnfollow: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['sharedWith']});
+        
+        if (!lickToUnfollow) {
+            ctx.status = 400; // BAD REQUEST
+            ctx.body = { errors: {error: "Error: The lick you are trying to unfollow doesn't exist."}}
+        } else {
+            // filter out the user trying to unfollow by ID
+            // allows a lick to be unfollowed by user if not shared with in the first place
+            lickToUnfollow.sharedWith =
+                lickToUnfollow.sharedWith.filter((user) => {
+                    return user.id !== thisUserID
+                });
+            // relation cascades on update, so only need to update lick entity
+            const unfollowedLick: Lick | undefined = await lickRepository.save(lickToUnfollow);
+            if (!unfollowedLick) {
+                ctx.status = 500; // SERVER ERROR
+                ctx.body = { errors: {error: "Error: Could not update lick to allow user to unfollow in db"}}
+            } else {
+                ctx.status = 204; // NO CONTENT
+            }
+        }
+    }
+
+    // maybe the make public should just be one case in the edit lick handler
+
+    // /**
+    //  * PUT /api/makePrivate/lick/{id}
+    //  *
+    //  * Makes the requested lick private 
+    //  */
+    // public static async makeLickPrivate(ctx: Context): Promise<void> {
+
+    //     const lickID = +ctx.params.id || 0;
+
+    //     const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+    //     const lickToMakePrivate: Lick | undefined = await lickRepository.findOne(lickID);
+        
+    //     if (!lickToMakePrivate) {
+    //         ctx.status = 400; // BAD REQUEST
+    //         ctx.body = { errors: {error: "Error: The lick you are trying to make private doesn't exist."}}
+    //     } else if (ctx.state.user.id !== lickToMakePrivate.owner.id) {
+    //         ctx.status = 403; // FORBIDDEN
+    //         ctx.body = { errors: {error: "Error: A lick can only be made private by its owner."}}
+    //     } else {
+    //         lickToMakePrivate.isPublic = false;
+    //         // relation cascades on update, so only need to update lick entity
+    //         const privateLick: Lick | undefined = await lickRepository.save(lickToMakePrivate);
+    //         if (!privateLick) {
+    //             ctx.status = 500; // SERVER ERROR
+    //             ctx.body = { errors: {error: "Error: Could not update lick to make private in db"}}
+    //         } else {
+    //             ctx.status = 200; // OK
+    //             ctx.body = privateLick;
+    //         }
+    //     }
+    // }
+
+    // /**
+    //  * PUT /api/makePublic/lick/{id}
+    //  *
+    //  * Makes the requested lick public
+    //  */
+    // public static async makeLickPublic(ctx: Context): Promise<void> {
+
+    //     const lickID = +ctx.params.id || 0;
+
+    //     const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+    //     const lickToMakePublic: Lick | undefined = await lickRepository.findOne(lickID);
+        
+    //     if (!lickToMakePublic) {
+    //         ctx.status = 400; // BAD REQUEST
+    //         ctx.body = { errors: {error: "Error: The lick you are trying to make public doesn't exist."}}
+    //     } else if (ctx.state.user.id !== lickToMakePublic.owner.id) {
+    //         ctx.status = 403; // FORBIDDEN
+    //         ctx.body = { errors: {error: "Error: A lick can only be made public by its owner."}}
+    //     } else {
+    //         lickToMakePublic.isPublic = true;
+    //         // relation cascades on update, so only need to update lick entity
+    //         const publicLick: Lick | undefined = await lickRepository.save(lickToMakePublic);
+    //         if (!publicLick) {
+    //             ctx.status = 500; // SERVER ERROR
+    //             ctx.body = { errors: {error: "Error: Could not update lick to make public in db"}}
+    //         } else {
+    //             ctx.status = 200; // OK
+    //             ctx.body = publicLick;
+    //         }
+    //     }
+    // }
+
+
 
     // get all user licks
 
@@ -191,26 +402,19 @@ export class LickController {
      */
     public static async deleteLick(ctx: Context): Promise<void> {
 
-        // get a lick repository to perform operations with licks
         const lickRepository = getManager().getRepository(Lick);
-
-        // attempt to find the lick by id and load its user
         const lickToRemove: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner']});
 
         if (!lickToRemove) {
-            // return a BAD REQUEST status code and error message
-            ctx.status = 400;
+            ctx.status = 400; // BAD REQUEST
             ctx.body = { errors: {error: "Error: The lick you are trying to delete doesn't exist."}}
         } else if (ctx.state.user.id !== lickToRemove.owner.id) {
-            // check user's token id and owner id are the same
-            // if not, return a FORBIDDEN status code and error message
-            ctx.status = 403;
+            ctx.status = 403; // FORBIDDEN
             ctx.body = { errors: {error: "Error: A lick can only be deleted by its owner."}}
         } else {
-            // first try to delete the file
             const err: NodeJS.ErrnoException = await LickController.unlinkAsync(lickToRemove.audioFileLocation);
             if (err) {
-                // if err isnt that there is no file to be deleted, then a real error occurred
+                // ENOENT == file doesn't exist, let that case fail silently
                 if (err.code != 'ENOENT') {
                     ctx.status = 500;
                     ctx.body = { errors: {error: "Error: Cant unlink lick from file system."}}
@@ -218,14 +422,12 @@ export class LickController {
                 }
             }
 
-            // the lick is there so can be removed
             const removedLick: Lick | undefined = await lickRepository.remove(lickToRemove);
             if (!removedLick) {
-                ctx.status = 500;
+                ctx.status = 500; // SERVER ERROR
                 ctx.body = { errors: {error: "Error: Cant remove lick from database."}}
             } else {
-                // return a NO CONTENT status code
-                ctx.status = 204;
+                ctx.status = 200; // OK
                 ctx.body = removedLick;
             }
         }
@@ -243,7 +445,7 @@ export class LickController {
         if (audioFile.size > 25000000) return new Error("Error: File must be less than 25MB.")
         
         // decide on supported types later
-        const supportedTypes: string[] = ["audio/mpeg", "audio/wav", "audio/mp4"]
+        const supportedTypes: string[] = ["audio/mpeg", "audio/wave", "audio/mp4"]
         if (!supportedTypes.includes(audioFile.type)) return new Error("Error: Mimetype is not supported.")
         
         return null;
@@ -275,13 +477,17 @@ export class LickController {
         return audioFileLocation;
     }
 
-    // TODO: test whether these comparisons work correctly & are a reasonably efficient way to do things
+    // The sharedWith relation MUST be loaded with lick passed in 
     private static canUserAccess(user: User, lick: Lick): boolean {
         // TODO: fix the shared with validation when implementing that functionality
         // note: will have to change query to get sharedWith attribute of lick
         // doesn't handle shared with
-        return lick.isPublic || (user && (user.id == lick.owner.id));
-        // return lick.isPublic || lick.owner.id == user.id || lick.sharedWith.indexOf(user)? !== -1;
+        if (!lick.owner || !lick.sharedWith) {
+            throw new Error('The owner and sharedWith relations MUST be loaded on lick parameter')
+        }
+        return lick.isPublic ||
+                (user && (user.id == lick.owner.id)) ||
+                (lick.sharedWith.some(user => user.id === user.id));
     }
 
     private static async attemptToDeleteFile(filePath: string): Promise<void> {

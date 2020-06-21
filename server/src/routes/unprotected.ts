@@ -16,5 +16,7 @@ unprotectedRouter.get("/token", OAuth2Controller.tokenExchange);
 // Unprotected Lick Routes
 unprotectedRouter.get("/licks/:id", LickController.getLick);
 unprotectedRouter.get("/licks/audio/:id", LickController.getLickAudio);
+// unprotectedRouter.get("/licks/sharedWith/:id", LickController.getUsersLickSharedWith);
+
 
 export { unprotectedRouter };

@@ -155,7 +155,7 @@ describe('Unit test: User endpoint', () => {
 
         const ctx = createMockContext();
         ctx.state = state;
-        await UserController.deleteAuthenticatedUser(ctx)
+        await UserController.deleteAuthUser(ctx)
 
         expect(ctx.status).toBe(204)
     })

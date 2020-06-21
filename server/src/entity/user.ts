@@ -13,12 +13,14 @@ export class User {
 
     @Column({ nullable: true })
     name: string;
-
+    
     @Column({ nullable: true })
     picture_URL: string;
     
+    @Column()
     given_name: string;
-
+    
+    @Column()
     family_name: string;
 
     @OneToMany(type => Lick, lick => lick.owner)
@@ -27,3 +29,6 @@ export class User {
     @ManyToMany(type => Lick, lick => lick.sharedWith)
     sharedWithMe: Lick[];
 }
+
+// add user to db
+// mysql> insert into user values(2, 'johndoe@gmail.com', 'John Doe', 'https://randompicURL.com', 'John', 'Doe', );
