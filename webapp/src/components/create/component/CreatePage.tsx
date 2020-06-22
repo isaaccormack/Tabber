@@ -11,8 +11,8 @@ import UploadButton from "./UploadButton";
 export default function CreatePage() {
 
     return(
-        <Container className="createPageBody">
-            <Row>
+        <Container className="createPageBody centered">
+            <Row className="button">
                 <img src={Record} className='recordButton' alt='record button' />
             </Row>
             <br />
@@ -20,7 +20,7 @@ export default function CreatePage() {
                 <img src={OrIcon} className='OrIcon' alt='OR icon' />
             </Row>
             <br />
-            <Row>
+            <Row className="button">
                <UploadButton />
             </Row>
         </Container>
