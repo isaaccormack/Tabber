@@ -19,18 +19,27 @@ if (!testUserToken) {
 
 const testDataDir = __dirname + '/../../../test/data/';
 
-// PRECONDITION: Tests assume the db is empty
-
-// This test could be in user.spec.ts, but it was made its own test to lower
-// coupling between test suites.
-// And theres lots of setup which is irrelevent to all other user tests.
-
-
-
-// write some nicely formatted notes here,
-// assumptions - db must be empty
-// test are dependent on each other
-// why these tests are here and not elsewhere
+/**
+ * Lick sharing tests.
+ * 
+ * These tests focus on only the lick sharing aspects of functionality implemented in the
+ * user and lick controllers.
+ * 
+ * NOTES:
+ * - These tests assume the the user.spec.ts and lick.spec.ts integration tests all pass.
+ *   Specifically, the ability to create, get, and delete licks is needed in setup for these
+ *   tests. These tests also test the sharing functionality of these endpoints.
+ * 
+ * - These tests are directly dependent on each other. It is sometimes noted when the dependency
+ *   is obscure, but mostly this is implied (ie. getting a shared lick must come after a lick was
+ *   shared).
+ * 
+ * PRECONDITION:
+ * - The database must not contain any records on any of the data used in this test before the 
+ *   test is run. To make things easy, the database should be empty intially.
+ * 
+ * LAST MODIFIED: June 21 2020
+ */
 describe('Integration: Users shared licks', () => {
     let app: Koa
     let db: Connection

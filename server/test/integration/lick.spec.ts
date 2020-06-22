@@ -14,6 +14,11 @@ if (!identityToken) {
     console.log("MUST INSERT IDENTITY TOKEN FOR INTEGRATION TESTING");
 }
 
+const testUserToken = keys.TEST_USER_IDENTITY_TOKEN;
+if (!testUserToken) {
+    console.log("MUST INSERT TEST USER TOKEN FOR INTEGRATION TESTING");
+}
+
 const testDataDir = __dirname + '/../../../test/data/';
 
 describe('Integration: Licks endpoint', () => {
@@ -46,7 +51,7 @@ describe('Integration: Licks endpoint', () => {
         db.close().then(done())
     });
     
-    ////////////////// TEST WITH PRIVATE LICK & USER LOGGED IN //////////////////
+    ////////////////// TEST WITH PRIVATE LICK //////////////////
     /**
      * Test createLick()
      */
@@ -91,36 +96,6 @@ describe('Integration: Licks endpoint', () => {
         expect(response.status).toBe(400);
         expect(response.body.errors.error).toContain("No file sent");
     });
-    it('should NOT be able to POST new lick with empty file', async () => {
-        const emptyAudioFilePath = testDataDir + 'empty_mp3_file.mp3';
-
-        const response: request.Response = await request(app.callback())
-            .post('/api/licks')
-            .type('form')
-            .field('name', lickBody.name)
-            .field('tuning', lickBody.tuning)
-            .field('isPublic', lickBody.isPublic)
-            .attach('file', emptyAudioFilePath)
-            .set("Cookie", "ti="+identityToken);
-
-        expect(response.status).toBe(400);
-        expect(response.body.errors.error).toContain("File is empty");
-    });
-    it('should NOT be able to POST new lick with no name', async () => {
-        const audioFilePath = testDataDir + '700KB_mp3_file_27s.mp3';
-
-        const response: request.Response = await request(app.callback())
-        .post('/api/licks')
-        .type('form')
-        .field('tuning', lickBody.tuning)
-        .field('isPublic', lickBody.isPublic)
-        .attach('file', audioFilePath)
-        .set("Cookie", "ti="+identityToken);
-        
-        expect(response.status).toBe(400);
-        expect(response.body.errors.length).toBeGreaterThan(0);
-        expect(response.body.errors[0].property).toBe('name')
-    });
     it('should NOT be able to POST new lick with audio file longer than 60s', async () => {
         const longAudioFilePath = testDataDir + '5MB_mp3_file_132s.mp3';
 
@@ -150,6 +125,19 @@ describe('Integration: Licks endpoint', () => {
 
         expect(response.status).toBe(400);
         expect(response.body.errors.error).toContain("Mimetype is not supported");
+    });
+    it('should NOT be able to POST new lick if not logged in', async () => {
+        const audioFilePath = testDataDir + '700KB_mp3_file_27s.mp3';
+
+        const response: request.Response = await request(app.callback())
+            .post('/api/licks')
+            .type('form')
+            .field('name', lickBody.name)
+            .field('tuning', lickBody.tuning)
+            .field('isPublic', lickBody.isPublic)
+            .attach('file', audioFilePath)
+
+        expect(response.status).toBe(401);
     });
     /**
      * Test getLick()
@@ -186,6 +174,13 @@ describe('Integration: Licks endpoint', () => {
         
         expect(response.status).toBe(403);
         expect(response.body.errors.error).toContain("You do not have permission");
+    });
+    it('should NOT be able to GET lick which doesnt exist with user not logged in', async () => {
+        const response: request.Response = await request(app.callback())
+        .get('/api/licks/' + 0) // no lick with id = 0
+        
+        expect(response.status).toBe(400);
+        expect(response.body.errors.error).toContain("doesn't exist");
     });
     /**
      * Test getLickAudio()
@@ -236,7 +231,8 @@ describe('Integration: Licks endpoint', () => {
         .delete('/api/licks/' + privateID)
         .set("Cookie", "ti="+identityToken);
         
-        expect(deleteResponse.status).toBe(204);
+        expect(deleteResponse.status).toBe(200);
+        expect(deleteResponse.body.name).toBe(lickBody.name);
 
         // expect file to be deleted
         expect(fs.existsSync(deleteResponse.body.audioFileLocation)).toBe(false);
@@ -249,9 +245,15 @@ describe('Integration: Licks endpoint', () => {
         expect(getResponse.status).toBe(400);
         expect(getResponse.body.errors.error).toContain("doesn't exist");
     });
+    it('should NOT be able to DELETE lick if not logged in', async () => {
+        const deleteResponse: request.Response = await request(app.callback())
+            .delete('/api/licks/' + privateID)
+
+        expect(deleteResponse.status).toBe(401);
+    });
 
 
-    ////////////////// TEST WITH PUBLIC LICK & USER NOT LOGGED IN //////////////////
+    ////////////////// TEST WITH PUBLIC LICK //////////////////
     /**
      * Test createLick()
      */
@@ -286,19 +288,6 @@ describe('Integration: Licks endpoint', () => {
 
             publicID = response.body.id // set id for later tests
     });
-    it('should NOT be able to POST new lick if not logged in', async () => {
-        const audioFilePath = testDataDir + '700KB_mp3_file_27s.mp3';
-
-        const response: request.Response = await request(app.callback())
-            .post('/api/licks')
-            .type('form')
-            .field('name', lickBody.name)
-            .field('tuning', lickBody.tuning)
-            .field('isPublic', lickBody.isPublic)
-            .attach('file', audioFilePath)
-
-        expect(response.status).toBe(401);
-    });
     /**
      * Test getLick()
      */
@@ -323,19 +312,12 @@ describe('Integration: Licks endpoint', () => {
             // when this is changed, test will fail and be updated
             expect(response.body.owner.email).toBe(tokenParams.email);
     });
-    it('should NOT be able to GET lick which doesnt exist with user not logged in', async () => {
-        const response: request.Response = await request(app.callback())
-        .get('/api/licks/' + 0) // no lick with id = 0
-        
-        expect(response.status).toBe(400);
-        expect(response.body.errors.error).toContain("doesn't exist");
-    });
     /**
      * Test getLickAudio()
      */
     // DOES NOT actually test whether files are equal, just that file can be received 
     // Rely on the other getLickAudio test to test that audio is uploaded correctly
-    it('should be able to GET private lick audio by id as owner', async () => {
+    it('should be able to GET public lick audio by id', async () => {
         const response: request.Response = await request(app.callback())
             .get('/api/licks/audio/' + publicID)
 
@@ -347,18 +329,22 @@ describe('Integration: Licks endpoint', () => {
     /**
      * Test deleteLick()
      */
-    it('should NOT be able to DELETE lick if not logged in', async () => {
+    it('should NOT be able to DELETE public lick if not owner', async () => {
         const deleteResponse: request.Response = await request(app.callback())
-            .delete('/api/licks/' + privateID)
+        .delete('/api/licks/' + publicID)
+        .set("Cookie", "ti="+testUserToken);
+        
+        expect(deleteResponse.status).toBe(403);
+        expect(deleteResponse.body.errors.error).toContain("only be deleted by its owner");
 
-        expect(deleteResponse.status).toBe(401);
     });
     it('should be able to DELETE public lick by id as owner', async () => {
         const deleteResponse: request.Response = await request(app.callback())
         .delete('/api/licks/' + publicID)
         .set("Cookie", "ti="+identityToken);
         
-        expect(deleteResponse.status).toBe(204);
+        expect(deleteResponse.status).toBe(200);
+        expect(deleteResponse.body.name).toBe(lickBody.name);
 
         // expect file to be deleted
         expect(fs.existsSync(deleteResponse.body.audioFileLocation)).toBe(false);
@@ -372,10 +358,6 @@ describe('Integration: Licks endpoint', () => {
         expect(getResponse.body.errors.error).toContain("doesn't exist");
     });
 
-    ////////////////// TESTS WITH MULTI USERS //////////////////
-    // multi user tests go here, ie.
-    //   - should not be able delete a lick which user doesnt own
-    //   - shouldnt be able to edit lick user doesnt own
-    
+    // TODO: (in addition to all edit tests) shouldnt be able to edit lick user doesnt own
 });
 

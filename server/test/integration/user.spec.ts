@@ -14,6 +14,14 @@ if (!identityToken) {
     console.log("MUST INSERT IDENTITY TOKEN FOR INTEGRATION TESTING");
 }
 
+
+/**
+ * User tests.
+ * 
+ * Testing of basic functionality in the user endpoint.
+ * 
+ * LAST MODIFIED: June 21 2020
+ */
 describe('Integration: Users endpoint', () => {
     let app: Koa
     let db: Connection

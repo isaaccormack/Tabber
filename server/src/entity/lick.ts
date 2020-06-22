@@ -2,9 +2,6 @@ import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTabl
 import { IsOptional, Length } from "class-validator";
 import { User } from "./user";
 
-// should Lick be plural so db table is licks not lick?
-// this should be weak entity which is defined by its name and user name such that each name is unique to user 
-
 @Entity()
 export class Lick {
     @PrimaryGeneratedColumn()

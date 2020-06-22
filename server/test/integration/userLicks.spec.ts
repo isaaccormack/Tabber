@@ -14,9 +14,15 @@ if (!identityToken) {
 
 const testDataDir = __dirname + '/../../../test/data/';
 
-// This test could be in user.spec.ts, but it was made its own test to lower
-// coupling between test suites.
-// And theres lots of setup which is irrelevent to all other user tests.
+/**
+ * Get user's licks test.
+ * 
+ * This test was broken into its own test unit as it depends on functionality 
+ * in the lick endpoint (ie. uploading and deleting licks) and therefore shouldnt
+ * be grouped into the user tests as this would increase coupling.
+ * 
+ * LAST MODIFIED: June 21 2020
+ */
 describe('Integration: Users licks', () => {
     let app: Koa
     let db: Connection

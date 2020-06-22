@@ -1,32 +1,14 @@
 import { validate, ValidationError } from "class-validator";
-import { getManager, Repository, Not, Equal, Like } from "typeorm";
+const fs = require('fs');
+import * as audioDuration from 'get-audio-duration';
+import { Context } from "koa";
+import { getManager, Repository } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
-import { Context, Request } from "koa";
+import * as util from 'util';
+
 import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
-import { Files } from "koa2-formidable";
-const fs = require('fs');
-import * as util from 'util';
-import * as audioDuration from 'get-audio-duration';
 import { UserController } from './user'
-
-
-const lickAudioDirectory: string = "uploads";
-
-// Get a new unique location for an audio file
-function getNewAudioFileUri(): string {
-    return lickAudioDirectory + "/" + uuidv4();
-    // return uuidv4();
-}
-
-// files must be added to Request interface
-interface FileRequest extends Request {
-    files?: Files;
-}
-
-interface FileContext extends Context {
-    request: FileRequest;
-}
 
 
 export class LickController {
@@ -158,37 +140,6 @@ export class LickController {
         }
     }
 
-    // this is just a subset of finding a lick and probably doesnt need to exist
-    // ie. instead just get a lick and look at who its shared with
-    // /**
-    //  * GET /api/licks/sharedWith/{id}
-    //  *
-    //  * Get users a lick is shared with by id.
-    //  */
-    // public static async getUsersLickSharedWith(ctx: Context): Promise<void> {
-
-    //     const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-    //     const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner', 'sharedWith']});
-
-    //     if (lick) {
-    //         const isPermitted = LickController.canUserAccess(ctx.state.user, lick);
-    //         if (isPermitted) {
-    //             ctx.status = 200; // OK
-
-    //             // should hide some attributes of lick.owner here, like email, not sure what so save for later
-    //             ctx.body = lick;
-    //         } else {
-    //             ctx.status = 403; // FORBIDDEN
-    //             ctx.body = { errors: {error: "Error: You do not have permission to see the users this lick is shared with."}}
-    //         }
-    //     } else {
-    //         ctx.status = 400; // BAD REQUEST
-    //         ctx.body = { errors: {error: "Error: The lick you are trying to get the shared with users of doesn't exist."}}
-    //     }
-    // }
-
-    // should include share date in shared with relation
-
     /**
      * PUT /api/lick/share/{id}
      *
@@ -315,76 +266,6 @@ export class LickController {
         }
     }
 
-    // maybe the make public should just be one case in the edit lick handler
-
-    // /**
-    //  * PUT /api/makePrivate/lick/{id}
-    //  *
-    //  * Makes the requested lick private 
-    //  */
-    // public static async makeLickPrivate(ctx: Context): Promise<void> {
-
-    //     const lickID = +ctx.params.id || 0;
-
-    //     const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-    //     const lickToMakePrivate: Lick | undefined = await lickRepository.findOne(lickID);
-        
-    //     if (!lickToMakePrivate) {
-    //         ctx.status = 400; // BAD REQUEST
-    //         ctx.body = { errors: {error: "Error: The lick you are trying to make private doesn't exist."}}
-    //     } else if (ctx.state.user.id !== lickToMakePrivate.owner.id) {
-    //         ctx.status = 403; // FORBIDDEN
-    //         ctx.body = { errors: {error: "Error: A lick can only be made private by its owner."}}
-    //     } else {
-    //         lickToMakePrivate.isPublic = false;
-    //         // relation cascades on update, so only need to update lick entity
-    //         const privateLick: Lick | undefined = await lickRepository.save(lickToMakePrivate);
-    //         if (!privateLick) {
-    //             ctx.status = 500; // SERVER ERROR
-    //             ctx.body = { errors: {error: "Error: Could not update lick to make private in db"}}
-    //         } else {
-    //             ctx.status = 200; // OK
-    //             ctx.body = privateLick;
-    //         }
-    //     }
-    // }
-
-    // /**
-    //  * PUT /api/makePublic/lick/{id}
-    //  *
-    //  * Makes the requested lick public
-    //  */
-    // public static async makeLickPublic(ctx: Context): Promise<void> {
-
-    //     const lickID = +ctx.params.id || 0;
-
-    //     const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-    //     const lickToMakePublic: Lick | undefined = await lickRepository.findOne(lickID);
-        
-    //     if (!lickToMakePublic) {
-    //         ctx.status = 400; // BAD REQUEST
-    //         ctx.body = { errors: {error: "Error: The lick you are trying to make public doesn't exist."}}
-    //     } else if (ctx.state.user.id !== lickToMakePublic.owner.id) {
-    //         ctx.status = 403; // FORBIDDEN
-    //         ctx.body = { errors: {error: "Error: A lick can only be made public by its owner."}}
-    //     } else {
-    //         lickToMakePublic.isPublic = true;
-    //         // relation cascades on update, so only need to update lick entity
-    //         const publicLick: Lick | undefined = await lickRepository.save(lickToMakePublic);
-    //         if (!publicLick) {
-    //             ctx.status = 500; // SERVER ERROR
-    //             ctx.body = { errors: {error: "Error: Could not update lick to make public in db"}}
-    //         } else {
-    //             ctx.status = 200; // OK
-    //             ctx.body = publicLick;
-    //         }
-    //     }
-    // }
-
-
-
-    // get all user licks
-
     /**
      * PUT /api/licks/{id}
      *
@@ -454,7 +335,7 @@ export class LickController {
     private static async saveAudioFile(audioFile: any): Promise<string> {
 
         // save the audio to a file with a randomly generated uuid
-        const audioFileLocation: string = getNewAudioFileUri();
+        const audioFileLocation: string = "uploads/" + uuidv4();
         
         // create read and write streams to save file
         const readStream = fs.createReadStream(audioFile.path);
@@ -503,9 +384,5 @@ export class LickController {
     private static async unlinkAsync(filePath: string) : Promise<NodeJS.ErrnoException> {
         const deleteFile = util.promisify(fs.unlink);
         return await deleteFile(filePath);
-    }
-
-    private static canUserModify(user: User, lick: Lick): boolean {
-        return lick.owner == user;
-    }
+    } 
 }

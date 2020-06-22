@@ -1,8 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany } from "typeorm";
 import { Lick } from "./lick";
 
-// Don't need to validate this entity, since all data comes
-// directly from a Google verified jwt token
+// Don't need to validate this entity, since all data comes directly from a Google verified jwt token
 @Entity()
 export class User {
     @PrimaryGeneratedColumn()
@@ -29,6 +28,3 @@ export class User {
     @ManyToMany(type => Lick, lick => lick.sharedWith)
     sharedWithMe: Lick[];
 }
-
-// add user to db
-// mysql> insert into user values(2, 'johndoe@gmail.com', 'John Doe', 'https://randompicURL.com', 'John', 'Doe', );

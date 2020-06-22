@@ -23,13 +23,6 @@ describe('Integration: Home page', () => {
         db.close().then(done())
     });
     
-    it('should say "Hello World!"', async () => {
-        const response: request.Response = await request(app.callback()).get('/api/helloworld')
-
-        expect(response.status).toBe(200);
-        expect(response.text).toBe('Hello World!');
-    });
-
     it('should say render an html page"', async () => {
         const response: request.Response = await request(app.callback()).get('/')
 
