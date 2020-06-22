@@ -1,17 +1,17 @@
 import {Context} from "koa";
+import { LoginTicket } from "google-auth-library";
 import * as googleApis from "googleapis";
 
 import * as keys from "../../keys/keys.json";
 import {User} from "../entity/user";
-import { LoginTicket } from "google-auth-library";
 import { UserController } from "./user";
-
 
 const oauth2Client = new googleApis.google.auth.OAuth2(
     keys.YOUR_CLIENT_ID,
     keys.YOUR_CLIENT_SECRET,
     keys.YOUR_REDIRECT_URL
 );
+
 const scopes = [
     'https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/userinfo.profile'
@@ -66,5 +66,4 @@ export default class OAuth2Controller {
         ctx.cookies.set('ta', tokens.access_token);
         ctx.cookies.set('ti', tokens.id_token);
     }
-
 }

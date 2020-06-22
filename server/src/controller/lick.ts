@@ -10,7 +10,6 @@ import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
 import { UserController } from './user'
 
-
 export class LickController {
 
     /**
@@ -317,8 +316,6 @@ export class LickController {
     /**
      * HELPERS
      */
-    // audioFile should be of some file type or multipart/formdata type
-    // would be cleaner just to have an AudioFile entity which links to lick and validate it that way
     private static validateAudioFile(audioFile: any): Error | null {
     
         if (!audioFile) return new Error("Error: No file sent.")
@@ -337,7 +334,6 @@ export class LickController {
         // save the audio to a file with a randomly generated uuid
         const audioFileLocation: string = "uploads/" + uuidv4();
         
-        // create read and write streams to save file
         const readStream = fs.createReadStream(audioFile.path);
         const writeStream = fs.createWriteStream(audioFileLocation);
         
@@ -358,11 +354,8 @@ export class LickController {
         return audioFileLocation;
     }
 
-    // The sharedWith relation MUST be loaded with lick passed in 
     private static canUserAccess(user: User, lick: Lick): boolean {
-        // TODO: fix the shared with validation when implementing that functionality
-        // note: will have to change query to get sharedWith attribute of lick
-        // doesn't handle shared with
+        // The owner and sharedWith relations MUST exist be loaded on the lick passed in
         if (!lick.owner || !lick.sharedWith) {
             throw new Error('The owner and sharedWith relations MUST be loaded on lick parameter')
         }

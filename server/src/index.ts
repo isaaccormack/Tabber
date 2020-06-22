@@ -1,19 +1,16 @@
+import * as fs from "fs";
 import Koa from "koa"
 import bodyParser from "koa-bodyparser";
+import formidable from "koa2-formidable"
 import helmet from "koa-helmet";
 import logger from "koa-logger";
-import formidable from "koa2-formidable"
-
 import Router from "koa-router";
 import serve from "koa-static";
-
 import * as path from "path";
-import * as fs from "fs";
 
 import { unprotectedRouter } from "./routes/unprotected";
 import { protectedRouter } from "./routes/protected";
-import {authValidator} from "./middleware/auth-validator";
-
+import { authValidator } from "./middleware/auth-validator";
 
 export function startApp(): Koa {
     const app: Koa = new Koa()
