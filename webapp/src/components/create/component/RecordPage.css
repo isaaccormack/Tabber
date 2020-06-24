@@ -15,18 +15,6 @@
     width: 128px;
 }
 
-.uploadButton {
-    width: 196px;
-}
-
-.OrIcon {
-    width: 400px;
-}
-
-#upload {
-    display: none;
-}
-
 #record {
     display: none;
 }
