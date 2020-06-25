@@ -9,7 +9,6 @@ import rootStore from "./store";
 import Navigation from "./components/common/navigation/component/Navigation";
 import OAuth2Page from "./components/oauth/component/OAuth2Page";
 import CreatePage from "./components/create/component/CreatePage";
-import RecordPage from "./components/create/component/RecordPage";
 import TrimPage from "./components/create/component/TrimPage";
 import LoginPage from "./components/login/component/LoginPage";
 import UploadPage from "./components/create/component/UploadPage";
@@ -17,12 +16,10 @@ import NotFoundPage from "./components/notfound/component/NotFoundPage";
 import AccountPage from "./components/account/component/AccountPage";
 import LibraryPage from "./components/library/component/LibraryPage";
 import SharedPage from "./components/shared/component/SharedPage";
-import CreateDescriptionPage from "./components/create/component/CreateDescriptionPage";
 import EditPage from "./components/edit/component/EditPage";
 import ViewPage from "./components/view/component/ViewPage";
-
+import RecordPage from './components/create/component/RecordPage';
 function App() {
-
     return (
       <Provider store={rootStore}>
         <div className="app-wrapper">

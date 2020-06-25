@@ -1,6 +1,13 @@
 @import "../../../mainstyles.css";
 
-.createPageBody {
+.preRecordPageBody {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.recordPageBody {
     display: flex;
     flex-direction: column;
     align-items: center;
