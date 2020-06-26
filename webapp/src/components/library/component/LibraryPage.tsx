@@ -1,24 +1,14 @@
 import React, {useEffect, useState} from "react";
-import {Table} from "react-bootstrap";
+import {Container, Table} from "react-bootstrap";
 import {sampleLicks} from "./tmp-sample-data";
 import "./LibraryPage.css";
+import LibraryTable, {LibraryTableProps, LickInterface} from "./LibraryTable";
 
-interface LickInterface {
-    id: number
-    name: string
-    description: string
-    dateUploaded: string
-    audioFileLocation: string
-    audioLength: string
-    tab: string,
-    tuning: string
-    isPublic: boolean,
-    owner: any
-}
+
 
 export default function LibraryPage() {
 
-    const [licks, setLicks] = useState([{}])
+    const [licks, setLicks] = useState<LickInterface[]>([])
 
     function getLibrary() {
         fetch("/api/user/licks", {
@@ -33,22 +23,6 @@ export default function LibraryPage() {
         })
     }
 
-    function renderTableBody(data: any) {
-        console.log(data);
-        if (data) {
-            return data.map((lick: LickInterface, i: number) => {
-                return (
-                    <tr>
-                        <td>{i}</td>
-                        <td>{lick.name}</td>
-                        <td>{lick.audioLength}</td>
-                        <td>{lick.dateUploaded}</td>
-                    </tr>
-                )
-            })
-        }
-        return {}
-    }
 
     useEffect(() => {
         getLibrary();
@@ -56,22 +30,13 @@ export default function LibraryPage() {
 
     return (
         <div>
-            <div className="library-title">
-                My Library
+            <div className="library-table-wrapper centered">
+                <div className="library-title">
+                    My Library
+                </div>
+                <LibraryTable licks={licks} />
             </div>
-            <Table striped bordered hover variant="dark">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Lick Name</th>
-                        <th>Length</th>
-                        <th>Uploaded</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {renderTableBody(licks)}
-                </tbody>
-            </Table>
+
         </div>
     )
 }

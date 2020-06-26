@@ -21,7 +21,7 @@ function App() {
 
     return (
       <Provider store={rootStore}>
-        <div>
+        <div className="app-wrapper">
             <div className="sidenav">
                 <Navigation />
             </div>
