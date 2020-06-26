@@ -1,0 +1,49 @@
+@import "../../../mainstyles.css";
+
+.library-table {
+    min-width: 700px;
+    border: var(--red) solid 1px;
+    border-radius: 10px;
+    overflow-y: scroll;
+}
+
+.table-header {
+    font-weight: bold;
+    font-size: var(--font-size-4);
+    color: var(--red);
+    border-bottom: var(--red) 1px solid;
+}
+
+.table-row {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.table-row:hover {
+    color: var(--blue);
+    cursor: pointer;
+}
+
+#playing {
+    color: lightgreen !important;
+}
+
+.edit-button:hover {
+    color: var(--pink) !important;
+}
+
+.scrollable {
+    max-height: 400px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+::-webkit-scrollbar {
+    -webkit-appearance: none;
+    width: 7px;
+}
+
+::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: var(--red);
+}

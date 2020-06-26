@@ -2,6 +2,11 @@
 
 .library-title {
     font-size: var(--font-size-8);
-    font-family: var(--font-header);
+    font-family: var(--font-body);
     margin-bottom: 10px;
+}
+
+.library-table-wrapper {
+    width: 60%;
+    height: 60vh;
 }
