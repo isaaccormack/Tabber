@@ -10,21 +10,20 @@ import UploadPageLoadingAnimation from "./UploadPageLoadingAnimation";
 
 export default function UploadPage() {
     const [responseStatus, setResponseStatus] = useState(0)
-    const file: FileList | undefined = useSelector((state: RootState) => state.fileState.file);
-
+    const {file, metadata} = useSelector((state: RootState) => state.fileState);
 
     const history = useHistory();
     const dispatch = useDispatch();
 
     const sendFile = useCallback(() => {
         setResponseStatus(0);
-        if (file) {
+        if (file && metadata) {
             const form = new FormData();
             form.append("file", file[0]);
-            form.append("name", "placeholder name");
-            form.append("tuning", "standard");
-            form.append("isPublic", "false");
-
+            form.append("name", metadata.lickname);
+            form.append("tuning", metadata.licktuning);
+            form.append("description", metadata.lickdescription)
+            form.append("isPublic", metadata.lickpublic.toString());
             fetch("/api/licks",{
                 method: "POST",
                 body: form
@@ -41,7 +40,7 @@ export default function UploadPage() {
                 setResponseStatus(418);
             })
         }
-    }, [file, history]);
+    }, [file, metadata, history]);
 
     useEffect(()=> {
         sendFile();

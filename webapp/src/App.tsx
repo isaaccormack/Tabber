@@ -15,6 +15,7 @@ import NotFoundPage from "./components/notfound/component/NotFoundPage";
 import AccountPage from "./components/account/component/AccountPage";
 import LibraryPage from "./components/library/component/LibraryPage";
 import SharedPage from "./components/shared/component/SharedPage";
+import CreateDescriptionPage from "./components/create/component/CreateDescriptionPage";
 
 function App() {
 
@@ -28,6 +29,7 @@ function App() {
                 <Container fluid className="app">
                     <Switch>
                         <Route exact path="/create/upload" component={UploadPage} />
+                        <Route exact path="/create/description" component={CreateDescriptionPage} />
                         <Route exact path="/create" component={CreatePage} />
                         <Route exact path="/account" component={AccountPage} />
                         <Route exact path="/library" component={LibraryPage} />
