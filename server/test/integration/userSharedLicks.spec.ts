@@ -131,7 +131,7 @@ describe('Integration: Users shared licks', () => {
         expect(shareRes.body.sharedWith[0].id).toBe(testUserID);
 
         const userRes: request.Response = await request(app.callback())
-        .get('/api/user/licksSharedWithMe')
+        .get('/api/user/licks-shared-with-me')
         .set("Cookie", "ti="+testUserToken);
     
         // expect the lick to be shared with the test user
@@ -159,7 +159,7 @@ describe('Integration: Users shared licks', () => {
         expect(shareRes.body.sharedWith[0].id).toBe(testUserID);
 
         const userRes: request.Response = await request(app.callback())
-        .get('/api/user/licksSharedWithMe')
+        .get('/api/user/licks-shared-with-me')
         .set("Cookie", "ti="+testUserToken);
     
         // expect the lick to be shared with the test user
@@ -186,7 +186,7 @@ describe('Integration: Users shared licks', () => {
         expect(shareRes.body.sharedWith[0].id).toBe(testUserID);
 
         const userRes: request.Response = await request(app.callback())
-        .get('/api/user/licksSharedWithMe')
+        .get('/api/user/licks-shared-with-me')
         .set("Cookie", "ti="+testUserToken);
 
         // expect the lick to be shared with the test user
@@ -242,7 +242,7 @@ describe('Integration: Users shared licks', () => {
         expect(shareRes.body.sharedWith.length).toBe(0);
 
         const userRes: request.Response = await request(app.callback())
-        .get('/api/user/licksSharedWithMe')
+        .get('/api/user/licks-shared-with-me')
         .set("Cookie", "ti="+testUserToken);
 
         // expect the lick with lickIDs[0] to be unshared with user 
@@ -267,7 +267,7 @@ describe('Integration: Users shared licks', () => {
         expect(shareRes.body.sharedWith.length).toBe(0);
 
         const userRes: request.Response = await request(app.callback())
-        .get('/api/user/licksSharedWithMe')
+        .get('/api/user/licks-shared-with-me')
         .set("Cookie", "ti="+testUserToken);
 
         // expect the licks shared with the test user to remain the same
@@ -325,7 +325,7 @@ describe('Integration: Users shared licks', () => {
 
         // GET user to see they no longer have the lick shared with them
         const userRes: request.Response = await request(app.callback())
-        .get('/api/user/licksSharedWithMe')
+        .get('/api/user/licks-shared-with-me')
         .set("Cookie", "ti="+testUserToken);
 
         // expect the test user to have no licks shared with them
@@ -355,7 +355,7 @@ describe('Integration: Users shared licks', () => {
 
         // GET user to see they no longer have the lick shared with them
         const userRes: request.Response = await request(app.callback())
-        .get('/api/user/licksSharedWithMe')
+        .get('/api/user/licks-shared-with-me')
         .set("Cookie", "ti="+testUserToken);
 
         // expect the test user to have no licks shared with them

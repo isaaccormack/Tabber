@@ -10,7 +10,8 @@ export class UserController {
     /**
      * GET /user
      * 
-     * Get data on the currently authenticated user.
+     * Get state of the currently authenticated user. Should not assume that owned licks
+     * or licks shared with me are loaded in the users state.
      */
     public static async getAuthUser(ctx: Context): Promise<void> {
 
@@ -105,22 +106,28 @@ export class UserController {
     /**
      * GET /api/user/licks
      *
-     * Get users a lick is shared with by id.
+     * Get all auth users licks by user id.
      */
     public static async getAuthUserLicks(ctx: Context): Promise<void> {
 
         const userRepository: Repository<User> = getManager().getRepository(User);
         // will always return the currently authenticated user
         const authUser: User = await userRepository.findOne({ where: {id: (ctx.state.user.id)}, relations: ['licks']});
+
+        if (authUser) {
+            ctx.status = 200; // OK
+            ctx.body = authUser.licks;
+        } else {
+            ctx.status = 500; // SERVER ERROR
+            ctx.body = { errors: {error: "We could not get your licks right now"}}
+        }
         
-        ctx.status = 200; // OK
-        ctx.body = authUser.licks;
     }
 
     /**
-     * GET /api/user/licksSharedWithMe
+     * GET /api/user/licks-shared-with-me
      *
-     * Get users a lick is shared with by id.
+     * Get all licks shared with the auth user by user id.
      */
     public static async getLicksSharedWithAuthUser(ctx: Context): Promise<void> {
 
@@ -128,8 +135,13 @@ export class UserController {
         // will always return the currently authenticated user
         const authUser: User= await userRepository.findOne({ where: {id: (ctx.state.user.id)}, relations: ['sharedWithMe']});
         
-        ctx.status = 200; // OK
-        ctx.body = authUser.sharedWithMe;
+        if (authUser) {
+            ctx.status = 200; // OK
+            ctx.body = authUser.sharedWithMe;
+        } else {
+            ctx.status = 500; // SERVER ERROR
+            ctx.body = { errors: {error: "We could not get the licks shared with you right now"}}
+        }
     }
 
 
