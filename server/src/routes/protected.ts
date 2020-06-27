@@ -10,12 +10,11 @@ protectedRouter.prefix("/api")
 protectedRouter.use(isAuthenticated);
 
 // User routes
+protectedRouter.get("/user", UserController.getAuthenticatedUser);
+protectedRouter.delete("/user", UserController.deleteAuthenticatedUser);
 protectedRouter.get("/users", UserController.getUsers);
 protectedRouter.get("/users/:id", UserController.getUser);
-protectedRouter.post("/users", UserController.createUser);
 protectedRouter.put("/users/:id", UserController.updateUser);
-protectedRouter.delete("/users/:id", UserController.deleteUser);
-protectedRouter.delete("/testusers/:id", UserController.deleteTestUser);
 
 // Lick routes
 protectedRouter.post("/licks", LickController.createLick);
