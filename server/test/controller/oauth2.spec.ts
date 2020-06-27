@@ -1,10 +1,10 @@
-import { createSandbox, SinonSandbox, spy } from 'sinon'
-import {createMockContext, createMockCookies} from '@shopify/jest-koa-mocks';
+import { createSandbox, SinonSandbox } from 'sinon'
+import { createMockContext } from '@shopify/jest-koa-mocks';
 import OAuth2Controller from "../../src/controller/oauth2";
 import * as googleApis from "googleapis";
-import { LoginTicket } from "google-auth-library";
 import * as typeorm from "typeorm";
-import {User} from "../../src/entity/user";
+import { User } from "../../src/entity/user";
+import { UserController } from '../../src/controller/user';
 
 describe('Unit test: User endpoint', () => {
     let sandbox: SinonSandbox
@@ -59,19 +59,19 @@ describe('Unit test: User endpoint', () => {
         const ctx = createMockContext();
         ctx.query["code"] = "abcde";
 
-        sandbox.stub(googleApis.google.auth.OAuth2.prototype, "getToken").returns(Promise.resolve(mockToken));
-        sandbox.stub(googleApis.google.auth.OAuth2.prototype, "verifyIdToken").returns(Promise.resolve(mockTicket));
-        stubGetUserRepository({findOne: () => {return mockUser}})
+        sandbox.stub(googleApis.google.auth.OAuth2.prototype, "getToken").returns(mockToken);
+        sandbox.stub(googleApis.google.auth.OAuth2.prototype, "verifyIdToken").returns(mockTicket);
+        sandbox.stub(UserController, "getOrCreateUser").returns(mockUser);
         await OAuth2Controller.tokenExchange(ctx);
 
         expect(ctx.status).toEqual(200);
-        expect(ctx.body).toEqual(mockUser.name);
+        expect(ctx.body).toBe(mockTicket.getPayload());
     })
-
+    
     it('should FAIL to verify id_token', async () => {
         sandbox.stub(googleApis.google.auth.OAuth2.prototype, "verifyIdToken").throws(new Error());
         const response = await OAuth2Controller.verifyToken("");
-
+        
         expect(response).toEqual(null);
     })
 

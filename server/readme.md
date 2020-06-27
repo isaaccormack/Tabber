@@ -1,9 +1,10 @@
 ## Getting Started
 To run the app:
 1. Set `"host": "localhost"` in `ormconfig.json`
-2. `npm i`
-3. `npm start`
-4. The app should be running on localhost:3000
+2. Add `keys.json` into the `keys/` folder. 
+3. `npm i` in the `/webapp` directory to install web app dependencies
+4. Back in `/server`, `npm i && npm run update-views && npm start`
+5. The app should be running on localhost:3000
 
 ## Developing
 To develop the app with hot-reloading:
@@ -12,7 +13,6 @@ To develop the app with hot-reloading:
 
 ## Testing
 Jest is used for testing.
-- All tests: `npm run jest`
 - Unit tests: `npm run unit-jest`
 - Integration tests: `npm run integration-jest`
 

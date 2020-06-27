@@ -4,7 +4,8 @@ import Koa from 'koa'
 
 import * as appModule from "../../src/index";
 import * as dbModule from "../../src/database/dbclient";
-import { mockUser } from '../interfaces/mockUser';
+
+var jwtDecode = require('jwt-decode');
 
 import * as keys from "../../keys/keys.json";
 const identityToken = keys.YOUR_TEST_IDENTITY_TOKEN;
@@ -13,19 +14,22 @@ if (!identityToken) {
     console.log("MUST INSERT IDENTITY TOKEN FOR INTEGRATION TESTING");
 }
 
+
+/**
+ * User tests.
+ * 
+ * Testing of basic functionality in the user endpoint.
+ * 
+ * LAST MODIFIED: June 21 2020
+ */
 describe('Integration: Users endpoint', () => {
     let app: Koa
     let db: Connection
-
-    const newUser: mockUser = {
-        name: 'john',
-        email: 'john@doe.com'
-    }
-
     let id: Number
 
+    const token = jwtDecode(identityToken);
+
     beforeAll((done) => {
-        // can wire in testdb if so inclined
         dbModule.initDb((err, conn) => {
             if (err) throw err
 
@@ -39,51 +43,54 @@ describe('Integration: Users endpoint', () => {
         db.close().then(done())
     });
     
-    it('should send back array of users', async () => {
+    it('should GET currently authenticated user', async () => {
+        // since the user is initialzed with the data in the jwt, 
+        // the user returned is guaranteed to have at least as much
+        // data as that in the jwt token
+        const response: request.Response = await request(app.callback())
+        .get('/api/user')
+        .set("Cookie", "ti="+identityToken);
+        
+        expect(response.status).toBe(200);
+        expect(response.body.name).toEqual(token.name)
+        expect(response.body.email).toEqual(token.email)
+        expect(response.body.id).toBeGreaterThan(0)
+        
+        id = response.body.id;
+    });
+    it('should GET all users', async () => {
         const response: request.Response = await request(app.callback())
             .get('/api/users')
             .set("Cookie", "ti="+identityToken);
 
         expect(response.status).toBe(200);
-        expect(response.body.length).toBeGreaterThanOrEqual(0)
+        // since at least the account created above exists
+        expect(response.body.length).toBeGreaterThan(0)
     });
-    it('should be able to create new user', async () => {
-        const response: request.Response = await request(app.callback())
-            .post('/api/users')
-            .send(newUser)
-            .set("Cookie", "ti="+identityToken);
-
-        expect(response.status).toBe(201);
-        expect(response.body.name).toEqual(newUser.name)
-        expect(response.body.email).toEqual(newUser.email)
-        expect(response.body.id).toBeGreaterThan(0)
-        id = response.body.id
-        console.log("from create: " + id)
-    });
-    it('should be able to get existing user by id', async () => {
+    it('should GET user by id', async () => {
         const response: request.Response = await request(app.callback())
             .get('/api/users/' + id)
             .set("Cookie", "ti="+identityToken);
         
         expect(response.status).toBe(200);
-        expect(response.body.name).toEqual(newUser.name)
-        expect(response.body.email).toEqual(newUser.email)
+        expect(response.body.name).toEqual(token.name)
+        expect(response.body.email).toEqual(token.email)
         expect(response.body.id).toEqual(id)
-        console.log("from get: " + response.body.id)
     });
-    it('should be able to delete the newly created user', async () => {
+    it('should DELETE the new user', async () => {
         const response: request.Response = await request(app.callback())
-            .delete('/api/testusers/' + id)
+            .delete('/api/user')
             .set("Cookie", "ti="+identityToken);
         
         expect(response.status).toBe(204);
-    });
-    it('should not be able to get delete a user which doesnt exist', async () => {
-        const response: request.Response = await request(app.callback())
-            .delete('/api/users/' + 0)
+
+        // expect there to no longer exist a user with the deleted id
+        const res: request.Response = await request(app.callback())
+            .get('/api/users/' + id)
             .set("Cookie", "ti="+identityToken);
         
-        expect(response.status).toBe(400);
+        expect(res.status).toBe(400);
+        expect(res.body.errors.error).toContain("doesn't exist in the db");
     });
 
 });
