@@ -143,8 +143,7 @@ export class UserController {
             ctx.body = { errors: {error: "We could not get the licks shared with you right now"}}
         }
     }
-
-
+  
     // Save this as template for later
     /**
      * PUT /users/{id}

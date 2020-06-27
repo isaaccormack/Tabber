@@ -7,6 +7,8 @@ import * as dbModule from "../../src/database/dbclient";
 
 var jwtDecode = require('jwt-decode');
 
+var jwtDecode = require('jwt-decode');
+
 import * as keys from "../../keys/keys.json";
 const identityToken = keys.YOUR_TEST_IDENTITY_TOKEN;
 
