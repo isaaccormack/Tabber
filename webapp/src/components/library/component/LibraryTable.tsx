@@ -25,7 +25,7 @@ export interface LibraryTableProps {
 export default function LibraryTable(props: LibraryTableProps) {
     const [selected, setSelected] = useState<LickInterface>()
     const history = useHistory();
-    if (!props.licks) {
+    if (!props.licks || props.licks.length < 1) {
         return (<div>We could not find any licks associated with your account.</div>)
     }
 
@@ -40,7 +40,6 @@ export default function LibraryTable(props: LibraryTableProps) {
             <div className="scrollable">
                 {renderTableBody(props.licks, selected, setSelected, history)}
             </div>
-
         </Container>
     )
 }
@@ -53,11 +52,14 @@ function renderTableBody(data: LickInterface[],
     if (data) {
         return data.map((lick: LickInterface, i: number) => {
             let playing = "";
-            if (lick === selected) playing = "playing"
+            if (selected && lick.id === selected.id) playing = "playing"
             return (
-                <Row className="table-row" id={playing} onClick={()=> {
-                    setSelected(lick);
-                }}>
+                <Row className="table-row"
+                     id={playing}
+                     key={i}
+                     onClick={()=> {
+                        setSelected(lick);
+                     }}>
                     <Col xs={5}>{lick.name}</Col>
                     <Col xs={2}>{lick.audioLength}</Col>
                     <Col xs={3}>{lick.dateUploaded}</Col>

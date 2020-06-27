@@ -14,18 +14,19 @@ export default function LibraryPage() {
         fetch("/api/user/licks", {
             method: "GET"
         }).then((response) => {
-            if (response.status !== 200) { //remove this later
-                setLicks(sampleLicks);
-            } else {
-                // need to integrate with api later
+            if (response.status === 200) { //remove this later
+                return response.json();
             }
-
+        }).then((responseJson) => {
+            if (responseJson) {
+                setLicks(responseJson);
+            }
         })
     }
 
     useEffect(() => {
         getLibrary();
-    }, [getLibrary])
+    }, [])
 
     //TODO: add music player next to library title
     return (
