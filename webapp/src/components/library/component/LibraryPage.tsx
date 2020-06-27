@@ -23,11 +23,11 @@ export default function LibraryPage() {
         })
     }
 
-
     useEffect(() => {
         getLibrary();
     }, [getLibrary])
 
+    //TODO: add music player next to library title
     return (
         <div>
             <div className="library-table-wrapper centered">
@@ -36,7 +36,6 @@ export default function LibraryPage() {
                 </div>
                 <LibraryTable licks={licks} />
             </div>
-
         </div>
     )
 }
