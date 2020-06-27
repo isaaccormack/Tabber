@@ -19,7 +19,11 @@ export default function MusicPlayer() {
 
     if (audioPath) {
         return (
-            <ReactPlayer url={audioPath} controls={true}></ReactPlayer>
+            <ReactPlayer url={audioPath}
+                         controls={true}
+                         config={{file: {forceAudio: true}}}
+                         height={"50px"}
+            />
         )
     } else {
         history.push("/create")
