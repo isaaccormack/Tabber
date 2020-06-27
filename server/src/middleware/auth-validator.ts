@@ -1,8 +1,9 @@
-import OAuth2Controller from "../controller/oauth2";
-import {User} from "../entity/user";
-import { LoginTicket } from "google-auth-library";
 import {Context} from "koa";
+import { LoginTicket } from "google-auth-library";
+
+import OAuth2Controller from "../controller/oauth2";
 import { UserController } from "../controller/user";
+import {User} from "../entity/user";
 
 export const authValidator = async (ctx: Context, next: Function) => {
     const idToken = ctx.cookies.get("ti");

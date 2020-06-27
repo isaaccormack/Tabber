@@ -12,10 +12,8 @@ export default function(props: any) {
     const authorizationCode = qs.parse(props.location.search)["code"]
     useEffect(() => {
         fetch("/api/token?code="+authorizationCode)
-            // deconstructed ti ticket is returned
             .then(response => response.json())
             .then(data => {
-                console.log(data)
                 dispatch(UpdateUser(data.given_name));
             })
         history.push("/")

@@ -1,4 +1,4 @@
-import { createSandbox, SinonSandbox, spy } from 'sinon'
+import { createSandbox, SinonSandbox } from 'sinon'
 import * as typeorm from 'typeorm'
 import {createMockContext } from '@shopify/jest-koa-mocks';
 import { User } from "../../src/entity/user";
@@ -155,7 +155,7 @@ describe('Unit test: User endpoint', () => {
 
         const ctx = createMockContext();
         ctx.state = state;
-        await UserController.deleteAuthenticatedUser(ctx)
+        await UserController.deleteAuthUser(ctx)
 
         expect(ctx.status).toBe(204)
     })

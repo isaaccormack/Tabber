@@ -4,7 +4,8 @@ import Koa from 'koa'
 
 import * as appModule from "../../src/index";
 import * as dbModule from "../../src/database/dbclient";
-import { mockUser } from '../interfaces/mockUser';
+
+var jwtDecode = require('jwt-decode');
 
 var jwtDecode = require('jwt-decode');
 
@@ -15,6 +16,14 @@ if (!identityToken) {
     console.log("MUST INSERT IDENTITY TOKEN FOR INTEGRATION TESTING");
 }
 
+
+/**
+ * User tests.
+ * 
+ * Testing of basic functionality in the user endpoint.
+ * 
+ * LAST MODIFIED: June 21 2020
+ */
 describe('Integration: Users endpoint', () => {
     let app: Koa
     let db: Connection
@@ -23,7 +32,6 @@ describe('Integration: Users endpoint', () => {
     const token = jwtDecode(identityToken);
 
     beforeAll((done) => {
-        // can wire in testdb if so inclined
         dbModule.initDb((err, conn) => {
             if (err) throw err
 
@@ -44,24 +52,13 @@ describe('Integration: Users endpoint', () => {
         const response: request.Response = await request(app.callback())
         .get('/api/user')
         .set("Cookie", "ti="+identityToken);
-
-        expect(response.status).toBe(200);
-        expect(response.body.name).toEqual(token.name)
-        expect(response.body.given_name).toEqual(token.given_name)
-        expect(response.body.family_name).toEqual(token.family_name)
-        expect(response.body.email).toEqual(token.email)
-        expect(response.body.id).toBeGreaterThan(0)
-
-        id = response.body.id;
-    });
-    it('should GET user by id', async () => {
-        const response: request.Response = await request(app.callback())
-            .get('/api/users/' + id)
-            .set("Cookie", "ti="+identityToken);
         
         expect(response.status).toBe(200);
+        expect(response.body.name).toEqual(token.name)
         expect(response.body.email).toEqual(token.email)
-        expect(response.body.id).toEqual(id)
+        expect(response.body.id).toBeGreaterThan(0)
+        
+        id = response.body.id;
     });
     it('should GET all users', async () => {
         const response: request.Response = await request(app.callback())
@@ -71,6 +68,16 @@ describe('Integration: Users endpoint', () => {
         expect(response.status).toBe(200);
         // since at least the account created above exists
         expect(response.body.length).toBeGreaterThan(0)
+    });
+    it('should GET user by id', async () => {
+        const response: request.Response = await request(app.callback())
+            .get('/api/users/' + id)
+            .set("Cookie", "ti="+identityToken);
+        
+        expect(response.status).toBe(200);
+        expect(response.body.name).toEqual(token.name)
+        expect(response.body.email).toEqual(token.email)
+        expect(response.body.id).toEqual(id)
     });
     it('should DELETE the new user', async () => {
         const response: request.Response = await request(app.callback())

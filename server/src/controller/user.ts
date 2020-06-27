@@ -1,8 +1,7 @@
 import { validate, ValidationError } from "class-validator";
-import { getManager, Repository, Not, Equal, Like } from "typeorm";
 import { Context } from "koa";
 import { TokenPayload } from "google-auth-library";
-
+import { getManager, Repository, Not, Equal } from "typeorm";
 
 import { User } from "../entity/user";
 
@@ -11,9 +10,10 @@ export class UserController {
     /**
      * GET /user
      * 
-     * Get data on the currently authenticated user.
+     * Get state of the currently authenticated user. Should not assume that owned licks
+     * or licks shared with me are loaded in the users state.
      */
-    public static async getAuthenticatedUser(ctx: Context): Promise<void> {
+    public static async getAuthUser(ctx: Context): Promise<void> {
 
         // If this route is reached then its guaranteed that ctx's state
         // has been set with the currently authenticated user
@@ -78,6 +78,7 @@ export class UserController {
         ctx.body = users;
     }
 
+    // For development
     /**
      * GET /users/{id}
      * 
@@ -100,9 +101,49 @@ export class UserController {
             ctx.status = 400;
             ctx.body = { errors: {error: "The user you are trying to retrieve doesn't exist in the db"}}
         }
-
     }
 
+    /**
+     * GET /api/user/licks
+     *
+     * Get all auth users licks by user id.
+     */
+    public static async getAuthUserLicks(ctx: Context): Promise<void> {
+
+        const userRepository: Repository<User> = getManager().getRepository(User);
+        // will always return the currently authenticated user
+        const authUser: User = await userRepository.findOne({ where: {id: (ctx.state.user.id)}, relations: ['licks']});
+
+        if (authUser) {
+            ctx.status = 200; // OK
+            ctx.body = authUser.licks;
+        } else {
+            ctx.status = 500; // SERVER ERROR
+            ctx.body = { errors: {error: "We could not get your licks right now"}}
+        }
+        
+    }
+
+    /**
+     * GET /api/user/licks-shared-with-me
+     *
+     * Get all licks shared with the auth user by user id.
+     */
+    public static async getLicksSharedWithAuthUser(ctx: Context): Promise<void> {
+
+        const userRepository: Repository<User> = getManager().getRepository(User);
+        // will always return the currently authenticated user
+        const authUser: User= await userRepository.findOne({ where: {id: (ctx.state.user.id)}, relations: ['sharedWithMe']});
+        
+        if (authUser) {
+            ctx.status = 200; // OK
+            ctx.body = authUser.sharedWithMe;
+        } else {
+            ctx.status = 500; // SERVER ERROR
+            ctx.body = { errors: {error: "We could not get the licks shared with you right now"}}
+        }
+    }
+  
     // Save this as template for later
     /**
      * PUT /users/{id}
@@ -151,7 +192,7 @@ export class UserController {
      * 
      * Delete the currently authenticated user.
      */
-    public static async deleteAuthenticatedUser(ctx: Context): Promise<void> {
+    public static async deleteAuthUser(ctx: Context): Promise<void> {
 
         const userRepository = getManager().getRepository(User);
 
@@ -168,5 +209,11 @@ export class UserController {
             }
             ctx.status = 204;
         }
+    }
+
+    // HELPERS - used in lick controller right now, can refactor this out to a service layer later
+    public static async getUserByID(id: number): Promise<User> {
+        const userRepository = getManager().getRepository(User);
+        return await userRepository.findOne(id);
     }
 }
