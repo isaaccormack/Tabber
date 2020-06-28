@@ -6,6 +6,7 @@ import moment from 'moment';
 import "./LibraryTable.css";
 import {useHistory} from "react-router";
 import {LickInterface} from "../../common/lick/interface/LickInterface";
+import SharedIcon from "../../common/navigation/icons/shared.svg";
 
 export interface LibraryTableProps {
     licks: LickInterface[]
@@ -25,10 +26,9 @@ export default function LibraryTable(props: LibraryTableProps) {
     return (
         <Container fluid className="library-table">
             <Row className="table-header">
-                <Col xs={5}>&nbsp;&nbsp;&nbsp;&nbsp;Name</Col>
+                <Col xs={6}>&nbsp;&nbsp;&nbsp;&nbsp;Name</Col>
                 <Col xs={2}>Length</Col>
                 <Col xs={3}>Created Date</Col>
-                <Col xs={2}>Actions</Col>
             </Row>
             <div className="scrollable">
                 {renderTableBody(props.licks, selected, setSelected, history)}
@@ -44,6 +44,7 @@ function renderTableBody(data: LickInterface[],
 
     if (data) {
         return data.map((lick: LickInterface, i: number) => {
+
             let playing = "";
             if (selected && lick.id === selected.id) playing = "playing"
             let date = moment(lick.dateUploaded).format("hh:mma MMM DD YYYY");
@@ -54,7 +55,7 @@ function renderTableBody(data: LickInterface[],
                      onClick={() => {
                          history.push("/edit/"+lick.id)
                      }}>
-                    <Col xs={5}>
+                    <Col xs={6}>
                         <span className="play-button"
                               onClick={(e)=> {
                                   e.stopPropagation();
@@ -66,9 +67,10 @@ function renderTableBody(data: LickInterface[],
                     </Col>
                     <Col xs={2}>{lick.audioLength}</Col>
                     <Col xs={3}>{date}</Col>
-                    <Col xs={2}
-                         className="edit-button">
-                        Edit
+                    <Col xs={1}>
+                        {lick.sharedWith.length > 0 &&
+                        <img src={SharedIcon} className="icon" alt="shared" />
+                        }
                     </Col>
                 </Row>
             )

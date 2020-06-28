@@ -112,7 +112,7 @@ export class UserController {
 
         const userRepository: Repository<User> = getManager().getRepository(User);
         // will always return the currently authenticated user
-        const authUser: User = await userRepository.findOne({ where: {id: (ctx.state.user.id)}, relations: ['licks']});
+        const authUser: User = await userRepository.findOne({ where: {id: (ctx.state.user.id)}, relations: ['licks', 'licks.sharedWith']});
 
         if (authUser) {
             ctx.status = 200; // OK
