@@ -3,8 +3,8 @@ import React from "react";
 
 import "./ShareForm.css";
 import {useForm} from "react-hook-form";
-import {LickInterface} from "../../lick/interface/LickInterface";
-import {UserInterface} from "../../user/interface/UserInterface";
+import {LickInterface} from "../../common/lick/interface/LickInterface";
+import {UserInterface} from "../../common/user/interface/UserInterface";
 
 interface ShareFormProps {
     lick: LickInterface

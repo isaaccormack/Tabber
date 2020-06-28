@@ -28,6 +28,14 @@
     color: lightgreen !important;
 }
 
+.play-button {
+    color: lightgreen;
+}
+
+.play-button:hover {
+    color: var(--green);
+}
+
 .edit-button:hover {
     color: var(--pink) !important;
 }

@@ -1,25 +1,26 @@
+import {useHistory} from "react-router";
 import {Col, Container, Row} from "react-bootstrap";
 import React from "react";
-import {History} from 'history';
-import moment from 'moment';
-
-import "./LibraryTable.css";
-import {useHistory} from "react-router";
 import {LickInterface} from "../../common/lick/interface/LickInterface";
+import {History} from "history";
+import moment from "moment";
 
-export interface LibraryTableProps {
+import "../../library/component/LibraryTable.css";
+import "./SharedTable.css";
+
+export interface SharedTableProps {
     licks: LickInterface[]
     selected?: LickInterface
     setSelected: Function
 }
 
-export default function LibraryTable(props: LibraryTableProps) {
+export default function SharedTable(props: SharedTableProps) {
     const selected = props.selected;
     const setSelected = props.setSelected;
 
     const history = useHistory();
     if (!props.licks || props.licks.length < 1) {
-        return (<div>We could not find any licks associated with your account.</div>)
+        return (<div>We could not find any licks shared with your account.</div>)
     }
 
     return (
@@ -28,7 +29,7 @@ export default function LibraryTable(props: LibraryTableProps) {
                 <Col xs={5}>&nbsp;&nbsp;&nbsp;&nbsp;Name</Col>
                 <Col xs={2}>Length</Col>
                 <Col xs={3}>Created Date</Col>
-                <Col xs={2}>Actions</Col>
+                <Col xs={2}>Owner</Col>
             </Row>
             <div className="scrollable">
                 {renderTableBody(props.licks, selected, setSelected, history)}
@@ -51,27 +52,19 @@ function renderTableBody(data: LickInterface[],
                 <Row className="table-row"
                      id={playing}
                      key={i}
-                     onClick={()=> {
-                        setSelected(lick);
-                     }}>
+                     >
                     <Col xs={5}>
                         <span className="play-button"
                               onClick={()=> {
-                                  setSelected(lick);
-                              }}>
+                                setSelected(lick);
+                            }}>
                             &#9658;
                         </span>
                         &nbsp;&nbsp;{lick.name}
                     </Col>
                     <Col xs={2}>{lick.audioLength}</Col>
                     <Col xs={3}>{date}</Col>
-                    <Col xs={2}
-                         className="edit-button"
-                         onClick={() => {
-                                 history.push("/edit/"+lick.id)
-                             }}>
-                        Edit
-                    </Col>
+                    <Col xs={2}>{lick.owner.name}</Col>
                 </Row>
             )
         })

@@ -3,8 +3,7 @@ import {useForm} from "react-hook-form";
 
 import "./EditForm.css";
 import {Col, Container, Row} from "react-bootstrap";
-import {Lick} from "../../../../../../server/src/entity/lick";
-import {LickInterface} from "../../lick/interface/LickInterface";
+import {LickInterface} from "../../common/lick/interface/LickInterface";
 
 interface EditFormProps {
     formTitle: string

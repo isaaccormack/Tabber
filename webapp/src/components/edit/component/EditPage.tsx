@@ -2,12 +2,12 @@ import {Col, Container, Row} from "react-bootstrap";
 import EditForm from "./EditForm";
 import React, {useEffect, useState} from "react";
 import {match} from "react-router";
-import {getAudioFile} from "../../musicplayer/component/MusicHelper";
-import LibraryPlayer from "../../musicplayer/component/LibraryPlayer";
+import {getAudioFile} from "../../common/musicplayer/component/MusicHelper";
+import LibraryPlayer from "../../common/musicplayer/component/LibraryPlayer";
 
 import "./EditPage.css";
 import ShareForm from "./ShareForm";
-import {LickInterface} from "../../lick/interface/LickInterface";
+import {LickInterface} from "../../common/lick/interface/LickInterface";
 
 interface EditFormProps {
     id: string
