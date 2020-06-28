@@ -1,9 +1,6 @@
 import React, {useEffect, useState} from "react";
-import {Container, Table} from "react-bootstrap";
-import {sampleLicks} from "./tmp-sample-data";
 import "./LibraryPage.css";
-import LibraryTable, {LibraryTableProps, LickInterface} from "./LibraryTable";
-import MusicPlayer from "../../common/musicplayer/component/MusicPlayer";
+import LibraryTable, {LickInterface} from "./LibraryTable";
 import LibraryPlayer from "../../common/musicplayer/component/LibraryPlayer";
 import {getAudioFile} from "../../common/musicplayer/component/MusicHelper";
 

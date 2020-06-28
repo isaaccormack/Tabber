@@ -1,9 +1,6 @@
-import React, {useEffect, useState} from "react";
+import React from "react";
 import ReactPlayer from "react-player";
-import {useSelector} from "react-redux";
-import RootState from "../../../../store/root-state";
-import {useHistory} from "react-router";
-import {LickInterface} from "../../../library/component/LibraryTable";
+
 
 export interface LibraryPlayerProps {
     selectedFile?: Blob
