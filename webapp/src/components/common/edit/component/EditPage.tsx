@@ -1,6 +1,5 @@
 import {Col, Container, Row} from "react-bootstrap";
 import EditForm from "./EditForm";
-import {LickInterface} from "../../../library/component/LibraryTable";
 import React, {useEffect, useState} from "react";
 import {match} from "react-router";
 import {getAudioFile} from "../../musicplayer/component/MusicHelper";
@@ -8,6 +7,7 @@ import LibraryPlayer from "../../musicplayer/component/LibraryPlayer";
 
 import "./EditPage.css";
 import ShareForm from "./ShareForm";
+import {LickInterface} from "../../lick/interface/LickInterface";
 
 interface EditFormProps {
     id: string
@@ -33,7 +33,6 @@ export default function EditPage(props: match<EditFormProps>) {
             })
             .then((responseJson) => {
                 setLick(responseJson);
-                console.log(responseJson);
             });
     }, [])
 
@@ -45,7 +44,6 @@ export default function EditPage(props: match<EditFormProps>) {
         }
     }, [lick])
 
-
     if (lick) {
         return (
             <Container fluid className="edit-page-wrapper">
@@ -56,13 +54,21 @@ export default function EditPage(props: match<EditFormProps>) {
                     <Col xs={6}>
                         <EditForm formTitle={lick.name} onSubmit={upload} defaultLick={lick}/>
                     </Col>
-                    <Col xs={3}>
-                        <ShareForm />
+                    <Col xs={5}>
+                        <ShareForm lick={lick} setLick={setLick}/>
                     </Col>
                 </Row>
                 <br />
                 <Row>
                     <LibraryPlayer audioFile={lickAudio} />
+                </Row>
+                <br />
+                <Row>
+                    <Col xs={11}>
+                        <textarea className="lick-tab-field">
+                            This is where the lick will go. It's blue because white was burning my eyeballs
+                        </textarea>
+                    </Col>
                 </Row>
             </Container>
         )

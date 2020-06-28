@@ -1,7 +1,7 @@
 @import "../../../../mainstyles.css";
 
 .edit-form-wrapper {
-    min-width: 700px;
+    min-width: 100%;
     border: var(--red) solid 1px;
     border-radius: 10px;
     padding: 10px;

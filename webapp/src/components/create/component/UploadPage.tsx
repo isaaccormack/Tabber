@@ -8,7 +8,7 @@ import {Button} from "react-bootstrap";
 import RootState from "../../../store/root-state";
 import UploadPageLoadingAnimation from "./UploadPageLoadingAnimation";
 import {ClearFileState} from "../actions/FileActions";
-import {LickInterface} from "../../library/component/LibraryTable";
+import {LickInterface} from "../../common/lick/interface/LickInterface";
 
 export default function UploadPage() {
     const [responseStatus, setResponseStatus] = useState(0)
@@ -31,13 +31,13 @@ export default function UploadPage() {
                 body: form
             }).then((response) => {
                 setResponseStatus(response.status);
+                if (response.status !== 201) throw Error("upload failed");
                 return response.json()
             }).then((responseJson: LickInterface) => {
                 dispatch(ClearFileState());
                 history.push("/edit/" + responseJson.id);
             }).catch((error) => {
                 console.log(error);
-                setResponseStatus(418);
             })
         }
     }, [file, metadata, history]);

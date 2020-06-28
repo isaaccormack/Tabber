@@ -1,10 +1,10 @@
-import React from "react";
+import React, {useState} from "react";
 import {useForm} from "react-hook-form";
 
 import "./EditForm.css";
 import {Col, Container, Row} from "react-bootstrap";
-import {LickInterface} from "../../../library/component/LibraryTable";
 import {Lick} from "../../../../../../server/src/entity/lick";
+import {LickInterface} from "../../lick/interface/LickInterface";
 
 interface EditFormProps {
     formTitle: string
@@ -20,7 +20,15 @@ export interface LickFormInterface {
 }
 
 export default function EditForm(props: EditFormProps) {
-    const { register, handleSubmit, errors } = useForm();
+    const { register, handleSubmit, errors } = useForm({
+        defaultValues: {
+            lickname: props.defaultLick?.name,
+            lickdescription: props.defaultLick?.description,
+            licktuning: props.defaultLick?.tuning
+        }
+    });
+
+
     const onSubmit = (data: any) => props.onSubmit(data);
 
 
@@ -32,11 +40,10 @@ export default function EditForm(props: EditFormProps) {
             <br />
             <form onSubmit={handleSubmit(onSubmit)}>
                <Row className="form-row">
-                   <Col className="form-label" xs={2}>Lick Name</Col>
+                   <Col className="form-label" lg={2}>Lick Name</Col>
                    <Col>
                        <input className="form-input"
                               name="lickname"
-                              value={props.defaultLick?.name}
                               ref={register({ required: true })}
                               autoFocus
                        />
@@ -45,30 +52,29 @@ export default function EditForm(props: EditFormProps) {
                    </Col>
                </Row>
                <Row className="form-row">
-                   <Col className="form-label" xs={2}>Description</Col>
+                   <Col className="form-label" lg={2}>Description</Col>
                    <Col>
                        <input className="form-input"
                               name="lickdescription"
-                              value={props.defaultLick?.description}
                               ref={register}
                        />
                    </Col>
                </Row>
                <Row className="form-row">
-                   <Col className="form-label" xs={2}>Tuning</Col>
+                   <Col className="form-label" lg={2}>Tuning</Col>
                    <Col>
                        <input className="form-input"
                               name="licktuning form-input"
-                              value={props.defaultLick?.tuning}
                               ref={register}
                        />
                    </Col>
                </Row>
                <Row className="form-row">
-                   <Col className="form-label" xs={2}>Public</Col>
+                   <Col className="form-label" lg={2}>Public</Col>
                    <Col>
                        <input type="checkbox"
                               name="lickpublic"
+                              defaultChecked={props.defaultLick?.isPublic}
                               ref={register} />
                    </Col>
                </Row>

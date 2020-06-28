@@ -4,3 +4,9 @@
     font-family: var(--font-body);
     margin-bottom: 10px;
 }
+
+.lick-tab-field {
+    width: 100%;
+    background-color: lightsteelblue;
+    height: 300px;
+}
