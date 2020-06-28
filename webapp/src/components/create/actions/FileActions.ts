@@ -1,4 +1,4 @@
-import {DELETE_FILE, FileActionTypes, UPDATE_FILE, UPDATE_METADATA} from "./FileActiontypes";
+import {CLEAR_FILESTATE, DELETE_FILE, FileActionTypes, UPDATE_FILE, UPDATE_METADATA} from "./FileActiontypes";
 import {LickFormInterface} from "../../common/edit/component/EditForm";
 
 export function UpdateFile(file: FileList) {
@@ -18,5 +18,11 @@ export function UpdateMetaData(data: LickFormInterface) {
 export function DeleteFile(): FileActionTypes {
     return {
         type: DELETE_FILE
+    }
+}
+
+export function ClearFileState() {
+    return {
+        type: CLEAR_FILESTATE
     }
 }

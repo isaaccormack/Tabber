@@ -46,7 +46,7 @@ export default function LibraryPage() {
                     My Library
                 </div>
                 <div>
-                    <LibraryPlayer selectedFile={selectedFile} />
+                    <LibraryPlayer audioFile={selectedFile} />
                 </div>
                 <br />
                 <LibraryTable licks={licks} selected={selected} setSelected={setSelected}/>

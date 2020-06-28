@@ -3,7 +3,7 @@ import ReactPlayer from "react-player";
 
 
 export interface LibraryPlayerProps {
-    selectedFile?: Blob
+    audioFile?: Blob
 }
 
 
@@ -11,14 +11,14 @@ export interface LibraryPlayerProps {
 export default function LibraryPlayer(props?: LibraryPlayerProps) {
 
 
-    if (!props || !props.selectedFile) {
+    if (!props || !props.audioFile) {
         return (<div>Please select a lick to player</div>);
     }
 
     let audioPath = "";
-    if (props.selectedFile) {
+    if (props.audioFile) {
         try {
-            audioPath = URL.createObjectURL(props.selectedFile);
+            audioPath = URL.createObjectURL(props.audioFile);
         } catch {
             return (<div>Failed to play the lick</div>);
         }

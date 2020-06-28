@@ -16,6 +16,7 @@ import AccountPage from "./components/account/component/AccountPage";
 import LibraryPage from "./components/library/component/LibraryPage";
 import SharedPage from "./components/shared/component/SharedPage";
 import CreateDescriptionPage from "./components/create/component/CreateDescriptionPage";
+import EditPage from "./components/common/edit/component/EditPage";
 
 function App() {
 
@@ -33,6 +34,7 @@ function App() {
                         <Route exact path="/create" component={CreatePage} />
                         <Route exact path="/account" component={AccountPage} />
                         <Route exact path="/library" component={LibraryPage} />
+                        <Route exact path="/edit/:id" component={EditPage} />
                         <Route exact path="/shared" component={SharedPage} />
                         <Route exact path="/oauth" component={OAuth2Page} />
                         <Route exact path="/login" component={LoginPage} />

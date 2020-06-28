@@ -1,0 +1,6 @@
+
+.edit-title {
+    font-size: var(--font-size-8);
+    font-family: var(--font-body);
+    margin-bottom: 10px;
+}
