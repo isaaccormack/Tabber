@@ -52,11 +52,15 @@ function renderTableBody(data: LickInterface[],
                 <Row className="table-row"
                      id={playing}
                      key={i}
+                     onClick={() => {
+                         history.push("/view/"+lick.id)
+                     }}
                      >
                     <Col xs={5}>
                         <span className="play-button"
-                              onClick={()=> {
-                                setSelected(lick);
+                              onClick={(e)=> {
+                                  e.stopPropagation();
+                                  setSelected(lick);
                             }}>
                             &#9658;
                         </span>

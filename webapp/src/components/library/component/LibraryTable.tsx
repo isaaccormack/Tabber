@@ -51,12 +51,13 @@ function renderTableBody(data: LickInterface[],
                 <Row className="table-row"
                      id={playing}
                      key={i}
-                     onClick={()=> {
-                        setSelected(lick);
+                     onClick={() => {
+                         history.push("/edit/"+lick.id)
                      }}>
                     <Col xs={5}>
                         <span className="play-button"
-                              onClick={()=> {
+                              onClick={(e)=> {
+                                  e.stopPropagation();
                                   setSelected(lick);
                               }}>
                             &#9658;
@@ -66,10 +67,7 @@ function renderTableBody(data: LickInterface[],
                     <Col xs={2}>{lick.audioLength}</Col>
                     <Col xs={3}>{date}</Col>
                     <Col xs={2}
-                         className="edit-button"
-                         onClick={() => {
-                                 history.push("/edit/"+lick.id)
-                             }}>
+                         className="edit-button">
                         Edit
                     </Col>
                 </Row>
