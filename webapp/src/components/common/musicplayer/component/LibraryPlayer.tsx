@@ -11,8 +11,9 @@ export interface LibraryPlayerProps {
 export default function LibraryPlayer(props?: LibraryPlayerProps) {
 
 
+
     if (!props || !props.audioFile) {
-        return (<div>Please select a lick to player</div>);
+        return (<div>Please select a lick to play</div>);
     }
 
     let audioPath = "";
