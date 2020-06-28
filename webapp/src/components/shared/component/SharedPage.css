@@ -1,0 +1,12 @@
+@import "../../../mainstyles.css";
+
+.shared-title {
+    font-size: var(--font-size-8);
+    font-family: var(--font-body);
+    margin-bottom: 10px;
+}
+
+.shared-table-wrapper {
+    width: 60%;
+    height: 60vh;
+}

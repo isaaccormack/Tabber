@@ -11,5 +11,5 @@ export interface LickInterface {
     tuning: string
     isPublic: boolean,
     sharedWith: UserInterface[]
-    owner: any
+    owner: UserInterface
 }

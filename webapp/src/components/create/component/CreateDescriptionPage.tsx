@@ -1,5 +1,5 @@
 import React from "react";
-import EditForm, {LickFormInterface} from "../../common/edit/component/EditForm";
+import EditForm, {LickFormInterface} from "../../edit/component/EditForm";
 import MusicPlayer from "../../common/musicplayer/component/MusicPlayer";
 import {useDispatch} from "react-redux";
 import {UpdateMetaData} from "../actions/FileActions";

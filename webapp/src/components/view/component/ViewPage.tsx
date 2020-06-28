@@ -1,25 +1,19 @@
-import {Col, Container, Row} from "react-bootstrap";
-import EditForm from "./EditForm";
-import React, {useEffect, useState} from "react";
 import {match} from "react-router";
-import {getAudioFile} from "../../musicplayer/component/MusicHelper";
-import LibraryPlayer from "../../musicplayer/component/LibraryPlayer";
+import React, {useEffect, useState} from "react";
+import {LickInterface} from "../../common/lick/interface/LickInterface";
+import {getAudioFile} from "../../common/musicplayer/component/MusicHelper";
+import {Col, Container, Row} from "react-bootstrap";
+import EditForm from "../../edit/component/EditForm";
+import ShareForm from "../../edit/component/ShareForm";
+import LibraryPlayer from "../../common/musicplayer/component/LibraryPlayer";
 
-import "./EditPage.css";
-import ShareForm from "./ShareForm";
-import {LickInterface} from "../../lick/interface/LickInterface";
-
-interface EditFormProps {
+interface ViewPageProps {
     id: string
 }
 
-export default function EditPage(props: match<EditFormProps>) {
+export default function ViewPage(props: match<ViewPageProps>) {
     const [lick, setLick] = useState<LickInterface>();
     const [lickAudio, setLickAudio] = useState<Blob>()
-
-    const upload = () => {
-
-    }
 
     useEffect(() => {
         // @ts-ignore //For some reason my IDE says that match doesn't exist but it does
@@ -48,14 +42,11 @@ export default function EditPage(props: match<EditFormProps>) {
         return (
             <Container fluid className="edit-page-wrapper">
                 <div className="edit-title">
-                    Edit Your Lick
+                    Preview
                 </div>
                 <Row>
                     <Col xs={6}>
-                        <EditForm formTitle={lick.name} onSubmit={upload} defaultLick={lick}/>
-                    </Col>
-                    <Col xs={5}>
-                        <ShareForm lick={lick} setLick={setLick}/>
+                        <EditForm formTitle={lick.name + " - " + lick.owner.name} onSubmit={() => {}} defaultLick={lick} disabled={true}/>
                     </Col>
                 </Row>
                 <br />
@@ -76,7 +67,7 @@ export default function EditPage(props: match<EditFormProps>) {
         return (
             <div>
                 <div className="edit-title">
-                Edit Your Lick
+                    Edit Your Lick
                 </div>
             </div>
         )
