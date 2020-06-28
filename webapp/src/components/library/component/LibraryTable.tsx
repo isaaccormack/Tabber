@@ -1,6 +1,7 @@
 import {Col, Container, Row} from "react-bootstrap";
 import React, {useState} from "react";
 import { History } from 'history';
+import moment from 'moment';
 
 import "./LibraryTable.css";
 import {useHistory} from "react-router";
@@ -20,10 +21,14 @@ export interface LickInterface {
 
 export interface LibraryTableProps {
     licks: LickInterface[]
+    selected?: LickInterface
+    setSelected: Function
 }
 
 export default function LibraryTable(props: LibraryTableProps) {
-    const [selected, setSelected] = useState<LickInterface>()
+    const selected = props.selected;
+    const setSelected = props.setSelected;
+
     const history = useHistory();
     if (!props.licks || props.licks.length < 1) {
         return (<div>We could not find any licks associated with your account.</div>)
@@ -53,6 +58,7 @@ function renderTableBody(data: LickInterface[],
         return data.map((lick: LickInterface, i: number) => {
             let playing = "";
             if (selected && lick.id === selected.id) playing = "playing"
+            let date = moment(lick.dateUploaded).format("hh:mma MMM DD YYYY");
             return (
                 <Row className="table-row"
                      id={playing}
@@ -62,7 +68,7 @@ function renderTableBody(data: LickInterface[],
                      }}>
                     <Col xs={5}>{lick.name}</Col>
                     <Col xs={2}>{lick.audioLength}</Col>
-                    <Col xs={3}>{lick.dateUploaded}</Col>
+                    <Col xs={3}>{date}</Col>
                     <Col xs={2}
                          className="edit-button"
                          onClick={() => {

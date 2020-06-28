@@ -3,12 +3,17 @@ import {Container, Table} from "react-bootstrap";
 import {sampleLicks} from "./tmp-sample-data";
 import "./LibraryPage.css";
 import LibraryTable, {LibraryTableProps, LickInterface} from "./LibraryTable";
+import MusicPlayer from "../../common/musicplayer/component/MusicPlayer";
+import LibraryPlayer from "../../common/musicplayer/component/LibraryPlayer";
+import {getAudioFile} from "../../common/musicplayer/component/MusicHelper";
 
 
 
 export default function LibraryPage() {
 
     const [licks, setLicks] = useState<LickInterface[]>([])
+    const [selected, setSelected] = useState<LickInterface>()
+    const [selectedFile, setSelectedFile] = useState<Blob>()
 
     function getLibrary() {
         fetch("/api/user/licks", {
@@ -28,6 +33,14 @@ export default function LibraryPage() {
         getLibrary();
     }, [])
 
+    useEffect(() => {
+        if (selected) {
+            getAudioFile(selected).then((file: Blob) => {
+                setSelectedFile(file);
+            })
+        }
+    }, [selected])
+
     //TODO: add music player next to library title
     return (
         <div>
@@ -35,7 +48,11 @@ export default function LibraryPage() {
                 <div className="library-title">
                     My Library
                 </div>
-                <LibraryTable licks={licks} />
+                <div>
+                    <LibraryPlayer selectedFile={selectedFile} />
+                </div>
+                <br />
+                <LibraryTable licks={licks} selected={selected} setSelected={setSelected}/>
             </div>
         </div>
     )
