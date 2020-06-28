@@ -20,7 +20,7 @@ export class LickController {
     public static async createLick(ctx: any): Promise<void> {
 
         const audioFile = ctx.request.files.file;
-        
+
         const err: Error = LickController.validateAudioFile(audioFile); 
         if (err) {
             ctx.status = 400; // BAD REQUEST
@@ -323,7 +323,7 @@ export class LickController {
         if (audioFile.size > 25000000) return new Error("Error: File must be less than 25MB.")
         
         // decide on supported types later
-        const supportedTypes: string[] = ["audio/mpeg", "audio/wave", "audio/mp4"]
+        const supportedTypes: string[] = ["audio/mpeg", "audio/wave", "audio/wav", "audio/mp4"]
         if (!supportedTypes.includes(audioFile.type)) return new Error("Error: Mimetype is not supported.")
         
         return null;

@@ -1,5 +1,5 @@
 import FileStateInterface from "./FileStateInterface";
-import {DELETE_FILE, UPDATE_FILE, UPDATE_METADATA} from "../actions/FileActiontypes";
+import {CLEAR_FILESTATE, DELETE_FILE, UPDATE_FILE, UPDATE_METADATA} from "../actions/FileActiontypes";
 
 const initialState: FileStateInterface = {
     file: undefined,
@@ -17,6 +17,8 @@ export default function FileReducer(
             return {...state, metadata: action.payload};
         case DELETE_FILE:
             return {...state, file: undefined};
+        case CLEAR_FILESTATE:
+            return {undefined};
         default:
             return {...state};
     }

@@ -11,15 +11,15 @@ export default function CreateDescriptionPage() {
     const history = useHistory();
 
     const submitForm = (data: LickFormInterface) => {
-        console.log(data);
         dispatch(UpdateMetaData(data));
         history.push("/create/upload");
     }
 
    return(
-        <div className={"centered"}>
-        <EditForm onSubmit={submitForm}/>
-        <MusicPlayer/>
+        <div className="centered">
+            <EditForm onSubmit={submitForm} formTitle="Tell us about your lick!"/>
+            <br />
+            <MusicPlayer/>
         </div>
     )
 }

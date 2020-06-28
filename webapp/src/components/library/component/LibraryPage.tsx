@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from "react";
 import "./LibraryPage.css";
-import LibraryTable, {LickInterface} from "./LibraryTable";
+import LibraryTable from "./LibraryTable";
 import LibraryPlayer from "../../common/musicplayer/component/LibraryPlayer";
 import {getAudioFile} from "../../common/musicplayer/component/MusicHelper";
+import {LickInterface} from "../../common/lick/interface/LickInterface";
 
 
 
@@ -45,7 +46,7 @@ export default function LibraryPage() {
                     My Library
                 </div>
                 <div>
-                    <LibraryPlayer selectedFile={selectedFile} />
+                    <LibraryPlayer audioFile={selectedFile} />
                 </div>
                 <br />
                 <LibraryTable licks={licks} selected={selected} setSelected={setSelected}/>

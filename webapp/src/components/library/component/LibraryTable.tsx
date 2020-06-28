@@ -1,23 +1,11 @@
 import {Col, Container, Row} from "react-bootstrap";
 import React from "react";
-import { History } from 'history';
+import {History} from 'history';
 import moment from 'moment';
 
 import "./LibraryTable.css";
 import {useHistory} from "react-router";
-
-export interface LickInterface {
-    id: number
-    name: string
-    description: string
-    dateUploaded: string
-    audioFileLocation: string
-    audioLength: number
-    tab: string,
-    tuning: string
-    isPublic: boolean,
-    owner: any
-}
+import {LickInterface} from "../../common/lick/interface/LickInterface";
 
 export interface LibraryTableProps {
     licks: LickInterface[]
