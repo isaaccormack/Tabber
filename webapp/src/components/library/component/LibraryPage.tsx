@@ -38,7 +38,6 @@ export default function LibraryPage() {
         }
     }, [selected])
 
-    //TODO: add music player next to library title
     return (
         <div>
             <div className="library-table-wrapper centered">
