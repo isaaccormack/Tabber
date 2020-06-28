@@ -78,9 +78,11 @@ export default function EditForm(props: EditFormProps) {
                        </Col>
                    </Row>
                    <br />
-                   <Row className="form-row">
-                       <input type="submit" />
-                   </Row>
+                    {!props.disabled &&
+                    <Row className="form-row">
+                        <input type="submit"/>
+                    </Row>
+                    }
                 </fieldset>
             </form>
         </Container>
