@@ -1,11 +1,17 @@
 
 import UserStateInterface from "./UserStateInterface";
-import {DELETE_USER, UPDATE_USER} from "../actions/UserActionTypes";
+import {DELETE_USER, UPDATE_USER, UserActionTypes} from "../actions/UserActionTypes";
+import {UserInterface} from "../interface/UserInterface";
+
+interface UserActionInterface {
+    type: string,
+    payload: UserInterface | undefined
+}
 
 const initialState: UserStateInterface = {user: undefined}
 export default function UserReducer(
     state: UserStateInterface = initialState,
-    action: any) {
+    action: UserActionInterface) {
 
     switch(action.type) {
         case UPDATE_USER:

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -14,6 +14,7 @@ import CreateIcon from "../icons/create.svg";
 import LibraryIcon from "../icons/library.svg";
 import SharedIcon from "../icons/shared.svg";
 import LogoutIcon from "../icons/logout.svg";
+import {UserInterface} from "../../user/interface/UserInterface";
 
 interface SelectorInterface {
     accountSelector: string
@@ -35,17 +36,34 @@ export default function Navigation() {
         librarySelector,
         sharedSelector } = getSelector(pathname);
 
-    let loginText = useSelector((state: RootState) => state.userState.user);
-    if (loginText === undefined) loginText = "";
-
-    // Simple redirection to login page, needs to be changed use cookies later
-    if (pathname !== "/login" && loginText === "") history.push("/login");
-
     const logout = () => {
         dispatch(DeleteUser());
         history.push("/login");
         localStorage.clear();
     }
+
+    // If No user
+    const user: UserInterface | undefined = useSelector((state: RootState) => state.userState.user);
+    if (pathname !== "/login" && !user) history.push("/login");
+
+    //check on initial load
+    if (user && user.identityToken) {
+        if (Math.floor(Date.now() / 1000) > user.identityToken.exp) {
+            logout();
+        }
+    }
+
+    useEffect(() => {
+        // Checks if token has expired every 30 seconds
+        const timer = setInterval(() => {
+            if (user && user.identityToken) {
+                if (Math.floor(Date.now() / 1000) > user.identityToken.exp) {
+                    logout();
+                }
+            }
+        }, 30000);
+        return () => clearInterval(timer);
+    }, [])
 
     return (
         <Container>

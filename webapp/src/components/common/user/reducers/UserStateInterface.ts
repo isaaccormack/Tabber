@@ -1,3 +1,5 @@
+import {UserInterface} from "../interface/UserInterface";
+
 export default interface UserStateInterface {
-    user: string | undefined
+    user: UserInterface | undefined
 }

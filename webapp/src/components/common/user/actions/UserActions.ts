@@ -1,7 +1,8 @@
 import {DELETE_USER, UPDATE_USER, UserActionTypes} from "./UserActionTypes";
+import {UserInterface} from "../interface/UserInterface";
 
 
-export function UpdateUser(user: string): UserActionTypes {
+export function UpdateUser(user: UserInterface): UserActionTypes {
     return {
         type: UPDATE_USER,
         payload: user
