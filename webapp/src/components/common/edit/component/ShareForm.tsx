@@ -37,20 +37,22 @@ export default function ShareForm(props: ShareFormProps) {
             })
     }
 
-    const submitUnshare = (id: string) => {
-        fetch("/api/lick/unshare/" + props.lick.id, {
-            method: "PUT",
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({userID: id})
-        })
-            .then((response) => {
-                return response.json();
+    const submitUnshare = (id: string | undefined) => {
+        if (id) {
+            fetch("/api/lick/unshare/" + props.lick.id, {
+                method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({userID: id})
             })
-            .then((responseJson) => {
-                props.setLick(responseJson);
-            })
+                .then((response) => {
+                    return response.json();
+                })
+                .then((responseJson) => {
+                    props.setLick(responseJson);
+                })
+        }
     }
 
     const renderSharedUsers = (lick: LickInterface) => {
