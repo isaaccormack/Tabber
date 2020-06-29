@@ -9,7 +9,7 @@ import * as util from 'util';
 import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
 import { UserController } from './user'
-import tabLick from "./tab-tmp";
+import tabLick from "../tabbing/tab-tmp";
 
 export class LickController {
 
@@ -22,7 +22,7 @@ export class LickController {
 
         const audioFile = ctx.request.files.file;
 
-        const err: Error = LickController.validateAudioFile(audioFile); 
+        const err: Error = LickController.validateAudioFile(audioFile);
         if (err) {
             ctx.status = 400; // BAD REQUEST
             ctx.body = { errors: {error: err.message}}
@@ -41,15 +41,15 @@ export class LickController {
         lickToBeSaved.isPublic = body.isPublic == "true" ? true : false;
         lickToBeSaved.owner = ctx.state.user;
         lickToBeSaved.sharedWith = []; // TODO - list of shared with users will be sent from client upon lick creation
-        
+
         const errors: ValidationError[] = await validate(lickToBeSaved);
-        
+
         if (errors.length > 0) {
             ctx.status = 400; // BAD REQUEST
             ctx.body = { errors };
             return
-        } 
-        
+        }
+
         try {
             lickToBeSaved.audioFileLocation = await LickController.saveAudioFile(audioFile);
         } catch (err) {
@@ -57,7 +57,7 @@ export class LickController {
             ctx.body = { errors: {error: err.message}}
             return
         }
-        
+
         try {
             lickToBeSaved.audioLength = await audioDuration.getAudioDurationInSeconds(lickToBeSaved.audioFileLocation)
         } catch (err) {
@@ -200,7 +200,7 @@ export class LickController {
 
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
         const lickToBeUnshared: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['owner', 'sharedWith']});
-        
+
         if (!lickToBeUnshared) {
             ctx.status = 400; // BAD REQUEST
             ctx.body = { errors: {error: "Error: The lick you are trying to unshare doesn't exist."}}
@@ -245,7 +245,7 @@ export class LickController {
 
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
         const lickToUnfollow: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['sharedWith']});
-        
+
         if (!lickToUnfollow) {
             ctx.status = 400; // BAD REQUEST
             ctx.body = { errors: {error: "Error: The lick you are trying to unfollow doesn't exist."}}
@@ -319,15 +319,15 @@ export class LickController {
      * HELPERS
      */
     private static validateAudioFile(audioFile: any): Error | null {
-    
+
         if (!audioFile) return new Error("Error: No file sent.")
         if (!audioFile.size) return new Error("Error: File is empty.")
         if (audioFile.size > 25000000) return new Error("Error: File must be less than 25MB.")
-        
+
         // decide on supported types later
         const supportedTypes: string[] = ["audio/mpeg", "audio/wave", "audio/wav", "audio/mp4"]
         if (!supportedTypes.includes(audioFile.type)) return new Error("Error: Mimetype is not supported.")
-        
+
         return null;
     }
 
@@ -335,10 +335,10 @@ export class LickController {
 
         // save the audio to a file with a randomly generated uuid
         const audioFileLocation: string = "uploads/" + uuidv4();
-        
+
         const readStream = fs.createReadStream(audioFile.path);
         const writeStream = fs.createWriteStream(audioFileLocation);
-        
+
         // asynchronously read from sent file and write to local file
         for await (const chunk of readStream) {
             const err: Error = await writeStream.write(chunk);
@@ -379,5 +379,5 @@ export class LickController {
     private static async unlinkAsync(filePath: string) : Promise<NodeJS.ErrnoException> {
         const deleteFile = util.promisify(fs.unlink);
         return await deleteFile(filePath);
-    } 
+    }
 }
