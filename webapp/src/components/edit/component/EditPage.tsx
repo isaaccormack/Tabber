@@ -34,7 +34,8 @@ export default function EditPage(props: match<EditFormProps>) {
             .then((responseJson) => {
                 setLick(responseJson);
             });
-    }, [])
+        // @ts-ignore //again, typescript says match doesn't exist
+    }, [props.match.params.id])
 
     useEffect(() => {
         if (lick) {

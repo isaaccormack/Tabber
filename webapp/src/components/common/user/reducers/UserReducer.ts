@@ -1,6 +1,6 @@
 
 import UserStateInterface from "./UserStateInterface";
-import {DELETE_USER, UPDATE_USER, UserActionTypes} from "../actions/UserActionTypes";
+import {DELETE_USER, UPDATE_USER} from "../actions/UserActionTypes";
 import {UserInterface} from "../interface/UserInterface";
 
 interface UserActionInterface {

@@ -93,7 +93,9 @@ export default function ShareForm(props: ShareFormProps) {
                                name="userToShare"
                                placeholder="enter user"
                                ref={register({
-                                   validate: user => user != props.lick.owner.id
+                                   validate: (user: string) => {
+                                       return user !== String(props.lick.owner.id);
+                                   }
                                })}
                         />
                         {errors.userToShare &&

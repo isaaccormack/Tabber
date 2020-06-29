@@ -4,7 +4,6 @@ import {LickInterface} from "../../common/lick/interface/LickInterface";
 import {getAudioFile} from "../../common/musicplayer/component/MusicHelper";
 import {Col, Container, Row} from "react-bootstrap";
 import EditForm from "../../edit/component/EditForm";
-import ShareForm from "../../edit/component/ShareForm";
 import LibraryPlayer from "../../common/musicplayer/component/LibraryPlayer";
 
 interface ViewPageProps {
@@ -28,7 +27,8 @@ export default function ViewPage(props: match<ViewPageProps>) {
             .then((responseJson) => {
                 setLick(responseJson);
             });
-    }, [])
+        // @ts-ignore //again, typescript says match doesn't exist
+    }, [props.match.params.id])
 
     useEffect(() => {
         if (lick) {
