@@ -5,15 +5,15 @@ import TabData from "./data/tabData";
 // The purpose of this file is to provide a way of converting AudioData into tabbable
 // data, i.e. strings + frets + timings
 
-export function calculateTab(audioData: AudioData): TabData {
+export async function calculateTab(audioData: AudioData): Promise<TabData> {
 
     const tabData: TabData = new TabData();
 
-    tabData.timeLength = audioData.time.length;
+    tabData.totalSamples = audioData.time.length;
     tabData.peakIndices = getLocalMaximaIndices(audioData.peakAmplitude);
-    tabData.peakIndices = tabData.peakIndices.map(idx => audioData.frequency[idx]);
-    tabData.peakNotes = tabData.peakFrequencies.map(freq => getNote(freq));
-    tabData.peakStringsAndFrets = tabData.peakNotes.map(note => getStringAndFret(note));
+    const peakFrequencies = tabData.peakIndices.map(idx => audioData.frequency[idx]);
+    const peakNotes = peakFrequencies.map(freq => getNote(freq));
+    tabData.peakStringsAndFrets = peakNotes.map(note => getStringAndFret(note));
 
     return tabData;
 }

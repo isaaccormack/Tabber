@@ -2,9 +2,7 @@ import StringFret from "./stringFret";
 
 /* Utility class for storing tabbable data, i.e. strings + frets + timings */
 export default class TabData {
-    timeLength: number;
-    peakIndices: number[];
-    peakFrequencies: number[];
-    peakNotes: number[];
-    peakStringsAndFrets: StringFret[];
+    totalSamples: number;
+    peakIndices: number[]; // which (0-indexed) sample indices had notes played at them
+    peakStringsAndFrets: StringFret[]; // what were the notes at those indices
 }

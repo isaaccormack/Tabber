@@ -5,6 +5,8 @@ import TabData from "./data/tabData";
 // i.e. strings + frets + timings, into an ASCII string.
 
 // Dear lord this is garbage. In desperate need of cleaning up the interface and comments.
+// Also in desperate need of rewriting and fixing. Plus the TabData class probably needs
+// to be improved to make this make a lot more sense.
 
 // Generates an actual tab string from a sequence of indices which correspond to the times
 // at which notes were played, and a sequence of notes (in terms of strings & frets) that
@@ -14,12 +16,12 @@ import TabData from "./data/tabData";
 // per second, and if they are, it's not clear that we'd be able to tab that correctly anyway.
 // The earliest note in each 10-sample interval takes priority if multiple are found.
 // NOTE: this fails for frets >= 10 (i.e. it can't deal with 2-digit frets - if one is
-//       encountered, it will push the rest of the line to the right by one character.
+//       encountered, it will push the rest of the line to the right by one character.)
 // NOTE: this generates the whole thing as one single line, so each guitar-string is separated
 //       by a newline only at the end. this means that for long tabs, displaying it will get ugly.
-export function generateTabString(tabData: TabData): string {
+export async function generateTabString(tabData: TabData): Promise<string> {
     // TODO: clean up
-    const totalSamples: number = tabData.timeLength;
+    const totalSamples: number = tabData.totalSamples;
     const peakIndices: number[] = tabData.peakIndices;
     const peakStringsAndFrets: StringFret[] = tabData.peakStringsAndFrets;
 

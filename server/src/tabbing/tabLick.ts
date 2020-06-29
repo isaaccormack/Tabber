@@ -24,15 +24,15 @@ export default async function tabLick(lick: Lick): Promise<string> {
         const idx: number = tabData.peakIndices[i];
         const str: string = audioData.time[idx] + "\t"
                             + idx + "\t"
-                            + tabData.peakFrequencies[i] + "\t\t"
+                            + audioData.frequency[idx] + "\t\t"
                             + audioData.peakAmplitude[idx] + "\t"
-                            + tabData.peakNotes[i] + "\t"
+                            + Math.round(69 + 12 * Math.log2(audioData.frequency[idx] / 440.0))  + "\t" // print note
                             + tabData.peakStringsAndFrets[i].stringIdx + "\t"
                             + tabData.peakStringsAndFrets[i].fret;
         console.log(str);
     }
 
-    const tab: string = generateTabString(tabData);
+    const tab: string = await generateTabString(tabData);
     console.log("tab:");
     console.log(tab);
 
