@@ -9,7 +9,7 @@ import * as util from 'util';
 import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
 import { UserController } from './user'
-import tabLick from "../tabbing/tab-tmp";
+import tabLick from "../tabbing/tabLick";
 
 export class LickController {
 
