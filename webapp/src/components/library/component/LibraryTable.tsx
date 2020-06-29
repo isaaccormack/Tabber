@@ -46,8 +46,8 @@ function renderTableBody(data: LickInterface[],
         return data.map((lick: LickInterface, i: number) => {
             let playing = "";
             if (selected && lick.id === selected.id) playing = "playing"
-            let date = moment(lick.dateUploaded).format("hh:mma MMM DD YYYY");
-            const audioLength = lick.audioLength === 60? "1:00" : "0:" + String(lick.audioLength);
+            let date = moment(lick.dateUploaded).format("h:mma MMM D YYYY");
+            const audioLength = lick.audioLength === 60? "1:00" : lick.audioLength < 10 ? "0:0" + String(lick.audioLength) : "0:" + String(lick.audioLength);
 
             return (
                 <Row className="table-row"
