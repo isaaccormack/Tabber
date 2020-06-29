@@ -1,9 +1,9 @@
 import { Lick } from "../entity/lick";
 import { getAudioData } from "./processAudio";
 import { generateTabString } from "./tabStringHandler";
-import AudioData from "./audioData";
+import AudioData from "./data/audioData";
 import { calculateTab } from "./tabCalculator";
-import TabData from "./tabData";
+import TabData from "./data/tabData";
 
 // The purpose of this file is to provide a single interface to convert lick -> tab string.
 export default async function tabLick(lick: Lick): Promise<string> {

@@ -1,5 +1,5 @@
 import { Lick } from "../entity/lick";
-import AudioData from "./audioData";
+import AudioData from "./data/audioData";
 
 import shell from "shelljs";
 import path from "path";

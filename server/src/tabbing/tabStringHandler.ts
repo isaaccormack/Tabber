@@ -1,5 +1,5 @@
-import StringFret from "./stringFret";
-import TabData from "./tabData";
+import StringFret from "./data/stringFret";
+import TabData from "./data/tabData";
 
 // The purpose of this file is to provide a way of converting some form of tabbing data,
 // i.e. strings + frets + timings, into an ASCII string.

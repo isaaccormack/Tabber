@@ -1,6 +1,6 @@
-import AudioData from "./audioData";
-import StringFret from "./stringFret";
-import TabData from "./tabData";
+import AudioData from "./data/audioData";
+import StringFret from "./data/stringFret";
+import TabData from "./data/tabData";
 
 // The purpose of this file is to provide a way of converting AudioData into tabbable
 // data, i.e. strings + frets + timings
