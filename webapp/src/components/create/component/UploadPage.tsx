@@ -40,7 +40,7 @@ export default function UploadPage() {
                 console.log(error);
             })
         }
-    }, [file, metadata, history]);
+    }, [file, metadata, history, dispatch]);
 
     useEffect(()=> {
         sendFile();

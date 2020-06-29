@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useCallback, useEffect} from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -36,11 +36,11 @@ export default function Navigation() {
         librarySelector,
         sharedSelector } = getSelector(pathname);
 
-    const logout = () => {
+    const logout = useCallback(() => {
         dispatch(DeleteUser());
         history.push("/login");
         localStorage.clear();
-    }
+    }, [dispatch, history])
 
     // If No user
     const user: UserInterface | undefined = useSelector((state: RootState) => state.userState.user);
@@ -63,7 +63,7 @@ export default function Navigation() {
             }
         }, 30000);
         return () => clearInterval(timer);
-    }, [])
+    }, [logout, user])
 
     return (
         <Container>

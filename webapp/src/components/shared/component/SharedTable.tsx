@@ -48,6 +48,8 @@ function renderTableBody(data: LickInterface[],
             let playing = "";
             if (selected && lick.id === selected.id) playing = "playing"
             let date = moment(lick.dateUploaded).format("hh:mma MMM DD YYYY");
+            const audioLength = lick.audioLength === 60? "1:00" : "0:" + String(lick.audioLength);
+
             return (
                 <Row className="table-row"
                      id={playing}
@@ -66,7 +68,7 @@ function renderTableBody(data: LickInterface[],
                         </span>
                         &nbsp;&nbsp;{lick.name}
                     </Col>
-                    <Col xs={2}>{lick.audioLength}</Col>
+                    <Col xs={2}>{audioLength}</Col>
                     <Col xs={3}>{date}</Col>
                     <Col xs={2}>{lick.owner.name}</Col>
                 </Row>
