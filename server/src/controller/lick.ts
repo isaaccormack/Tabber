@@ -74,6 +74,16 @@ export class LickController {
             return
         }
 
+        try {
+            // Generate tab for lick after other data is handled
+            lickToBeSaved.tab = await tabLick(lickToBeSaved);
+        } catch (err) {
+            await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
+            ctx.status = 500; // SERVER ERROR
+            ctx.body = { errors: {error: "Error: Failed to tab audio file."}};
+            return;
+        }
+
         // finally, save the lick to the database
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
         const lick: Lick | undefined = await lickRepository.save(lickToBeSaved);
@@ -85,7 +95,6 @@ export class LickController {
             ctx.status = 201; // CREATED
             ctx.body = lick;
         }
-        await tabLick(lick); // TODO: use node worker
     }
 
     /**

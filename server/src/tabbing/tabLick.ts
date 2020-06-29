@@ -6,11 +6,16 @@ import { calculateTab } from "./tabCalculator";
 import TabData from "./data/tabData";
 
 // The purpose of this file is to provide a single interface to convert lick -> tab string.
-export default async function tabLick(lick: Lick): Promise<string> {
-    console.log("tabbing lick with crepe.");
-    console.log(lick);
+// Should only ever require the "audioFileLocation", "tuning", and "audioLength" lick members to be valid;
+// at present only requires the "audioFileLocation" lick member to be valid.
 
-    const audioData: AudioData = await getAudioData(lick);
+export default async function tabLick(lick: Lick): Promise<string> {
+    const audioFilePath: string = lick.audioFileLocation;
+
+    console.log("tabbing lick with crepe.");
+    console.log(audioFilePath);
+
+    const audioData: AudioData = await getAudioData(audioFilePath);
 
     console.log("final audio data:");
     console.log(audioData);

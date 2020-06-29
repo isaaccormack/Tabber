@@ -1,4 +1,3 @@
-import { Lick } from "../entity/lick";
 import AudioData from "./data/audioData";
 
 import shell from "shelljs";
@@ -11,9 +10,9 @@ const readFile = util.promisify(fs.readFile); // necessary because async readFil
 
 const crepeOutputDirectory: string = "crepe";
 
-export async function getAudioData(lick: Lick): Promise<AudioData> {
-    const crepeData: any = await getCrepeOutput(lick);
-    const amplitudeData: any = await getAmplitudeData(lick);
+export async function getAudioData(lickAudioFilePath: string): Promise<AudioData> {
+    const crepeData: any = await getCrepeOutput(lickAudioFilePath);
+    const amplitudeData: any = await getAmplitudeData(lickAudioFilePath);
 
     // Workaround for off-by-one errors in current implementation. This way we can fix that issue
     // independently of working with the data. However, once we fix the issues with the amplitude
@@ -45,7 +44,7 @@ export async function getAudioData(lick: Lick): Promise<AudioData> {
     return data;
 }
 
-async function getCrepeOutput(lick: Lick): Promise<any> {
+async function getCrepeOutput(lickPath: string): Promise<any> {
     // this is absurdly sketchy and insecure. ideally we would transfer crepe
     // to javascript (which is very doable - we just need to use tensorflow for javascript and
     // convert a bunch of scipy/numpy code into js; most crucially we need to find an effective
@@ -53,15 +52,15 @@ async function getCrepeOutput(lick: Lick): Promise<any> {
     // inputting into the tensorflow model).
     console.log("running crepe model");
 
-    const execString: string = "crepe " + "--output " + crepeOutputDirectory + " --model-capacity full " + lick.audioFileLocation;
+    const execString: string = "crepe " + "--output " + crepeOutputDirectory + " --model-capacity full " + lickPath;
 
     console.log("executing string:");
     console.log(execString);
 
     await shell.exec(execString);
 
-    console.log("crepe output complete for " + lick.audioFileLocation);
-    const crepeFilePath: string = crepeOutputDirectory + "/" + path.basename(lick.audioFileLocation)
+    console.log("crepe output complete for " + lickPath);
+    const crepeFilePath: string = crepeOutputDirectory + "/" + path.basename(lickPath)
 
     console.log("output file: " + crepeFilePath);
     const results: any = await getCrepeCsvData(crepeFilePath);
@@ -69,22 +68,22 @@ async function getCrepeOutput(lick: Lick): Promise<any> {
     return results;
 }
 
-async function getAmplitudeData(lick: Lick): Promise<any> {
+async function getAmplitudeData(lickPath: string): Promise<any> {
     // this is pretty sketchy and slow. ideally we transfer this to pure js, or at the very least
     // merge it with crepe's data analysis so that we don't spawn multiple shells and read the file
     // multiple times. if we could find an effective .wav file reader, then this would all be thoroughly
     // doable. (or, if we could modify crepe to take mp3 or other data formats, then a reader for those)
     console.log("getting wav data");
 
-    const amplitudeFilePath: string = crepeOutputDirectory + "/" + path.basename(lick.audioFileLocation) + "-amplitude.csv";
-    const execString: string = "python3 crepe/read_wav.py --input " + lick.audioFileLocation + " --output " + amplitudeFilePath;
+    const amplitudeFilePath: string = crepeOutputDirectory + "/" + path.basename(lickPath) + "-amplitude.csv";
+    const execString: string = "python3 crepe/read_wav.py --input " + lickPath + " --output " + amplitudeFilePath;
 
     console.log("executing string:");
     console.log(execString);
 
     await shell.exec(execString);
 
-    console.log("amplitude data extraction complete for " + lick.audioFileLocation);
+    console.log("amplitude data extraction complete for " + lickPath);
 
     console.log("output file: " + amplitudeFilePath);
     const results: any = await getAmplitudeCsvData(amplitudeFilePath);
