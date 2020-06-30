@@ -5,6 +5,8 @@ import { Context } from "koa";
 import { getManager, Repository } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 import * as util from 'util';
+const ffmpeg = require('fluent-ffmpeg');
+
 
 import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
@@ -48,7 +50,7 @@ export class LickController {
             ctx.body = { errors };
             return
         } 
-        
+            
         try {
             lickToBeSaved.audioFileLocation = await LickController.saveAudioFile(audioFile);
         } catch (err) {
@@ -56,16 +58,17 @@ export class LickController {
             ctx.body = { errors: {error: err.message}}
             return
         }
-        
+
         try {
             lickToBeSaved.audioLength = await audioDuration.getAudioDurationInSeconds(lickToBeSaved.audioFileLocation)
         } catch (err) {
+            console.log(err)
             await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
             ctx.status = 500; // SERVER ERROR
             ctx.body = { errors: {error: "Error: Cant get length of audio file."}}
             return
         }
-
+        
         if (lickToBeSaved.audioLength > 60) { // lick is too long
             await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
             ctx.status = 400; // BAD REQUEST
@@ -323,31 +326,56 @@ export class LickController {
         if (audioFile.size > 25000000) return new Error("Error: File must be less than 25MB.")
         
         // decide on supported types later
-        const supportedTypes: string[] = ["audio/mpeg", "audio/wave", "audio/wav", "audio/mp4"]
+        const supportedTypes: string[] = ["audio/mpeg", "audio/webm", "audio/wave", "audio/wav", "audio/mp4"]
         if (!supportedTypes.includes(audioFile.type)) return new Error("Error: Mimetype is not supported.")
         
         return null;
+    }
+
+    // promisify file conversion and saving of file
+    private static async saveWebmFileAsWav(audioFileLocation: string, audioFile: any): Promise<void>{
+        return new Promise((res, rej) => {
+            ffmpeg(audioFile.path)
+            .toFormat('wav')
+            .on('error', (err) => {
+                rej(err);
+            })
+            .on('end', () => {
+                res();
+            })
+            .save(audioFileLocation);
+        })
     }
 
     private static async saveAudioFile(audioFile: any): Promise<string> {
 
         // save the audio to a file with a randomly generated uuid
         const audioFileLocation: string = "uploads/" + uuidv4();
-        
-        const readStream = fs.createReadStream(audioFile.path);
-        const writeStream = fs.createWriteStream(audioFileLocation);
-        
-        // asynchronously read from sent file and write to local file
-        for await (const chunk of readStream) {
-            const err: Error = await writeStream.write(chunk);
-            if (err) {
-                // try to delete file created, if any was
-                try {
-                    await fs.unlink(audioFileLocation);
-                } catch (e) {
-                    // let this fail silently, already in the midst of an exception
-                }
+
+        // for files which were recorded
+        if (audioFile.type === "audio/webm") {
+            try {
+                await LickController.saveWebmFileAsWav(audioFileLocation, audioFile);
+            } catch (err) {
                 throw err;
+            }
+        } else { 
+
+            const readStream = fs.createReadStream(audioFile.path);
+            const writeStream = fs.createWriteStream(audioFileLocation);
+            
+            // asynchronously read from sent file and write to local file
+            for await (const chunk of readStream) {
+                const err: Error = await writeStream.write(chunk);
+                if (err) {
+                    // try to delete file created, if any was
+                    try {
+                        await fs.unlink(audioFileLocation);
+                    } catch (e) {
+                        // let this fail silently, already in the midst of an exception
+                    }
+                    throw err;
+                }
             }
         }
 

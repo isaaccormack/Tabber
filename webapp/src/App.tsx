@@ -16,9 +16,10 @@ import NotFoundPage from "./components/notfound/component/NotFoundPage";
 import AccountPage from "./components/account/component/AccountPage";
 import LibraryPage from "./components/library/component/LibraryPage";
 import SharedPage from "./components/shared/component/SharedPage";
+import CreateDescriptionPage from "./components/create/component/CreateDescriptionPage";
 import EditPage from "./components/edit/component/EditPage";
 import ViewPage from "./components/view/component/ViewPage";
-import RecordPage from './components/create/component/RecordPage';
+import DummyRecordPage from './components/create/component/DummyRecordPage';
 function App() {
     return (
       <Provider store={rootStore}>
@@ -31,7 +32,7 @@ function App() {
                     <Switch>
                         <Route exact path="/create/upload" component={UploadPage} />
                         <Route exact path="/create/description" component={CreateDescriptionPage} />
-                        <Route exact path="/create/record" component={RecordPage} />
+                        <Route exact path="/create/record" component={DummyRecordPage} />
                         <Route exact path="/create/trim" component={TrimPage} />
                         <Route exact path="/create" component={CreatePage} />
                         <Route exact path="/account" component={AccountPage} />

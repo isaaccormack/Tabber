@@ -34,34 +34,46 @@ export default function RecordPage() {
     };
 
 
-    const startTimer = (num: number) => {
-        setTimer(num);
-        if (num > 0) {
-            const timeout = setTimeout(() => {startTimer(num - 1)}, 1000);
-            setTimerTimeout(timeout);
-        } else {
-            setRec(false);
-        }
-    }
+    // const startTimer = (num: number) => {
+    //     setTimer(num);
+    //     if (num > 0) {
+    //         const timeout = setTimeout(() => {startTimer(num - 1)}, 1000);
+    //         setTimerTimeout(timeout);
+    //     } else {
+    //         setRec(false);
+    //     }
+    // }
 
-    const startCountDown = (num: number) => {
-        setNumber(num);
-        if (num > 0) {
-            const timeout = setTimeout(() => {startCountDown(num - 1)}, 1000);
-            setCountdownTimeout(timeout);
-        } else {
-            setRec(true);
-            startTimer(timer);
-        }
-    }
+    // const startCountDown = (num: number) => {
+    //     setNumber(num);
+    //     if (num > 0) {
+    //         const timeout = setTimeout(() => {startCountDown(num - 1)}, 1000);
+    //         setCountdownTimeout(timeout);
+    //     } else {
+    //         setRec(true);
+    //         startTimer(timer);
+    //     }
+    // }
+
+    // useEffect(()=> {
+    //     startCountDown(number);
+
+    //     return () => {console.log("i left")}
+    //     // return () => {setRec(false);  } // use hard refresh only if user exits in the middle of recording -> use prompt to filter this
+    // }, []); // empty dependencies so startCountDown() is only called once
+
+    // useEffect(()=> {
+    //     return () => { clearTimeout(timerTimeout); clearTimeout(countdownTimeout); }
+    // }, [timerTimeout, countdownTimeout]);
 
     useEffect(()=> {
-        startCountDown(number);
-    }, []); // empty dependencies so startCountDown() is only called once
-
+        setRec(true);
+        console.log(rec)
+        // return () => { setRec(false); }
+    }, []);
     useEffect(()=> {
-        return () => { clearTimeout(timerTimeout); clearTimeout(countdownTimeout); }
-    }, [timerTimeout, countdownTimeout]);
+        return () => { setRec(false); }
+    });
 
     const onData = (recordedBlob: any) => {
         // console.log('chunk of real-time data is: ', recordedBlob);
@@ -79,19 +91,30 @@ export default function RecordPage() {
         history.push('/create/trim');
     }
 
-
     return (
         <Container className="recordPageBody centered">
             {/* make this display as modal */}
-            <Prompt
+            {/* <Prompt
                 when={rec}
                 message={() => {
                     console.log("leaving");
                     setRec(false); // intercept request to leave page to disable react-mic
+                    // window.location.reload();
                     return true; // always allow user to navigate back
                 }}
-            />
-            {!rec
+            /> */}
+            {/* <Prompt
+                message={(location, action) => {
+                    if (action === 'POP') {
+                    console.log("Backing up...")
+                    }
+
+                    return location.pathname.startsWith("/app")
+                    ? true
+                    : `Are you sure you want to go to ${location.pathname}?`
+                }}
+                /> */}
+            {/* {!rec
                 ? <Row className="loading centered">
                     {number}
                 </Row>
@@ -109,7 +132,7 @@ export default function RecordPage() {
                         </label>
                     </Row>
                 </div>
-            }
+            } */}
             <Row>
                 <ReactMic
                     record={rec}
@@ -117,7 +140,7 @@ export default function RecordPage() {
                     onStop={onStop}
                     onData={onData}
                     strokeColor="#000000"
-                    backgroundColor="#FF4081" />
+                backgroundColor="#FF4081" /> 
             </Row>
         </Container>
     )

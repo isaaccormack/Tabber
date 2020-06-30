@@ -21,7 +21,7 @@ export default function UploadPage() {
         setResponseStatus(0);
         if (file && metadata) {
             const form = new FormData();
-            form.append("file", file[0]);
+            form.append("file", file);
             form.append("name", metadata.lickname);
             form.append("tuning", metadata.licktuning);
             form.append("description", metadata.lickdescription)
