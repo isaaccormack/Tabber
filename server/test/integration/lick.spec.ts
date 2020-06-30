@@ -55,7 +55,7 @@ describe('Integration: Licks endpoint', () => {
     /**
      * Test createLick()
      */
-    it('should be able to POST new lick with valid data', async () => {
+    it('should be able to POST new lick with valid data and mp3 file', async () => {
         const audioFilePath = testDataDir + '700KB_mp3_file_27s.mp3';
         const tokenParams = jwtDecode(identityToken);
 
@@ -185,21 +185,22 @@ describe('Integration: Licks endpoint', () => {
     /**
      * Test getLickAudio()
      */
+    // This test doesn't work anymore since the server converts the file to .wav, so it wont match the original file
     // WARNING - this test will console.log diff of the files which produces a LOT of output when it fail
-    it('should be able to GET private lick audio by id as owner', async () => {
-        const audioFilePath = testDataDir + '700KB_mp3_file_27s.mp3';
+    // it('should be able to GET private lick audio by id as owner', async () => {
+    //     const audioFilePath = testDataDir + '700KB_mp3_file_27s.mp3';
 
-        const readFile = util.promisify(fs.readFile);
-        const expectedFile = await readFile(audioFilePath)
+    //     const readFile = util.promisify(fs.readFile);
+    //     const expectedFile = await readFile(audioFilePath)
 
-        const response: request.Response = await request(app.callback())
-            .get('/api/licks/audio/' + privateID)
-            .set("Cookie", "ti="+identityToken);
+    //     const response: request.Response = await request(app.callback())
+    //         .get('/api/licks/audio/' + privateID)
+    //         .set("Cookie", "ti="+identityToken);
 
-            expect(response.status).toBe(200);
-            // compare contents of buffer
-            expect(response.body).toStrictEqual(expectedFile);
-    });
+    //         expect(response.status).toBe(200);
+    //         // compare contents of buffer
+    //         expect(response.body).toStrictEqual(expectedFile);
+    // });
     it('should NOT be able to GET lick audio which doesnt exist', async () => {
         const response: request.Response = await request(app.callback())
         .get('/api/licks/audio/' + 0) // no lick with id = 0
@@ -257,8 +258,8 @@ describe('Integration: Licks endpoint', () => {
     /**
      * Test createLick()
      */
-    // This test is pretty much just for set up
-    it('should be able to POST new public lick with valid data', async () => {
+    // this test is pretty much just for set up
+    it('should be able to POST new public lick with valid data and mp3 file', async () => {
         const audioFilePath = testDataDir + '700KB_mp3_file_27s.mp3';
 
         const tokenParams = jwtDecode(identityToken);

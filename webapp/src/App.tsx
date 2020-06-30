@@ -3,13 +3,11 @@ import Container from "react-bootstrap/Container";
 import {Provider} from "react-redux";
 import {Redirect, Route, Switch} from "react-router";
 
-
 import './App.css';
 import rootStore from "./store";
 import Navigation from "./components/common/navigation/component/Navigation";
 import OAuth2Page from "./components/oauth/component/OAuth2Page";
 import CreatePage from "./components/create/component/CreatePage";
-import TrimPage from "./components/create/component/TrimPage";
 import LoginPage from "./components/login/component/LoginPage";
 import UploadPage from "./components/create/component/UploadPage";
 import NotFoundPage from "./components/notfound/component/NotFoundPage";
@@ -19,7 +17,9 @@ import SharedPage from "./components/shared/component/SharedPage";
 import CreateDescriptionPage from "./components/create/component/CreateDescriptionPage";
 import EditPage from "./components/edit/component/EditPage";
 import ViewPage from "./components/view/component/ViewPage";
-import DummyRecordPage from './components/create/component/DummyRecordPage';
+import RecordPage from './components/create/component/RecordPage';
+
+
 function App() {
     return (
       <Provider store={rootStore}>
@@ -32,8 +32,7 @@ function App() {
                     <Switch>
                         <Route exact path="/create/upload" component={UploadPage} />
                         <Route exact path="/create/description" component={CreateDescriptionPage} />
-                        <Route exact path="/create/record" component={DummyRecordPage} />
-                        <Route exact path="/create/trim" component={TrimPage} />
+                        <Route exact path="/create/record" component={RecordPage} />
                         <Route exact path="/create" component={CreatePage} />
                         <Route exact path="/account" component={AccountPage} />
                         <Route exact path="/library" component={LibraryPage} />

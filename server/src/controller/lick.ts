@@ -54,6 +54,7 @@ export class LickController {
         try {
             lickToBeSaved.audioFileLocation = await LickController.saveAudioFile(audioFile);
         } catch (err) {
+            console.log(err)
             ctx.status = 500; // SERVER ERROR
             ctx.body = { errors: {error: err.message}}
             return
@@ -324,27 +325,13 @@ export class LickController {
         if (!audioFile) return new Error("Error: No file sent.")
         if (!audioFile.size) return new Error("Error: File is empty.")
         if (audioFile.size > 25000000) return new Error("Error: File must be less than 25MB.")
+
+        console.log(audioFile.type)
         
-        // decide on supported types later
-        const supportedTypes: string[] = ["audio/mpeg", "audio/webm", "audio/wave", "audio/wav", "audio/mp4"]
-        if (!supportedTypes.includes(audioFile.type)) return new Error("Error: Mimetype is not supported.")
+        // ffmpeg can convert most types of audio files, let it fail if it can't convert the audio file
+        if (!audioFile.type.startsWith("audio/"))  return new Error("Error: Mimetype is not supported.");
         
         return null;
-    }
-
-    // promisify file conversion and saving of file
-    private static async saveWebmFileAsWav(audioFileLocation: string, audioFile: any): Promise<void>{
-        return new Promise((res, rej) => {
-            ffmpeg(audioFile.path)
-            .toFormat('wav')
-            .on('error', (err) => {
-                rej(err);
-            })
-            .on('end', () => {
-                res();
-            })
-            .save(audioFileLocation);
-        })
     }
 
     private static async saveAudioFile(audioFile: any): Promise<string> {
@@ -352,34 +339,18 @@ export class LickController {
         // save the audio to a file with a randomly generated uuid
         const audioFileLocation: string = "uploads/" + uuidv4();
 
-        // for files which were recorded
-        if (audioFile.type === "audio/webm") {
-            try {
-                await LickController.saveWebmFileAsWav(audioFileLocation, audioFile);
-            } catch (err) {
-                throw err;
-            }
-        } else { 
-
-            const readStream = fs.createReadStream(audioFile.path);
-            const writeStream = fs.createWriteStream(audioFileLocation);
-            
-            // asynchronously read from sent file and write to local file
-            for await (const chunk of readStream) {
-                const err: Error = await writeStream.write(chunk);
-                if (err) {
-                    // try to delete file created, if any was
-                    try {
-                        await fs.unlink(audioFileLocation);
-                    } catch (e) {
-                        // let this fail silently, already in the midst of an exception
-                    }
-                    throw err;
-                }
-            }
-        }
-
-        return audioFileLocation;
+        // convert all file types to .wav before saving
+        return new Promise((res, rej) => {
+            ffmpeg(audioFile.path)
+            .toFormat('wav')
+            .on('error', (err) => {
+                rej(err);
+            })
+            .on('end', () => {
+                res(audioFileLocation);
+            })
+            .save(audioFileLocation);
+        })
     }
 
     private static canUserAccess(user: User, lick: Lick): boolean {
