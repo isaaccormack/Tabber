@@ -56,6 +56,9 @@ export default function UploadPage() {
             dispatch(DeleteUser());
             history.push("/login");
             localStorage.clear();
+        } else if (responseStatus === 201) {
+            // load nothing while page redirects
+            return
         } else {
             //render retry buttons
             return (

@@ -27,15 +27,10 @@ export default function CreatePage() {
     return(
         <Container className="createPageBody centered">
             <Row className="button">
-                {/* perhaps refactor this into its own component that can be reused? */}
-                <div>
-                    <label htmlFor={"record"}>
-                        <img src={Record} className='recordButton' alt='record button' onClick={() => onRecordClick()}/>
-                    </label>
-                </div>
+                <img src={Record} className='recordButton' alt='record button' onClick={() => onRecordClick()}/>
             </Row>
             {permissionErr && <Row>
-                Allow microphone to record a lick
+                Please allow microphone to record a lick
             </Row>}
             <br />
             <Row>

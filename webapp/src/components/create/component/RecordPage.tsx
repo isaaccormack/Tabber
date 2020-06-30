@@ -17,7 +17,7 @@ export default function RecordPage() {
 
     const [number, setNumber] = useState(3);
     const [timer, setTimer] = useState(60);
-    const [loc, setLoc] = useState("words");
+    const [loc, setLoc] = useState("init");
     const stateRef = useRef<any>();
 
     // work around so loc's state is always up to date in onStop()
@@ -47,7 +47,7 @@ export default function RecordPage() {
             const timeout = setTimeout(() => {startTimer(num - 1)}, 1000);
             setTimerTimeout(timeout);
         } else {
-            setLoc("words");
+            setLoc(descPage);
         }
     }
 
@@ -82,13 +82,14 @@ export default function RecordPage() {
                     return false; // dont let user navigate
                 }}
             />
-            {loc
-                ? <Row className="countdown">
+            {loc === "init" &&
+                <Row className="countdown">
                     {number}
                 </Row>
-
-                : <div>
-                    <Row className="timer1">
+            }
+            {!loc &&
+                <div>
+                    <Row>
                         <h1 className="timer">{timer === 60 ? '1:00' : timer < 10 ? `0:0${timer}` : `0:${timer}`}</h1>
                     </Row>
                     <Row className="button">
