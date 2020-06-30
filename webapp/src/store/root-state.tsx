@@ -5,5 +5,5 @@ import FileStateInterface from "../components/create/reducers/FileStateInterface
 export default interface RootState {
     navigationState: NavigationStateInterface,
     userState: UserStateInterface,
-    fileState: FileStateInterface,
+    fileState: FileStateInterface
 }  

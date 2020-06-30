@@ -6,7 +6,7 @@ import FileReducer from "../components/create/reducers/FileReducer";
 const rootReducer = () => combineReducers({
     navigationState: NavigationReducer,
     userState: UserReducer,
-    fileState: FileReducer,
+    fileState: FileReducer
 });
 
 export default rootReducer;

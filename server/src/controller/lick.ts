@@ -54,7 +54,6 @@ export class LickController {
         try {
             lickToBeSaved.audioFileLocation = await LickController.saveAudioFile(audioFile);
         } catch (err) {
-            console.log(err)
             ctx.status = 500; // SERVER ERROR
             ctx.body = { errors: {error: err.message}}
             return
@@ -63,7 +62,6 @@ export class LickController {
         try {
             lickToBeSaved.audioLength = await audioDuration.getAudioDurationInSeconds(lickToBeSaved.audioFileLocation)
         } catch (err) {
-            console.log(err)
             await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
             ctx.status = 500; // SERVER ERROR
             ctx.body = { errors: {error: "Error: Cant get length of audio file."}}
@@ -326,8 +324,6 @@ export class LickController {
         if (!audioFile.size) return new Error("Error: File is empty.")
         if (audioFile.size > 25000000) return new Error("Error: File must be less than 25MB.")
 
-        console.log(audioFile.type)
-        
         // ffmpeg can convert most types of audio files, let it fail if it can't convert the audio file
         if (!audioFile.type.startsWith("audio/"))  return new Error("Error: Mimetype is not supported.");
         
