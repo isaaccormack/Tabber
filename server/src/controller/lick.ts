@@ -149,13 +149,9 @@ export class LickController {
     public static async shareLick(ctx: Context): Promise<void> {
 
         const lickID = +ctx.params.id || 0;
-        const userIDToShareWith = ctx.request.body.userID || 0;
+        const userEmailToShareWith = ctx.request.body.userEmail || "";
 
-        if (userIDToShareWith == ctx.state.user.id) {
-            ctx.status = 400; // BAD REQUEST
-            ctx.body = { errors: {error: "Error: Cannot share a lick with yourself."}}
-            return
-        }
+        console.log(userEmailToShareWith)
 
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
         const lickToBeShared: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['owner', 'sharedWith']});
@@ -167,11 +163,15 @@ export class LickController {
             ctx.status = 403; // FORBIDDEN
             ctx.body = { errors: {error: "Error: A lick can only be shared by its owner."}}
         } else {
-            const sharedWithUser: User | undefined = await UserController.getUserByID(userIDToShareWith);
+            const sharedWithUser: User | undefined = await UserController.getUserByEmail(userEmailToShareWith);
 
             if (!sharedWithUser) {
                 ctx.status = 400; // BAD REQUEST
                 ctx.body = { errors: {error: "Error: The user you are trying to share with doesn't exist in the db"}}
+            } else if (sharedWithUser.id == ctx.state.user.id) {
+                ctx.status = 400; // BAD REQUEST
+                ctx.body = { errors: {error: "Error: Cannot share a lick with yourself."}}
+                return
             } else {
                 if (!lickToBeShared.sharedWith.some(user => user.id === sharedWithUser.id)) {
                     lickToBeShared.sharedWith.push(sharedWithUser)
@@ -273,8 +273,43 @@ export class LickController {
      * Update a lick by id.
      */
     public static async updateLick(ctx: Context): Promise<void> {
-        // TODO: implement this along with a frontend for it.
-        return;
+
+        const lickID = +ctx.params.id || 0;
+
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['owner', 'sharedWith']});
+
+        if (lick) {
+            if (ctx.state.user.id === lick.owner.id) {
+                const body = ctx.request.body;
+
+                if (body.makePublic !== undefined) {
+                    lick.isPublic = body.makePublic;
+                }
+                // assert the name isnt empty
+                if (body.newName) {
+                    lick.name = body.newName; // could validate this
+                }
+                if (body.newDescription != undefined) {
+                    lick.description = body.newDescription; // could validate this
+                }
+
+                const updatedLick: Lick | undefined = await lickRepository.save(lick);
+                if (!updatedLick) {
+                    ctx.status = 500; // SERVER ERROR
+                    ctx.body = { errors: {error: "Error: Could not update lick in db"}}
+                } else {
+                    ctx.status = 200; // OK
+                    ctx.body = updatedLick;
+                }
+            } else {
+                ctx.status = 403; // FORBIDDEN
+                ctx.body = { errors: {error: "Error: You do not have permission to edit this lick."}}
+            }
+        } else {
+            ctx.status = 400; // BAD REQUEST
+            ctx.body = { errors: {error: "Error: The lick you are trying to retrieve doesn't exist."}}
+        }
     }
 
     /**

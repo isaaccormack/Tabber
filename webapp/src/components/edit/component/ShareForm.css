@@ -15,5 +15,12 @@
 }
 
 .share-text {
+    padding-top: 5px;
+    padding-bottom: 5px;
     color: var(--red);
+}
+
+.share-name {
+    display: flex;
+    align-items: center;
 }
