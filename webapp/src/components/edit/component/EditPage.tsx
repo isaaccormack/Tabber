@@ -66,7 +66,7 @@ export default function EditPage(props: match<EditFormProps>) {
                 <Row>
                     <Col xs={11}>
                         <textarea className="lick-tab-field">
-                            This is where the lick will go. It's blue because white was burning my eyeballs
+                            {lick.tab ? lick.tab : "No tab available."}
                         </textarea>
                     </Col>
                 </Row>
