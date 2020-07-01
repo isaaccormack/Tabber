@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable } from "typeorm";
-import { IsOptional, Length } from "class-validator";
+import { IsOptional, Length, IsIn } from "class-validator";
 import { User } from "./user";
 
 @Entity()
@@ -31,6 +31,7 @@ export class Lick {
 
     // Should just be a string with notes concatenated ie. EADGBE or D#AGBED#
     @Column()
+    @IsIn(["Standard", "Open G", "Drop D"])
     tuning: string; // TODO: make tuning data structure/data type
 
     @Column()

@@ -72,7 +72,7 @@ export default function ViewPage(props: match<ViewPageProps>) {
                 </div>
                 <Row>
                     <Col xs={6}>
-                        <EditForm formTitle={lick.name + " - " + lick.owner.name} onSubmit={() => {}} defaultLick={lick} disabled={true}  tuningReadOnly={true} showPublic={false}/>
+                        <EditForm formTitle={lick.name + " - " + lick.owner.name} onSubmit={() => {}} defaultLick={lick} disabled={true}  uploading={false}/>
                     </Col>
                     <Col xs={6}>
                         <Button
