@@ -3,9 +3,9 @@ import React, {useCallback, useEffect, useState} from "react";
 import "./UploadPage.css";
 import {useHistory} from "react-router";
 import {useDispatch, useSelector} from "react-redux";
+import RootState from "../../../store/root-state";
 import {DeleteUser} from "../../common/user/actions/UserActions";
 import {Button} from "react-bootstrap";
-import RootState from "../../../store/root-state";
 import UploadPageLoadingAnimation from "./UploadPageLoadingAnimation";
 import {ClearFileState} from "../actions/FileActions";
 import {LickInterface} from "../../common/lick/interface/LickInterface";
@@ -21,7 +21,7 @@ export default function UploadPage() {
         setResponseStatus(0);
         if (file && metadata) {
             const form = new FormData();
-            form.append("file", file[0]);
+            form.append("file", file);
             form.append("name", metadata.lickname);
             form.append("tuning", metadata.licktuning);
             form.append("description", metadata.lickdescription)
@@ -56,6 +56,9 @@ export default function UploadPage() {
             dispatch(DeleteUser());
             history.push("/login");
             localStorage.clear();
+        } else if (responseStatus === 201) {
+            // load nothing while page redirects
+            return
         } else {
             //render retry buttons
             return (

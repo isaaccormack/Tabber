@@ -1,6 +1,6 @@
 import {LickFormInterface} from "../../edit/component/EditForm";
 
 export default interface FileStateInterface {
-    file: FileList | undefined
+    file: File | undefined
     metadata: LickFormInterface | undefined
-}
+} 

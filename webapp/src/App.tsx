@@ -3,7 +3,6 @@ import Container from "react-bootstrap/Container";
 import {Provider} from "react-redux";
 import {Redirect, Route, Switch} from "react-router";
 
-
 import './App.css';
 import rootStore from "./store";
 import Navigation from "./components/common/navigation/component/Navigation";
@@ -18,9 +17,10 @@ import SharedPage from "./components/shared/component/SharedPage";
 import CreateDescriptionPage from "./components/create/component/CreateDescriptionPage";
 import EditPage from "./components/edit/component/EditPage";
 import ViewPage from "./components/view/component/ViewPage";
+import RecordPage from './components/create/component/RecordPage';
+
 
 function App() {
-
     return (
       <Provider store={rootStore}>
         <div className="app-wrapper">
@@ -32,6 +32,7 @@ function App() {
                     <Switch>
                         <Route exact path="/create/upload" component={UploadPage} />
                         <Route exact path="/create/description" component={CreateDescriptionPage} />
+                        <Route exact path="/create/record" component={RecordPage} />
                         <Route exact path="/create" component={CreatePage} />
                         <Route exact path="/account" component={AccountPage} />
                         <Route exact path="/library" component={LibraryPage} />

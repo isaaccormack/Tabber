@@ -1,0 +1,16 @@
+.tryAgainButton {
+    width: 25%;
+    margin-bottom: 2%;
+}
+
+/* saturate doesnt since button is white, so change opacity instead */
+.tryAgainButton:hover {
+    opacity: 0.5;
+}
+
+.centered {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
