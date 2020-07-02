@@ -8,6 +8,8 @@ import TabData from "./data/tabData";
 // Also in desperate need of rewriting and fixing. Plus the TabData class probably needs
 // to be improved to make this make a lot more sense.
 
+// TODO: prepend note-that-the-string-is-tuned-to to each guitar string's line
+
 // Generates an actual tab string from a sequence of indices which correspond to the times
 // at which notes were played, and a sequence of notes (in terms of strings & frets) that
 // were played at those times. The lengths of the arrays are equal.
@@ -20,19 +22,17 @@ import TabData from "./data/tabData";
 // NOTE: this generates the whole thing as one single line, so each guitar-string is separated
 //       by a newline only at the end. this means that for long tabs, displaying it will get ugly.
 export async function generateTabString(tabData: TabData): Promise<string> {
-    // TODO: clean up
     const totalSamples: number = tabData.totalSamples;
-    const peakIndices: number[] = tabData.peakIndices;
-    const peakStringsAndFrets: StringFret[] = tabData.peakStringsAndFrets;
+    const playedStringFrets: (StringFret | null)[] = tabData.playedStringFrets;
 
     // this is ugly. feel free to clean it up.  We should probably just make the tab-lines, then replace
     // values as necessary.
-    const sequenceData: (StringFret|null)[] = new Array(Math.floor(totalSamples / 10)).fill(null);
-    for (var i = 0; i < peakIndices.length; ++i) {
-        const idx: number = peakIndices[i];
-        if (sequenceData[Math.floor(idx / 10)] === null) {
-            sequenceData[Math.floor(idx / 10)] = peakStringsAndFrets[i];
-        }
+
+    // Take first element in each 10-sample range
+    const sequenceData: (StringFret | null)[] = new Array(Math.ceil(totalSamples / 10)).fill(null);
+    for (var i = 0; i < totalSamples; ++i) {
+        const curData: StringFret | null = sequenceData[Math.floor(i/10)];
+        sequenceData[Math.floor(i/10)] = !curData && playedStringFrets[i] ? playedStringFrets[i] : curData;
     }
 
     // one data-string per guitar-string. These are joined by newlines after tabbing is complete.

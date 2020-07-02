@@ -10,12 +10,49 @@ export async function calculateTab(audioData: AudioData): Promise<TabData> {
     const tabData: TabData = new TabData();
 
     tabData.totalSamples = audioData.time.length;
-    tabData.peakIndices = getLocalMaximaIndices(audioData.peakAmplitude);
-    const peakFrequencies = tabData.peakIndices.map(idx => audioData.frequency[idx]);
-    const peakNotes = peakFrequencies.map(freq => getNote(freq));
-    tabData.peakStringsAndFrets = peakNotes.map(note => getStringAndFret(note));
+    const onsets = detectOnsets(audioData.peakAmplitude);
+
+    const playedStringFrets: (StringFret | null)[] = [];
+    for (var i = 0; i < audioData.time.length; ++i) {
+        if (onsets.includes(i)) {
+            playedStringFrets.push(getStringAndFret(getNote(audioData.frequency[i])));
+        } else {
+            playedStringFrets.push(null);
+        }
+    }
+
+    tabData.playedStringFrets = playedStringFrets;
 
     return tabData;
+}
+
+interface SmoothMaxima {
+    prev: number[]; // Number of samples before this sample that the sample is greater than
+    next: number[]; // Number of samples after this sample that the sample is greater than
+}
+
+function detectOnsets(peakAbsAmplitude: number[]): number[] {
+
+    // Define onset as place where the sample is greater than 7 previous samples and 7 subsequent samples.
+    // This means at most 1 onset per 150 ms (and, in quiet regions, exactly 1 onset per 150 ms), but that's okay for now.
+    // This onset-detection algorithm will have substantial rewriting performed later.
+
+    const { prev, next } = smoothLocalMaxima(peakAbsAmplitude);
+    console.log("Idx\tAmplitude\tprev\t\next")
+    for (var i = 0; i < peakAbsAmplitude.length; ++i) {
+        const str: string = i.toString() + "\t" + peakAbsAmplitude[i].toPrecision(8) + "\t" + prev[i] + "\t" + next[i];
+        console.log(str);
+    }
+
+    const onsets: number[] = [];
+
+    for (var i = 0; i < prev.length; ++i) {
+        if (prev[i] >= 7 && next[i] >= 7) {
+            onsets.push(i);
+        }
+    }
+
+    return onsets;
 }
 
 function getNote(pitch: number): number {
@@ -88,7 +125,7 @@ function getLocalMaximaIndices(values: number[]): number[] {
 // are the local maximums of an 8-sample region, or which must be larger
 // than the 3 prior samples and the 6 subsequent samples, and so forth.
 // This implementation is O(n).
-function smoothLocalMaxima(values: number[]): any {
+function smoothLocalMaxima(values: number[]): SmoothMaxima {
     const previousValues: number[] = new Array(values.length);
     const nextValues: number[] = new Array(values.length);
     const stack: number[] = [];
@@ -102,7 +139,7 @@ function smoothLocalMaxima(values: number[]): any {
             const idx = stack[stack.length - 1];
             previousValues[i] = i - idx - 1;
         } else {
-            previousValues[i] = i - 1;
+            previousValues[i] = i;
         }
         stack.push(i);
     }
