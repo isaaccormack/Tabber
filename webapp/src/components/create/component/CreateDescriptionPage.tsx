@@ -20,7 +20,7 @@ export default function CreateDescriptionPage() {
    return(
         <div className="centered">
             <img src={TryAgain} className='tryAgainButton' alt='try again button' onClick={() => {history.goBack()}}/>
-            <EditForm onSubmit={submitForm} formTitle="Tell us about your lick!"  tuningReadOnly={false} showPublic={true}/>
+            <EditForm onSubmit={submitForm} formTitle="Tell us about your lick!"  uploading={true}/>
             <br />
             <MusicPlayer/>
         </div>

@@ -119,8 +119,7 @@ export default function ShareForm(props: ShareFormProps) {
                 <Button
                     style={{marginLeft: '10px'}}
                     variant="danger"
-                    // onClick={() => { submitMakeLickPublic(false) } // call edit lick with args make public, need to build this endpoint
-                    onClick={() => { handleShow() } // call edit lick with args make public, need to build this endpoint
+                    onClick={() => { handleShow() }
                     }>
                     Make Private
                 </Button>

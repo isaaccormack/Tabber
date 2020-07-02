@@ -71,7 +71,7 @@ export default function EditPage(props: match<EditFormProps>) {
                 </div>
                 <Row>
                     <Col xs={6}>
-                        <EditForm formTitle={lick.name} onSubmit={submitEditLick} defaultLick={lick} tuningReadOnly={true} showPublic={false}/>
+                        <EditForm formTitle={lick.name} onSubmit={submitEditLick} defaultLick={lick} uploading={false}/>
                     </Col>
                     <Col xs={5}>
                         <ShareForm lick={lick} setLick={setLick}/>
