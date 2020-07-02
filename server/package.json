@@ -8,7 +8,9 @@
         "dev": "nodemon -e js bin/www",
         "unit-jest": "tsc && jest --coverage dist/test/controller/*.spec.js dist/test/middleware/*.spec.js",
         "integration-jest": "tsc && jest --coverage dist/test/integration/index.spec.js && jest --coverage dist/test/integration/user.spec.js && jest --coverage dist/test/integration/lick.spec.js && jest --coverage dist/test/integration/userLicks.spec.js && jest --coverage dist/test/integration/userSharedLicks.spec.js",
-        "update-views": "(cd ../webapp && npm run build)"
+        "update-views": "(cd ../webapp && npm run build)",
+        "clean": "rm -rf node_modules",
+        "fully-rebuild": "npm run clean && npm install && npm run build"
     },
     "repository": {
         "type": "git",
@@ -42,6 +44,7 @@
         "bufferutil": "^4.0.1",
         "canvas": "^2.6.1",
         "class-validator": "^0.12.0",
+        "csv-parse": "^4.10.1",
         "fluent-ffmpeg": "^2.1.2",
         "get-audio-duration": "^2.0.2-beta.0",
         "googleapis": "^51.0.0",
@@ -54,6 +57,7 @@
         "koa-static": "^5.0.0",
         "koa2-formidable": "^1.0.2",
         "mysql": "^2.15.0",
+        "shelljs": "^0.8.4",
         "typeorm": "^0.2.0",
         "utf-8-validate": "^5.0.2",
         "uuid": "^8.1.0"

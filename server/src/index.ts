@@ -25,7 +25,7 @@ export function startApp(): Koa {
     // Enable multipart/form-data style uploads for files
     app.use(formidable({}))
 
-    // Enable bodyParser with default options
+    // Enable koa-bodyparser with default options
     app.use(bodyParser());
 
     // Middleware to parse jwt token and initialize ctx.state

@@ -11,6 +11,7 @@ const ffmpeg = require('fluent-ffmpeg');
 import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
 import { UserController } from './user'
+import tabLick from "../tabbing/tabLick";
 
 export class LickController {
 
@@ -23,7 +24,7 @@ export class LickController {
 
         const audioFile = ctx.request.files.file;
 
-        const err: Error = LickController.validateAudioFile(audioFile); 
+        const err: Error = LickController.validateAudioFile(audioFile);
         if (err) {
             ctx.status = 400; // BAD REQUEST
             ctx.body = { errors: {error: err.message}}
@@ -42,15 +43,15 @@ export class LickController {
         lickToBeSaved.isPublic = body.isPublic == "true" ? true : false;
         lickToBeSaved.owner = ctx.state.user;
         lickToBeSaved.sharedWith = []; // TODO - list of shared with users will be sent from client upon lick creation
-        
+
         const errors: ValidationError[] = await validate(lickToBeSaved);
-        
+
         if (errors.length > 0) {
             ctx.status = 400; // BAD REQUEST
             ctx.body = { errors };
             return
-        } 
-            
+        }
+
         try {
             lickToBeSaved.audioFileLocation = await LickController.saveAudioFile(audioFile);
         } catch (err) {
@@ -73,6 +74,16 @@ export class LickController {
             ctx.status = 400; // BAD REQUEST
             ctx.body = { errors: {error: "Error: Audio file is longer than 60 seconds."}}
             return
+        }
+
+        try {
+            // Generate tab for lick after other data is handled
+            lickToBeSaved.tab = await tabLick(lickToBeSaved);
+        } catch (err) {
+            await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
+            ctx.status = 500; // SERVER ERROR
+            ctx.body = { errors: {error: "Error: Failed to tab audio file."}};
+            return;
         }
 
         // finally, save the lick to the database
@@ -200,7 +211,7 @@ export class LickController {
 
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
         const lickToBeUnshared: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['owner', 'sharedWith']});
-        
+
         if (!lickToBeUnshared) {
             ctx.status = 400; // BAD REQUEST
             ctx.body = { errors: {error: "Error: The lick you are trying to unshare doesn't exist."}}
@@ -245,7 +256,7 @@ export class LickController {
 
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
         const lickToUnfollow: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['sharedWith']});
-        
+
         if (!lickToUnfollow) {
             ctx.status = 400; // BAD REQUEST
             ctx.body = { errors: {error: "Error: The lick you are trying to unfollow doesn't exist."}}
@@ -354,14 +365,14 @@ export class LickController {
      * HELPERS
      */
     private static validateAudioFile(audioFile: any): Error | null {
-    
+
         if (!audioFile) return new Error("Error: No file sent.")
         if (!audioFile.size) return new Error("Error: File is empty.")
         if (audioFile.size > 25000000) return new Error("Error: File must be less than 25MB.")
 
         // ffmpeg can convert most types of audio files, let it fail if it can't convert the audio file
         if (!audioFile.type.startsWith("audio/"))  return new Error("Error: Mimetype is not supported.");
-        
+
         return null;
     }
 
@@ -407,5 +418,5 @@ export class LickController {
     private static async unlinkAsync(filePath: string) : Promise<NodeJS.ErrnoException> {
         const deleteFile = util.promisify(fs.unlink);
         return await deleteFile(filePath);
-    } 
+    }
 }
