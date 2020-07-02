@@ -10,6 +10,8 @@ interface EditFormProps {
     onSubmit: Function
     defaultLick?: LickInterface
     disabled?: boolean
+    tuningReadOnly: boolean
+    showPublic: boolean
 }
 
 export interface LickFormInterface {
@@ -28,8 +30,10 @@ export default function EditForm(props: EditFormProps) {
         }
     });
 
-    const onSubmit = (data: any) => props.onSubmit(data);
+    const onSubmit = (data: any) => {props.onSubmit(data);}
 
+
+    // add props to this to hide public and make tuning read only
     return (
         <Container fluid className="edit-form-wrapper">
             <div className="form-title">
@@ -65,9 +69,11 @@ export default function EditForm(props: EditFormProps) {
                            <input className="form-input"
                                   name="licktuning form-input"
                                   ref={register}
+                                  readOnly={props.tuningReadOnly}
                            />
                        </Col>
                    </Row>
+                   {props.showPublic && 
                    <Row className="form-row">
                        <Col className="form-label" lg={2}>Public</Col>
                        <Col>
@@ -77,7 +83,7 @@ export default function EditForm(props: EditFormProps) {
                                   ref={register} />
                        </Col>
                    </Row>
-                   <br />
+                    }
                     {!props.disabled &&
                     <Row className="form-row">
                         <input type="submit"/>

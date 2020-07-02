@@ -21,7 +21,7 @@ protectedRouter.post("/licks", LickController.createLick);
 protectedRouter.put("/lick/share/:id", LickController.shareLick);
 protectedRouter.put("/lick/unshare/:id", LickController.unshareLick);
 protectedRouter.put("/lick/unfollow/:id", LickController.unfollowLick);
-protectedRouter.put("/licks/:id", LickController.updateLick);
+protectedRouter.put("/lick/:id", LickController.updateLick);
 protectedRouter.delete("/licks/:id", LickController.deleteLick);
 
 export { protectedRouter };
