@@ -17,8 +17,26 @@ export default function EditPage(props: match<EditFormProps>) {
     const [lick, setLick] = useState<LickInterface>();
     const [lickAudio, setLickAudio] = useState<Blob>()
 
-    const upload = () => {
+    // must receieve the whole data and parse out whats needed here
+    const submitEditLick = (data: any) => {
 
+        fetch("/api/lick/" + lick!.id, {
+            method: "PUT",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({newName: data.lickname, newDescription: data.lickdescription})
+        })
+        .then((response) => {
+            if (response.status === 200) {
+                return response.json();
+            } else {
+                throw new Error('Couldnt update lick');
+            }
+        })
+        .then((responseJson) => {
+            setLick(responseJson);
+        })
     }
 
     useEffect(() => {
@@ -34,7 +52,8 @@ export default function EditPage(props: match<EditFormProps>) {
             .then((responseJson) => {
                 setLick(responseJson);
             });
-    }, [])
+        // @ts-ignore //again, typescript says match doesn't exist
+    }, [props.match.params.id])
 
     useEffect(() => {
         if (lick) {
@@ -52,7 +71,7 @@ export default function EditPage(props: match<EditFormProps>) {
                 </div>
                 <Row>
                     <Col xs={6}>
-                        <EditForm formTitle={lick.name} onSubmit={upload} defaultLick={lick}/>
+                        <EditForm formTitle={lick.name} onSubmit={submitEditLick} defaultLick={lick} uploading={false}/>
                     </Col>
                     <Col xs={5}>
                         <ShareForm lick={lick} setLick={setLick}/>

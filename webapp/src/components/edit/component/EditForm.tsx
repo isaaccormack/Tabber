@@ -1,4 +1,4 @@
-import React, {useState} from "react";
+import React from "react";
 import {useForm} from "react-hook-form";
 
 import "./EditForm.css";
@@ -10,6 +10,7 @@ interface EditFormProps {
     onSubmit: Function
     defaultLick?: LickInterface
     disabled?: boolean
+    uploading: boolean
 }
 
 export interface LickFormInterface {
@@ -28,7 +29,8 @@ export default function EditForm(props: EditFormProps) {
         }
     });
 
-    const onSubmit = (data: any) => props.onSubmit(data);
+    const onSubmit = (data: any) => {props.onSubmit(data);}
+
 
     return (
         <Container fluid className="edit-form-wrapper">
@@ -38,50 +40,64 @@ export default function EditForm(props: EditFormProps) {
             <br />
             <form onSubmit={handleSubmit(onSubmit)}>
                 <fieldset disabled={props.disabled}>
-                   <Row className="form-row">
-                       <Col className="form-label" lg={2}>Lick Name</Col>
-                       <Col>
-                           <input className="form-input"
-                                  name="lickname"
-                                  ref={register({ required: true })}
-                                  autoFocus
-                           />
-                           {errors.lickname &&
-                           <span className="required-text">This field is required!</span>}
-                       </Col>
-                   </Row>
-                   <Row className="form-row">
-                       <Col className="form-label" lg={2}>Description</Col>
-                       <Col>
-                           <input className="form-input"
-                                  name="lickdescription"
-                                  ref={register}
-                           />
-                       </Col>
-                   </Row>
-                   <Row className="form-row">
-                       <Col className="form-label" lg={2}>Tuning</Col>
-                       <Col>
-                           <input className="form-input"
-                                  name="licktuning form-input"
-                                  ref={register}
-                           />
-                       </Col>
-                   </Row>
-                   <Row className="form-row">
-                       <Col className="form-label" lg={2}>Public</Col>
-                       <Col>
-                           <input type="checkbox"
-                                  name="lickpublic"
-                                  defaultChecked={props.defaultLick?.isPublic}
-                                  ref={register} />
-                       </Col>
-                   </Row>
-                   <br />
-                    {!props.disabled &&
                     <Row className="form-row">
-                        <input type="submit"/>
+                        <Col className="form-label" lg={2}>Lick Name</Col>
+                        <Col>
+                            <input className="form-input"
+                                    name="lickname"
+                                    ref={register({ required: true })}
+                                    autoFocus
+                            />
+                            {errors.lickname &&
+                            <span className="required-text">This field is required!</span>}
+                        </Col>
                     </Row>
+                    <Row className="form-row">
+                        <Col className="form-label" lg={2}>Description</Col>
+                        <Col>
+                            <input className="form-input"
+                                    name="lickdescription"
+                                    ref={register}
+                            />
+                        </Col>
+                    </Row>
+
+                    {/* if uploading, show upload option, else just display tuning */}
+                    {props.uploading ? 
+                        <Row className="form-row">
+                            <Col className="form-label" lg={2}>Tuning</Col>
+                            <Col>
+                                <select name="licktuning" id="licktuning" ref={register}>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Drop D">Drop D</option>
+                                    <option value="Open G">Open G</option>
+                                </select>
+                            </Col>
+                            <Col className="form-label" lg={2}>Privacy</Col>
+                            <Col>
+                                <select name="lickpublic" id="lickpublic" ref={register}>
+                                    <option value="Private">Private</option>
+                                    <option value="Public">Public</option>
+                                </select>
+                            </Col>
+                        </Row>
+                    :
+                    <Row className="form-row">
+                        <Col className="form-label" lg={2}>Tuning</Col>
+                        <Col>
+                            <input className="form-input"
+                                    name="licktuning"
+                                    ref={register}
+                                    readOnly={true}
+                            />
+                        </Col>
+                    </Row>
+                    }
+               
+                    {!props.disabled &&
+                        <Row className="form-row">
+                            <input type="submit"/>
+                        </Row>
                     }
                 </fieldset>
             </form>

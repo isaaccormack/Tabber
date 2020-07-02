@@ -1,6 +1,6 @@
 @import "../../../mainstyles.css";
 
-.createPageBody {
+.recordPageBody {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -15,20 +15,20 @@
     width: 128px;
 }
 
-.uploadButton {
-    width: 196px;
+.timer {
+    font-size: 500%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.OrIcon {
-    width: 400px;
+.stopButton {
+    margin: 10%;
+    width: 80%;
 }
 
-#upload {
-    display: none;
-}
-
-#record {
-    display: none;
+.countdown {
+    font-size: 750%;
+    font-family: var(--font-header);
 }
 
 .centered {

@@ -6,4 +6,4 @@ export default interface RootState {
     navigationState: NavigationStateInterface,
     userState: UserStateInterface,
     fileState: FileStateInterface
-}
+}  

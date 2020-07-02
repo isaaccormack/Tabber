@@ -5,6 +5,8 @@ import { Context } from "koa";
 import { getManager, Repository } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 import * as util from 'util';
+const ffmpeg = require('fluent-ffmpeg');
+
 
 import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
@@ -66,7 +68,7 @@ export class LickController {
             ctx.body = { errors: {error: "Error: Cant get length of audio file."}}
             return
         }
-
+        
         if (lickToBeSaved.audioLength > 60) { // lick is too long
             await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
             ctx.status = 400; // BAD REQUEST
@@ -158,13 +160,9 @@ export class LickController {
     public static async shareLick(ctx: Context): Promise<void> {
 
         const lickID = +ctx.params.id || 0;
-        const userIDToShareWith = ctx.request.body.userID || 0;
+        const userEmailToShareWith = ctx.request.body.userEmail || "";
 
-        if (userIDToShareWith == ctx.state.user.id) {
-            ctx.status = 400; // BAD REQUEST
-            ctx.body = { errors: {error: "Error: Cannot share a lick with yourself."}}
-            return
-        }
+        console.log(userEmailToShareWith)
 
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
         const lickToBeShared: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['owner', 'sharedWith']});
@@ -176,11 +174,15 @@ export class LickController {
             ctx.status = 403; // FORBIDDEN
             ctx.body = { errors: {error: "Error: A lick can only be shared by its owner."}}
         } else {
-            const sharedWithUser: User | undefined = await UserController.getUserByID(userIDToShareWith);
+            const sharedWithUser: User | undefined = await UserController.getUserByEmail(userEmailToShareWith);
 
             if (!sharedWithUser) {
                 ctx.status = 400; // BAD REQUEST
                 ctx.body = { errors: {error: "Error: The user you are trying to share with doesn't exist in the db"}}
+            } else if (sharedWithUser.id == ctx.state.user.id) {
+                ctx.status = 400; // BAD REQUEST
+                ctx.body = { errors: {error: "Error: Cannot share a lick with yourself."}}
+                return
             } else {
                 if (!lickToBeShared.sharedWith.some(user => user.id === sharedWithUser.id)) {
                     lickToBeShared.sharedWith.push(sharedWithUser)
@@ -282,8 +284,43 @@ export class LickController {
      * Update a lick by id.
      */
     public static async updateLick(ctx: Context): Promise<void> {
-        // TODO: implement this along with a frontend for it.
-        return;
+
+        const lickID = +ctx.params.id || 0;
+
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['owner', 'sharedWith']});
+
+        if (lick) {
+            if (ctx.state.user.id === lick.owner.id) {
+                const body = ctx.request.body;
+
+                if (body.makePublic !== undefined) {
+                    lick.isPublic = body.makePublic;
+                }
+                // assert the name isnt empty
+                if (body.newName) {
+                    lick.name = body.newName; // could validate this
+                }
+                if (body.newDescription != undefined) {
+                    lick.description = body.newDescription; // could validate this
+                }
+
+                const updatedLick: Lick | undefined = await lickRepository.save(lick);
+                if (!updatedLick) {
+                    ctx.status = 500; // SERVER ERROR
+                    ctx.body = { errors: {error: "Error: Could not update lick in db"}}
+                } else {
+                    ctx.status = 200; // OK
+                    ctx.body = updatedLick;
+                }
+            } else {
+                ctx.status = 403; // FORBIDDEN
+                ctx.body = { errors: {error: "Error: You do not have permission to edit this lick."}}
+            }
+        } else {
+            ctx.status = 400; // BAD REQUEST
+            ctx.body = { errors: {error: "Error: The lick you are trying to retrieve doesn't exist."}}
+        }
     }
 
     /**
@@ -333,9 +370,8 @@ export class LickController {
         if (!audioFile.size) return new Error("Error: File is empty.")
         if (audioFile.size > 25000000) return new Error("Error: File must be less than 25MB.")
 
-        // decide on supported types later
-        const supportedTypes: string[] = ["audio/mpeg", "audio/wave", "audio/wav", "audio/mp4"]
-        if (!supportedTypes.includes(audioFile.type)) return new Error("Error: Mimetype is not supported.")
+        // ffmpeg can convert most types of audio files, let it fail if it can't convert the audio file
+        if (!audioFile.type.startsWith("audio/"))  return new Error("Error: Mimetype is not supported.");
 
         return null;
     }
@@ -345,24 +381,18 @@ export class LickController {
         // save the audio to a file with a randomly generated uuid
         const audioFileLocation: string = "uploads/" + uuidv4();
 
-        const readStream = fs.createReadStream(audioFile.path);
-        const writeStream = fs.createWriteStream(audioFileLocation);
-
-        // asynchronously read from sent file and write to local file
-        for await (const chunk of readStream) {
-            const err: Error = await writeStream.write(chunk);
-            if (err) {
-                // try to delete file created, if any was
-                try {
-                    await fs.unlink(audioFileLocation);
-                } catch (e) {
-                    // let this fail silently, already in the midst of an exception
-                }
-                throw err;
-            }
-        }
-
-        return audioFileLocation;
+        // convert all file types to .wav before saving
+        return new Promise((res, rej) => {
+            ffmpeg(audioFile.path)
+            .toFormat('wav')
+            .on('error', (err) => {
+                rej(err);
+            })
+            .on('end', () => {
+                res(audioFileLocation);
+            })
+            .save(audioFileLocation);
+        })
     }
 
     private static canUserAccess(user: User, lick: Lick): boolean {

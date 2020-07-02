@@ -7,14 +7,14 @@ import {useHistory} from "react-router";
 
 
 export default function UploadButton() {
-
     const dispatch = useDispatch();
     const history = useHistory();
 
-    const onFileSelect = (file: FileList | null) => {
-        if (file) {
+
+    const onFileSelect = (fileList: FileList | null) => {
+        if (fileList) {
+            const file: File = fileList[0];
             dispatch(UpdateFile(file));
-            console.log(file);
             history.push("/create/description");
         }
     }

@@ -5,7 +5,7 @@ export const CLEAR_FILESTATE = "CLEAR_FILESTATE";
 
 interface UpdateFileType {
     type: typeof UPDATE_FILE
-    payload: FileList
+    payload: File
 }
 
 interface DeleteFileType {
