@@ -21,34 +21,38 @@ import TabData from "./data/tabData";
 //       encountered, it will push the rest of the line to the right by one character.)
 // NOTE: this generates the whole thing as one single line, so each guitar-string is separated
 //       by a newline only at the end. this means that for long tabs, displaying it will get ugly.
-export async function generateTabString(tabData: TabData): Promise<string> {
-    const totalSamples: number = tabData.totalSamples;
-    const playedStringFrets: (StringFret | null)[] = tabData.playedStringFrets;
 
-    // this is ugly. feel free to clean it up.  We should probably just make the tab-lines, then replace
-    // values as necessary.
+export default class TabGenerator {
 
-    // Take first element in each 10-sample range
-    const sequenceData: (StringFret | null)[] = new Array(Math.ceil(totalSamples / 10)).fill(null);
-    for (var i = 0; i < totalSamples; ++i) {
-        const curData: StringFret | null = sequenceData[Math.floor(i/10)];
-        sequenceData[Math.floor(i/10)] = !curData && playedStringFrets[i] ? playedStringFrets[i] : curData;
-    }
+    public static async generateTab(tabData: TabData): Promise<string> {
+        const totalSamples: number = tabData.totalSamples;
+        const playedStringFrets: (StringFret | null)[] = tabData.playedStringFrets;
 
-    // one data-string per guitar-string. These are joined by newlines after tabbing is complete.
-    const stringTabStrings: string[] = new Array(6).fill("|");
-    for (var i = 0; i < sequenceData.length; ++i) {
-        const stringVal: string[] = new Array(6).fill("-");
-        if (sequenceData[i] !== null) {
-            stringVal[sequenceData[i].stringIdx] = sequenceData[i].fret.toString();
+        // this is ugly. feel free to clean it up.  We should probably just make the tab-lines, then replace
+        // values as necessary.
+
+        // Take first element in each 10-sample range
+        const sequenceData: (StringFret | null)[] = new Array(Math.ceil(totalSamples / 10)).fill(null);
+        for (var i = 0; i < totalSamples; ++i) {
+            const curData: StringFret | null = sequenceData[Math.floor(i/10)];
+            sequenceData[Math.floor(i/10)] = !curData && playedStringFrets[i] ? playedStringFrets[i] : curData;
         }
-        stringVal.map((x, idx) => stringTabStrings[idx] += x);
-    }
 
-    // End each string with | character
-    for (var i = 0; i < stringTabStrings.length; ++i) {
-        stringTabStrings[i] += "|";
-    }
+        // one data-string per guitar-string. These are joined by newlines after tabbing is complete.
+        const stringTabStrings: string[] = new Array(6).fill("|");
+        for (var i = 0; i < sequenceData.length; ++i) {
+            const stringVal: string[] = new Array(6).fill("-");
+            if (sequenceData[i] !== null) {
+                stringVal[sequenceData[i].stringIdx] = sequenceData[i].fret.toString();
+            }
+            stringVal.map((x, idx) => stringTabStrings[idx] += x);
+        }
 
-    return stringTabStrings.join("\n");
+        // End each string with | character
+        for (var i = 0; i < stringTabStrings.length; ++i) {
+            stringTabStrings[i] += "|";
+        }
+
+        return stringTabStrings.join("\n");
+    }
 }
