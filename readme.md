@@ -10,11 +10,11 @@ Tabber is a web app which generates tablature for licks played from an instrumen
 ## How do we Make Tabber?
 Tabber takes advantage of an existing machine learning model, such as ml5's pitch detection, to classify notes. The location of these notes on the instrument (say, guitar neck) is then determined using a heuristic considering past and (future?) notes and the likelihood of their proximity. The heuristic could possibly be machine learning based. 
 
-Tabber also consists of an online app platform which implements many featurs (listed below) using standard web technologies.
+Tabber also consists of an online app platform which implements many features (listed below) using standard web technologies.
 
 ## Why Bother?
 - Writing down tabs is slow, Tabber is fast
-- Getting tabs is as easy, just play
+- Getting tabs is easy, just play
 - Lots of great licks are just that... _licks_
 
 ## Lets Talk Requirements
@@ -47,7 +47,7 @@ Just some easy ones.
 
 ### As a Guitar Player, I want to:
 1. Tab a famous guitar lick so I can send it to my friend to help him learn the lick.
-2. Share my lick publically so everyone can hear it
+2. Share my lick publicly so everyone can hear it
 
 ### As a Beginner, I want to:
 1. Use a _pretty_ website so all my friends will be jealous.
