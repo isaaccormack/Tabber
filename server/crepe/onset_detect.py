@@ -44,8 +44,8 @@ def get_onsets(filePath):
     post_max = (sample_rate * 0.00) // hop_length + 1
     pre_avg = (sample_rate * 0.10) // hop_length
     post_avg = (sample_rate * 0.10) // hop_length + 1
-    wait = (sample_rate * 0.03) // hop_length
-    delta = 0.07
+    wait = (sample_rate * 0.05) // hop_length
+    delta = 0.20
     onset_times = onset_detect(y=values, sr=sample_rate, hop_length=hop_length, units="time",
                                pre_max=pre_max,
                                post_max=post_max,
