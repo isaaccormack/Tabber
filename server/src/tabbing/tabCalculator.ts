@@ -1,6 +1,7 @@
 import PitchData from "./data/pitchData";
 import OnsetData from "./data/onsetData";
 import TabData from "./data/tabData";
+import Tuning from "./data/tuning";
 import StringFret from "./data/stringFret";
 
 // The purpose of this class is to handle conversion from frequency & onset data,
@@ -9,9 +10,10 @@ import StringFret from "./data/stringFret";
 
 export default class TabCalculator {
 
-    public static async getTabData(pitch: PitchData, onsets: OnsetData): Promise<TabData> {
-
+    public static async getTabData(pitch: PitchData, onsets: OnsetData, tuning: Tuning): Promise<TabData> {
         const tabData: TabData = new TabData();
+        console.log("tuning:");
+        console.log(tuning.getNotes());
 
         tabData.totalSamples = pitch.time.length;
         const onsetIndices: number[] = TabCalculator.onsetsToIndices(onsets.time, pitch.time);
@@ -19,7 +21,7 @@ export default class TabCalculator {
         const playedStringFrets: (StringFret | null)[] = [];
         for (var i = 0; i < pitch.time.length; ++i) {
             if (onsetIndices.includes(i)) {
-                playedStringFrets.push(TabCalculator.getStringAndFret(TabCalculator.getNote(pitch.frequency[i])));
+                playedStringFrets.push(TabCalculator.getStringAndFret(TabCalculator.getNote(pitch.frequency[i]), tuning));
             } else {
                 playedStringFrets.push(null);
             }
@@ -67,11 +69,11 @@ export default class TabCalculator {
     //
     // see en.wikipedia.org/wiki/Scientific_pitch_notation#Table_of_note_frequencies
     // and en.wikipedia.org/wiki/Guitar_tunings#Standard
-    public static getStringAndFret(note: number): StringFret {
-        const tuning: number[] = [64, 59, 55, 50, 45, 40]; // Standard tuning
-        for (var i = 0; i < tuning.length; ++i) {
-            if (note >= tuning[i]) {
-                return { stringIdx: i, fret: note - tuning[i] };
+    public static getStringAndFret(note: number, tuning: Tuning): StringFret {
+        const notes: number[] = tuning.getNotes();
+        for (var i = 0; i < notes.length; ++i) {
+            if (note >= notes[i]) {
+                return { stringIdx: i, fret: note - notes[i] };
             }
         }
         throw new Error("Could not determine string and fret of note (note index: " + note + ")");

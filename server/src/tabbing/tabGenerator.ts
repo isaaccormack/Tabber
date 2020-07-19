@@ -1,5 +1,6 @@
 import StringFret from "./data/stringFret";
 import TabData from "./data/tabData";
+import Tuning from "./data/tuning";
 
 // The purpose of this file is to provide a way of converting some form of tabbing data,
 // i.e. strings + frets + timings, into an ASCII string.
@@ -24,7 +25,9 @@ import TabData from "./data/tabData";
 
 export default class TabGenerator {
 
-    public static async generateTab(tabData: TabData): Promise<string> {
+    private static readonly noteStrings: string[] = ["C ", "C#", "D ", "Eb", "E ", "F ", "F#", "G ", "G#", "A ", "Bb", "B "];
+
+    public static async generateTab(tabData: TabData, tuning: Tuning): Promise<string> {
         const totalSamples: number = tabData.totalSamples;
         const playedStringFrets: (StringFret | null)[] = tabData.playedStringFrets;
 
@@ -39,11 +42,16 @@ export default class TabGenerator {
         }
 
         // one data-string per guitar-string. These are joined by newlines after tabbing is complete.
-        const stringTabStrings: string[] = new Array(6).fill("|");
+        const stringTabStrings: string[] = tuning.getNotes().map(n => TabGenerator.noteStrings[n % 12] + "|");
         for (var i = 0; i < sequenceData.length; ++i) {
-            const stringVal: string[] = new Array(6).fill("-");
+            let stringVal: string[] = new Array(6).fill("-");
             if (sequenceData[i] !== null) {
-                stringVal[sequenceData[i].stringIdx] = sequenceData[i].fret.toString();
+                const fretString: string = sequenceData[i].fret.toString();
+                for (var j = 1; j < fretString.length; ++j) {
+                    stringVal = stringVal.map(x => x + "-");
+                }
+                stringVal[sequenceData[i].stringIdx] = fretString;
+
             }
             stringVal.map((x, idx) => stringTabStrings[idx] += x);
         }
