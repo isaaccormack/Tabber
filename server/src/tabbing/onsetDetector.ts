@@ -5,7 +5,9 @@ import parse from "csv-parse/lib/sync";
 import fs from "fs";
 import util from "util";
 
-const readFile = util.promisify(fs.readFile); // necessary because async readFile seems to be unavailable for some reason
+// These are necessary because async fs functions are unavailable for some reason
+const readFile = util.promisify(fs.readFile);
+const unlink = util.promisify(fs.unlink);
 
 // The purpose of this class is to detect onsets
 
@@ -14,6 +16,7 @@ export default class OnsetDetector {
     public static async getOnsetData(audioFilepath: string): Promise<OnsetData> {
         const onsetFilePath: string = await OnsetDetector.runOnsetDetection(audioFilepath);
         const results: OnsetData = await OnsetDetector.readOnsetData(onsetFilePath);
+        unlink(onsetFilePath); // Delete intermediary onset detection output file.
 
         return results;
     }
@@ -27,7 +30,7 @@ export default class OnsetDetector {
 
         const crepeOutputDirectory: string = "crepe"; // TODO: remove this asap; use a tmp file
         const onsetFilePath: string = crepeOutputDirectory + "/" + path.basename(audioFilePath) + "-amplitude.csv";
-        const execString: string = "python3 crepe/onset_detect.py --input " + audioFilePath + " --output " + onsetFilePath;
+        const execString: string = "python3 tabbing/onset_detect.py --input " + audioFilePath + " --output " + onsetFilePath;
 
         console.log("executing string:");
         console.log(execString);

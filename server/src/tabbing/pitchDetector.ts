@@ -5,7 +5,9 @@ import fs from "fs";
 import util from "util";
 import PitchData from "./data/pitchData";
 
-const readFile = util.promisify(fs.readFile); // necessary because async readFile seems to be unavailable for some reason
+// These are necessary because async fs functions are unavailable for some reason
+const readFile = util.promisify(fs.readFile);
+const unlink = util.promisify(fs.unlink);
 
 // The purpose of this class is to calculate pitch data from an audio file.
 
@@ -13,11 +15,13 @@ export default class PitchDetector {
 
     // folder, relative to pwd, to store output csv file in.
     // TODO: make this just use a temp folder, if crepe allows.
-    static CrepeOutputDirectory: string = "crepe";
+    private static readonly CrepeOutputDirectory: string = "crepe";
 
     public static async getPitchData(audioFilePath: string): Promise<PitchData> {
         const crepeFilePath: string = await PitchDetector.runCrepe(audioFilePath);
         const results: PitchData = await PitchDetector.getCrepeCsvData(crepeFilePath);
+        unlink(crepeFilePath); // Delete intermediary crepe output file.
+
         return results;
     }
 
