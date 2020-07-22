@@ -7,7 +7,7 @@ import {LickInterface} from "../../common/lick/interface/LickInterface";
 
 interface EditFormProps {
     formTitle: string
-    onSubmit: Function
+    onSubmit: (data: LickFormInterface) => any
     defaultLick?: LickInterface
     disabled?: boolean
     uploading: boolean
@@ -27,12 +27,12 @@ export default function EditForm(props: EditFormProps) {
             lickname: props.defaultLick?.name,
             lickdescription: props.defaultLick?.description,
             licktuning: props.defaultLick?.tuning,
-            lickcapo: props.defaultLick?.capo
+            lickcapo: props.defaultLick?.capo,
+            lickpublic: props.defaultLick?.isPublic
         }
     });
 
-    const onSubmit = (data: any) => {props.onSubmit(data);}
-
+    const onSubmit = (data: LickFormInterface) => {props.onSubmit(data);}
 
     return (
         <Container fluid className="edit-form-wrapper">
@@ -75,9 +75,10 @@ export default function EditForm(props: EditFormProps) {
                         <Col className="form-label" lg={2}>Capo</Col>
                         <Col>
                             <select name="lickcapo" id="lickcapo" ref={register}>
-                                {[...Array(25)].map((x, i) =>
-                                    "<option value=\""+i+"\">"+i+"</option>" // ew
-                                )}
+                                <option value="0">None</option>
+                                {[...Array(24)].map((x, idx) => {
+                                    return <option value={idx+1}>{idx+1}</option>
+                                })}
                             </select>
                         </Col>
                     </Row>

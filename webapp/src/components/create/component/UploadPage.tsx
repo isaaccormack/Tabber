@@ -25,7 +25,7 @@ export default function UploadPage() {
             form.append("name", metadata.lickname);
             form.append("description", metadata.lickdescription);
             form.append("tuning", metadata.licktuning);
-            form.append("capo", metadata.lickcapo.toFixed(0));
+            form.append("capo", metadata.lickcapo.toString());
             form.append("isPublic", metadata.lickpublic.toString());
             fetch("/api/licks",{
                 method: "POST",
