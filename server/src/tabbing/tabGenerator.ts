@@ -21,7 +21,7 @@ import Capo from "./data/capo";
 
 export default class TabGenerator {
 
-    private static readonly noteStrings: string[] = ["C ", "C#", "D ", "Eb", "E ", "F ", "F#", "G ", "G#", "A ", "Bb", "B "];
+    private static readonly noteStrings: string[] = ["C", "C#", "D", "Eb", "E", "F", "F#", "G", "G#", "A", "Bb", "B"];
 
     public static async generateTab(tabData: TabData, tuning: Tuning, capo: Capo): Promise<string> {
         const totalSamples: number = tabData.totalSamples;
@@ -38,7 +38,7 @@ export default class TabGenerator {
         }
 
         // one data-string per guitar-string. These are joined by newlines after tabbing is complete.
-        const stringTabStrings: string[] = tuning.getNotes().map(n => TabGenerator.noteStrings[n % 12] + "|");
+        const stringTabStrings: string[] = TabGenerator.getTuningNoteStrings(tuning).map(x => x + "|");
         for (var i = 0; i < sequenceData.length; ++i) {
             let stringVal: string[] = new Array(6).fill("-");
             if (sequenceData[i] !== null) {
@@ -60,5 +60,24 @@ export default class TabGenerator {
         const capoString: string = capo.getCapo() === 0 ? "(No capo)\n" : "(Capo " + capo.getCapo().toFixed(0) + ")\n";
 
         return capoString + stringTabStrings.join("\n");
+    }
+
+    // Gets the note that each string is tuned to. Ensures string lengths are uniform.
+    // e.g. standard tuning results in
+    // ["E", "B", "G", "D", "A", "E"]
+    // but with standard tuning and tuning the A down a half-step, results in
+    // ["E ", "B ", "G ", "D ", "G#", "E "]
+    // So the start of the tab would look like the following:
+    //
+    // E|--    E |--
+    // B|--    B |--
+    // G|-- vs G |--
+    // D|--    D |--
+    // A|--    G#|--
+    // E|--    E |--
+    private static getTuningNoteStrings(tuning: Tuning): string[] {
+        const noteStrings: string[] = tuning.getNotes().map(n => TabGenerator.noteStrings[n % 12]);
+        const maxStringLength: number = Math.max(...noteStrings.map(x => x.length));
+        return noteStrings.map(n => n.padEnd(maxStringLength));
     }
 }
