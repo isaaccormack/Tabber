@@ -17,6 +17,7 @@ export interface LickFormInterface {
     lickname: string
     lickdescription: string
     licktuning: string
+    lickcapo: number
     lickpublic: boolean
 }
 
@@ -25,7 +26,8 @@ export default function EditForm(props: EditFormProps) {
         defaultValues: {
             lickname: props.defaultLick?.name,
             lickdescription: props.defaultLick?.description,
-            licktuning: props.defaultLick?.tuning
+            licktuning: props.defaultLick?.tuning,
+            lickcapo: props.defaultLick?.capo
         }
     });
 
@@ -61,18 +63,28 @@ export default function EditForm(props: EditFormProps) {
                             />
                         </Col>
                     </Row>
+                    <Row className="form-row">
+                        <Col className="form-label" lg={2}>Tuning</Col>
+                        <Col>
+                            <select name="licktuning" id="licktuning" ref={register}>
+                                <option value="Standard">Standard</option>
+                                <option value="Drop D">Drop D</option>
+                                <option value="Open G">Open G</option>
+                            </select>
+                        </Col>
+                        <Col className="form-label" lg={2}>Capo</Col>
+                        <Col>
+                            <select name="lickcapo" id="lickcapo" ref={register}>
+                                {[...Array(25)].map((x, i) =>
+                                    "<option value=\""+i+"\">"+i+"</option>" // ew
+                                )}
+                            </select>
+                        </Col>
+                    </Row>
 
                     {/* if uploading, show upload option, else just display tuning */}
-                    {props.uploading ? 
+                    {props.uploading &&
                         <Row className="form-row">
-                            <Col className="form-label" lg={2}>Tuning</Col>
-                            <Col>
-                                <select name="licktuning" id="licktuning" ref={register}>
-                                    <option value="Standard">Standard</option>
-                                    <option value="Drop D">Drop D</option>
-                                    <option value="Open G">Open G</option>
-                                </select>
-                            </Col>
                             <Col className="form-label" lg={2}>Privacy</Col>
                             <Col>
                                 <select name="lickpublic" id="lickpublic" ref={register}>
@@ -81,17 +93,6 @@ export default function EditForm(props: EditFormProps) {
                                 </select>
                             </Col>
                         </Row>
-                    :
-                    <Row className="form-row">
-                        <Col className="form-label" lg={2}>Tuning</Col>
-                        <Col>
-                            <input className="form-input"
-                                    name="licktuning"
-                                    ref={register}
-                                    readOnly={true}
-                            />
-                        </Col>
-                    </Row>
                     }
                
                     {!props.disabled &&

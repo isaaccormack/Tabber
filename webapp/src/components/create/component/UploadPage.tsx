@@ -23,8 +23,9 @@ export default function UploadPage() {
             const form = new FormData();
             form.append("file", file);
             form.append("name", metadata.lickname);
+            form.append("description", metadata.lickdescription);
             form.append("tuning", metadata.licktuning);
-            form.append("description", metadata.lickdescription)
+            form.append("capo", metadata.lickcapo.toFixed(0));
             form.append("isPublic", metadata.lickpublic.toString());
             fetch("/api/licks",{
                 method: "POST",

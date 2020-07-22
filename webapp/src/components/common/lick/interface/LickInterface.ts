@@ -7,9 +7,10 @@ export interface LickInterface {
     dateUploaded: string
     audioFileLocation: string
     audioLength: number
-    tab: string,
+    tab: string
     tuning: string
-    isPublic: boolean,
+    capo: number
+    isPublic: boolean
     sharedWith: UserInterface[]
     owner: UserInterface
 }
