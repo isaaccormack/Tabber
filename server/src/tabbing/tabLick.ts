@@ -38,7 +38,7 @@ export default async function tabLick(lick: Lick): Promise<string> {
     console.log(tabData);
 
     // Generate tab string from tabbable data
-    const tab: string = await TabGenerator.generateTab(tabData, tuning);
+    const tab: string = await TabGenerator.generateTab(tabData, tuning, capo);
     console.log("tab:");
     console.log(tab);
 
