@@ -3,12 +3,12 @@ import sys, getopt
 from librosa import load as load_audio
 from librosa.onset import onset_detect
 from numpy import savetxt
-import numpy as np
-import librosa
-import librosa.display
-import matplotlib.pyplot as plt
 
 def gen_plot(y, sr, hop_length, loc, **kwargs):
+    import numpy as np
+    import librosa
+    import librosa.display
+    import matplotlib.pyplot as plt
     o_env = librosa.onset.onset_strength(y=y, sr=sr, hop_length=hop_length)
     times = librosa.times_like(o_env, sr=sr)
     onset_frames = librosa.onset.onset_detect(onset_envelope=o_env, sr=sr,
@@ -28,7 +28,7 @@ def gen_plot(y, sr, hop_length, loc, **kwargs):
     plt.savefig(loc)
 
 # See https://librosa.org/librosa/generated/librosa.onset.onset_detect.html
-def get_onsets(filePath):
+def get_onsets(filePath, should_plot=False):
 
     values, sample_rate = load_audio(filePath)
     # peak_pick parameters: pre_max, post_max, pre_avg, post_avg, delta, wait.
@@ -54,25 +54,28 @@ def get_onsets(filePath):
                                wait=wait,
                                delta=delta
                                )
-    gen_plot(y=values, sr=sample_rate, hop_length=hop_length, loc="crepe/genplot.png",
-             pre_max=pre_max,
-             post_max=post_max,
-             pre_avg=pre_avg,
-             post_avg=post_avg,
-             wait=wait,
-             delta=delta
-             )
 
+    # Plot spectrogram & onsets. Helpful for analyzing onset detection parameters.
+    if should_plot:
+        gen_plot(y=values, sr=sample_rate, hop_length=hop_length, loc="crepe/genplot.png",
+                pre_max=pre_max,
+                post_max=post_max,
+                pre_avg=pre_avg,
+                post_avg=post_avg,
+                wait=wait,
+                delta=delta
+                )
 
     return onset_times
 
 
 if __name__ == "__main__":
-    helptext = "Usage: onset_detect.py -i <inputfile> -o <outputfile>. <inputfile> and <outputfile> are required."
+    helptext = "Usage: onset_detect.py -i <inputfile> -o <outputfile> [-p]. <inputfile> and <outputfile> are required. -p generates a plot."
     inputfile = ""
     outputfile = ""
+    should_plot = False
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "hi:o:", ["help", "input=", "output="])
+        opts, args = getopt.getopt(sys.argv[1:], "hi:o:p", ["help", "input=", "output=", "plot"])
     except getopt.GetOptError:
         print(helptext)
         sys.exit(2)
@@ -84,12 +87,14 @@ if __name__ == "__main__":
             inputfile = arg
         elif opt in ("-o", "--output"):
             outputfile = arg
+        elif opt in ("-p", "--plot"):
+            should_plot = True
 
     if not inputfile or not outputfile:
         print(helptext)
         sys.exit(2)
 
-    times = get_onsets(inputfile)
+    times = get_onsets(inputfile, should_plot)
 
     # write calculated values as CSV in the same format that CREPE uses
     savetxt(outputfile, times, fmt=['%.6f'], delimiter=',',
