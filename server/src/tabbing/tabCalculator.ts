@@ -5,7 +5,7 @@ import Tuning from "./data/tuning";
 import StringFret from "./data/stringFret";
 
 // The purpose of this class is to handle conversion from frequency & onset data,
-// as well as (currently-unimplemented) tuning + user input, to a series of
+// as well as tuning + capo + (currently-unimplemented) user input, to a series of
 // strings + frets + times of played notes.
 
 export default class TabCalculator {
@@ -50,7 +50,7 @@ export default class TabCalculator {
     }
 
     public static getNote(pitch: number): number {
-        // Convert a pitch to a number between 0 and 127
+        // Convert a pitch to an integer between 0 and 127
         // see en.wikipedia.org/wiki/MIDI_tuning_standard#Frequency_values
         return Math.round(69 + 12 * Math.log2(pitch / 440.0));
     }
@@ -58,7 +58,7 @@ export default class TabCalculator {
     // note is a MIDI-tuning-standard note index, between 0 (C_{-1}) and 127 (G_9).
     // Low E on guitar is E_2 (80 Hz, index 40).
     // For now, we take the trivial idea that the note is played on the highest-pitched
-    // string that can play it. We do not take tuning into account (i.e. we assume standard tuning).
+    // string that can play it.
     // Standard tuning: (string index, note, note index)
     // 0 E_4 64
     // 1 B_3 59

@@ -10,11 +10,11 @@ import TabGenerator from "./tabGenerator";
 
 // The purpose of this file is to provide a single interface to convert lick -> tab string.
 // Should only ever require the "audioFileLocation", "tuning", and "audioLength" lick members to be valid;
-// at present only requires the "audioFileLocation" lick member to be valid.
+// at present only requires the "audioFileLocation" and "tuning" lick members to be valid.
 
 export default async function tabLick(lick: Lick): Promise<string> {
     const audioFilePath: string = lick.audioFileLocation;
-    const tuning: Tuning = Tuning.Standard; // = lick.tuning; // 6-element array; e.g. standard: [64, 59, 55, 50, 45, 40]
+    const tuning: Tuning = Tuning.fromString(lick.tuning); // 6-element array; e.g. standard: [64, 59, 55, 50, 45, 40]
 
     console.log("tabbing lick with crepe.");
     console.log(audioFilePath);

@@ -7,7 +7,8 @@ export default class Tuning {
         if (notes.length != 6) {
             throw new Error("Invalid tuning");
         }
-        this.notes = notes;
+        // Ensure notes are integers.
+        this.notes = notes.map(n => Math.round(n));
     }
 
     public getNotes() {
