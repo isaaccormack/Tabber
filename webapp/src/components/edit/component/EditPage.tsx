@@ -25,7 +25,12 @@ export default function EditPage(props: match<EditFormProps>) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({newName: data.lickname, newDescription: data.lickdescription})
+            body: JSON.stringify({
+                newName: data.lickname,
+                newDescription: data.lickdescription,
+                newTuning: data.licktuning,
+                newCapo: data.lickcapo
+            })
         })
         .then((response) => {
             if (response.status === 200) {

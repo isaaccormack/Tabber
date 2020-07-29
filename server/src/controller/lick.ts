@@ -40,6 +40,7 @@ export class LickController {
         lickToBeSaved.dateUploaded = new Date();
         lickToBeSaved.tab = ""; // initally empty, tab not generated yet
         lickToBeSaved.tuning = body.tuning;
+        lickToBeSaved.capo = parseInt(body.capo);
         lickToBeSaved.isPublic = body.isPublic == "true" ? true : false;
         lickToBeSaved.owner = ctx.state.user;
         lickToBeSaved.sharedWith = []; // TODO - list of shared with users will be sent from client upon lick creation
@@ -68,7 +69,7 @@ export class LickController {
             ctx.body = { errors: {error: "Error: Cant get length of audio file."}}
             return
         }
-        
+
         if (lickToBeSaved.audioLength > 60) { // lick is too long
             await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
             ctx.status = 400; // BAD REQUEST
@@ -300,10 +301,24 @@ export class LickController {
                 }
                 // assert the name isnt empty
                 if (body.newName) {
-                    lick.name = body.newName; // could validate this
+                    lick.name = body.newName;
                 }
-                if (body.newDescription != undefined) {
-                    lick.description = body.newDescription; // could validate this
+                if (body.newDescription !== undefined) {
+                    lick.description = body.newDescription;
+                }
+                if (body.newTuning) {
+                    lick.tuning = body.newTuning;
+                }
+                if (body.newCapo) {
+                    lick.capo = parseInt(body.newCapo);
+                }
+
+                const errors: ValidationError[] = await validate(lick);
+
+                if (errors.length > 0) {
+                    ctx.status = 400; // BAD REQUEST
+                    ctx.body = { errors };
+                    return;
                 }
 
                 const updatedLick: Lick | undefined = await lickRepository.save(lick);

@@ -7,7 +7,7 @@ import {LickInterface} from "../../common/lick/interface/LickInterface";
 
 interface EditFormProps {
     formTitle: string
-    onSubmit: Function
+    onSubmit: (data: LickFormInterface) => any
     defaultLick?: LickInterface
     disabled?: boolean
     uploading: boolean
@@ -17,6 +17,7 @@ export interface LickFormInterface {
     lickname: string
     lickdescription: string
     licktuning: string
+    lickcapo: number
     lickpublic: boolean
 }
 
@@ -25,12 +26,13 @@ export default function EditForm(props: EditFormProps) {
         defaultValues: {
             lickname: props.defaultLick?.name,
             lickdescription: props.defaultLick?.description,
-            licktuning: props.defaultLick?.tuning
+            licktuning: props.defaultLick?.tuning,
+            lickcapo: props.defaultLick?.capo,
+            lickpublic: props.defaultLick?.isPublic
         }
     });
 
-    const onSubmit = (data: any) => {props.onSubmit(data);}
-
+    const onSubmit = (data: LickFormInterface) => {props.onSubmit(data);}
 
     return (
         <Container fluid className="edit-form-wrapper">
@@ -61,18 +63,29 @@ export default function EditForm(props: EditFormProps) {
                             />
                         </Col>
                     </Row>
+                    <Row className="form-row">
+                        <Col className="form-label" lg={2}>Tuning</Col>
+                        <Col>
+                            <select name="licktuning" id="licktuning" ref={register}>
+                                <option value="Standard">Standard</option>
+                                <option value="Drop D">Drop D</option>
+                                <option value="Open G">Open G</option>
+                            </select>
+                        </Col>
+                        <Col className="form-label" lg={2}>Capo</Col>
+                        <Col>
+                            <select name="lickcapo" id="lickcapo" ref={register}>
+                                <option value="0">None</option>
+                                {[...Array(24)].map((x, idx) => {
+                                    return <option value={idx+1}>{idx+1}</option>
+                                })}
+                            </select>
+                        </Col>
+                    </Row>
 
                     {/* if uploading, show upload option, else just display tuning */}
-                    {props.uploading ? 
+                    {props.uploading &&
                         <Row className="form-row">
-                            <Col className="form-label" lg={2}>Tuning</Col>
-                            <Col>
-                                <select name="licktuning" id="licktuning" ref={register}>
-                                    <option value="Standard">Standard</option>
-                                    <option value="Drop D">Drop D</option>
-                                    <option value="Open G">Open G</option>
-                                </select>
-                            </Col>
                             <Col className="form-label" lg={2}>Privacy</Col>
                             <Col>
                                 <select name="lickpublic" id="lickpublic" ref={register}>
@@ -81,17 +94,6 @@ export default function EditForm(props: EditFormProps) {
                                 </select>
                             </Col>
                         </Row>
-                    :
-                    <Row className="form-row">
-                        <Col className="form-label" lg={2}>Tuning</Col>
-                        <Col>
-                            <input className="form-input"
-                                    name="licktuning"
-                                    ref={register}
-                                    readOnly={true}
-                            />
-                        </Col>
-                    </Row>
                     }
                
                     {!props.disabled &&

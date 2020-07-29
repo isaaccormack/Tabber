@@ -3,17 +3,23 @@ import OnsetData from "./data/onsetData";
 import TabData from "./data/tabData";
 import Tuning from "./data/tuning";
 import StringFret from "./data/stringFret";
+import Capo from "./data/capo";
 
 // The purpose of this class is to handle conversion from frequency & onset data,
 // as well as tuning + capo + (currently-unimplemented) user input, to a series of
 // strings + frets + times of played notes.
+//
+// fret values returned are relative to the capo; e.g. a capo of 5 is treated as tuning
+// the guitar 5 semitones higher.
 
 export default class TabCalculator {
 
-    public static async getTabData(pitch: PitchData, onsets: OnsetData, tuning: Tuning): Promise<TabData> {
+    public static async getTabData(pitch: PitchData, onsets: OnsetData, tuning: Tuning, capo: Capo): Promise<TabData> {
         const tabData: TabData = new TabData();
         console.log("tuning:");
         console.log(tuning.getNotes());
+        console.log("capo:");
+        console.log(capo.getCapo());
 
         tabData.totalSamples = pitch.time.length;
         const onsetIndices: number[] = TabCalculator.onsetsToIndices(onsets.time, pitch.time);
@@ -21,7 +27,7 @@ export default class TabCalculator {
         const playedStringFrets: (StringFret | null)[] = [];
         for (var i = 0; i < pitch.time.length; ++i) {
             if (onsetIndices.includes(i)) {
-                playedStringFrets.push(TabCalculator.getStringAndFret(TabCalculator.getNote(pitch.frequency[i]), tuning));
+                playedStringFrets.push(TabCalculator.getStringAndFret(TabCalculator.getNote(pitch.frequency[i]), tuning, capo));
             } else {
                 playedStringFrets.push(null);
             }
@@ -69,8 +75,8 @@ export default class TabCalculator {
     //
     // see en.wikipedia.org/wiki/Scientific_pitch_notation#Table_of_note_frequencies
     // and en.wikipedia.org/wiki/Guitar_tunings#Standard
-    public static getStringAndFret(note: number, tuning: Tuning): StringFret {
-        const notes: number[] = tuning.getNotes();
+    public static getStringAndFret(note: number, tuning: Tuning, capo: Capo): StringFret {
+        const notes: number[] = tuning.getNotes().map(x => x + capo.getCapo());
         for (var i = 0; i < notes.length; ++i) {
             if (note >= notes[i]) {
                 return { stringIdx: i, fret: note - notes[i] };

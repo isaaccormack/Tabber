@@ -7,14 +7,16 @@ import PitchDetector from "./pitchDetector";
 import OnsetDetector from "./onsetDetector";
 import TabCalculator from "./tabCalculator";
 import TabGenerator from "./tabGenerator";
+import Capo from "./data/capo";
 
 // The purpose of this file is to provide a single interface to convert lick -> tab string.
-// Should only ever require the "audioFileLocation", "tuning", and "audioLength" lick members to be valid;
-// at present only requires the "audioFileLocation" and "tuning" lick members to be valid.
+// Should only ever require the "audioFileLocation", "tuning", "capo", and "audioLength" lick members to be valid;
+// at present only requires the "audioFileLocation", "tuning", and "capo" lick members to be valid.
 
 export default async function tabLick(lick: Lick): Promise<string> {
     const audioFilePath: string = lick.audioFileLocation;
     const tuning: Tuning = Tuning.fromString(lick.tuning); // 6-element array; e.g. standard: [64, 59, 55, 50, 45, 40]
+    const capo: Capo = new Capo(lick.capo);
 
     console.log("tabbing lick with crepe.");
     console.log(audioFilePath);
@@ -30,13 +32,13 @@ export default async function tabLick(lick: Lick): Promise<string> {
     console.log("onset data:");
     console.log(onsetData);
 
-    // Get tabbable data
-    const tabData: TabData = await TabCalculator.getTabData(pitchData, onsetData, tuning);
+    // Get tabbable data, taking tuning & capo into account
+    const tabData: TabData = await TabCalculator.getTabData(pitchData, onsetData, tuning, capo);
     console.log("tab data:");
     console.log(tabData);
 
     // Generate tab string from tabbable data
-    const tab: string = await TabGenerator.generateTab(tabData, tuning);
+    const tab: string = await TabGenerator.generateTab(tabData, tuning, capo);
     console.log("tab:");
     console.log(tab);
 
