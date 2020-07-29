@@ -91,6 +91,7 @@ export class LickController {
         const lick: Lick | undefined = await lickRepository.save(lickToBeSaved);
 
         if (!lick) {
+            await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
             ctx.status = 500; // SERVER ERROR
             ctx.body = { errors: {error: "Error: Cant save lick to database."}}
         } else {
