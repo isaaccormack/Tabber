@@ -13,7 +13,7 @@ import Capo from "./data/capo";
 // Should only ever require the "audioFileLocation", "tuning", "capo", and "audioLength" lick members to be valid;
 // at present only requires the "audioFileLocation", "tuning", and "capo" lick members to be valid.
 
-export default async function tabLick(lick: Lick): Promise<string> {
+async function tabLick(lick: Lick): Promise<string> {
     const audioFilePath: string = lick.audioFileLocation;
     const tuning: Tuning = Tuning.fromString(lick.tuning); // 6-element array; e.g. standard: [64, 59, 55, 50, 45, 40]
     const capo: Capo = new Capo(lick.capo);
@@ -63,3 +63,5 @@ export default async function tabLick(lick: Lick): Promise<string> {
     console.log("done tabbing lick.");
     return tab;
 }
+
+module.exports = {tabLick};

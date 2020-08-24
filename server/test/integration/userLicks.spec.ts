@@ -21,7 +21,7 @@ const testDataDir = __dirname + '/../../../test/data/';
  * in the lick endpoint (ie. uploading and deleting licks) and therefore shouldnt
  * be grouped into the user tests as this would increase coupling.
  * 
- * LAST MODIFIED: June 21 2020
+ * LAST MODIFIED: Aug 24 2020
  */
 describe('Integration: Users licks', () => {
     let app: Koa
@@ -31,13 +31,15 @@ describe('Integration: Users licks', () => {
     const licks = [
         {
             name: "lick1",
-            tuning: "standard",
+            tuning: "Standard",
+            capo: 0,
             isPublic: "false", // must send as string, recieve as bool
             audioFilePath: testDataDir + '700KB_mp3_file_27s.mp3'
         },
         {
             name: "lick2",
-            tuning: "drop d",
+            tuning: "Drop D",
+            capo: 0,
             isPublic: "false", // must send as string, recieve as bool
             audioFilePath: testDataDir + '400KB_wav_file_2s.wav'
         }
@@ -49,6 +51,8 @@ describe('Integration: Users licks', () => {
             .type('form')
             .field('name', lick.name)
             .field('tuning', lick.tuning)
+            .field('capo', lick.capo)
+            .field('skipTabbing', "true")
             .field('isPublic', lick.isPublic)
             .attach('file', lick.audioFilePath)
             .set("Cookie", "ti="+identityToken)

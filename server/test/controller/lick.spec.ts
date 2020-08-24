@@ -4,6 +4,7 @@ import {createMockContext } from '@shopify/jest-koa-mocks';
 import { User } from "../../src/entity/user";
 import { LickController } from '../../src/controller/lick'
 import { Lick } from '../../src/entity/lick';
+const TabModule = require('../../src/tabbing/tabLick');
 
 const audioDuration = require('get-audio-duration')
 
@@ -42,7 +43,8 @@ describe('Unit test: Lick endpoint', () => {
         fakeLick.description = "good one";
         fakeLick.dateUploaded = now;
         fakeLick.tab = "";
-        fakeLick.tuning = "drop d";
+        fakeLick.tuning = "Drop D";
+        fakeLick.capo = 0;
         fakeLick.isPublic = false;
         fakeLick.owner = lickOwner;
         fakeLick.sharedWith = [];
@@ -54,12 +56,14 @@ describe('Unit test: Lick endpoint', () => {
             name: fakeLick.name,
             description: fakeLick.description,
             tuning: fakeLick.tuning,
+            capo: fakeLick.capo,
             isPublic: fakeLick.isPublic
         }
 
         sandbox.stub(LickController, "validateAudioFile").returns(null);
         sandbox.stub(LickController, "saveAudioFile").returns(fakeLick.audioFileLocation);
         sandbox.stub(audioDuration, "getAudioDurationInSeconds").returns(fakeLick.audioLength);
+        sandbox.stub(TabModule, "tabLick").returns("");
         stubGetLickRepository({ save: function() { return fakeLick } });
  
         const ctx: any = createMockContext();
@@ -78,7 +82,8 @@ describe('Unit test: Lick endpoint', () => {
         let body = {
             name: "",
             description: "",
-            tuning: "standard",
+            tuning: "Drop D",
+            capo: 0,
             isPublic: false
         }
 
@@ -91,7 +96,7 @@ describe('Unit test: Lick endpoint', () => {
         await LickController.createLick(ctx)
 
         expect(ctx.status).toBe(400)
-        expect(ctx.body.errors.length).toBeGreaterThanOrEqual(1)
+        expect(ctx.body.errors.length).toEqual(1)
         expect(ctx.body.errors[0].property).toBe('name')
     })
     it('should NOT CREATE lick when no file sent', async () => {
@@ -109,7 +114,8 @@ describe('Unit test: Lick endpoint', () => {
         let body = {
             name: "another lick",
             description: "",
-            tuning: "standard",
+            tuning: "Drop D",
+            capo: 0,
             isPublic: false
         }
 

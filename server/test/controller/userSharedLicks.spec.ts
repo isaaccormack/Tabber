@@ -32,9 +32,17 @@ describe('Unit test: User shared licks endpoint', () => {
         const lickOwner: User = new User()
         lickOwner.id = 1 // must set id
 
+        const lickToBeShared: Lick = new Lick()
+        lickToBeShared.owner = lickOwner;
+
         const body = {
             userID: lickOwner.id
         }
+
+        sandbox.stub(UserController, "getUserByEmail").returns(lickOwner);
+        stubGetLickRepository({
+            findOne: function() { return lickToBeShared }
+        });
 
         const ctx: any = createMockContext();
         ctx.request.body = body;
@@ -68,7 +76,7 @@ describe('Unit test: User shared licks endpoint', () => {
             },   
         });
 
-        sandbox.stub(UserController, "getUserByID").returns(anotherUser);
+        sandbox.stub(UserController, "getUserByEmail").returns(anotherUser);
  
         const ctx: any = createMockContext();
         ctx.request.body = {};
@@ -140,7 +148,7 @@ describe('Unit test: User shared licks endpoint', () => {
             findOne: function() { return lickToBeShared }
         });
 
-        sandbox.stub(UserController, "getUserByID").returns(null);
+        sandbox.stub(UserController, "getUserByEmail").returns(null);
 
         const ctx: any = createMockContext();
         ctx.request.body = {};

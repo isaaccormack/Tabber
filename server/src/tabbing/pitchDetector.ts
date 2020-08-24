@@ -34,7 +34,7 @@ export default class PitchDetector {
         // inputting into the tensorflow model).
         console.log("running crepe model");
 
-        const execString: string = "crepe " + "--output " + PitchDetector.CrepeOutputDirectory + " --model-capacity full " + audioFilePath;
+        const execString: string = "python3 -m crepe " + "--output " + PitchDetector.CrepeOutputDirectory + " --model-capacity full " + audioFilePath;
 
         console.log("executing string:");
         console.log(execString);

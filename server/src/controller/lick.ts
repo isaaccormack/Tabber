@@ -11,7 +11,7 @@ const ffmpeg = require('fluent-ffmpeg');
 import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
 import { UserController } from './user'
-import tabLick from "../tabbing/tabLick";
+const TabModule = require('../tabbing/tabLick');
 
 export class LickController {
 
@@ -77,14 +77,17 @@ export class LickController {
             return
         }
 
-        try {
-            // Generate tab for lick after other data is handled
-            lickToBeSaved.tab = await tabLick(lickToBeSaved);
-        } catch (err) {
-            await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
-            ctx.status = 500; // SERVER ERROR
-            ctx.body = { errors: {error: "Error: Failed to tab audio file."}};
-            return;
+        lickToBeSaved.tab = "";
+        if (!body.skipTabbing) {
+            try {
+                // Generate tab for lick after other data is handled
+                lickToBeSaved.tab = await TabModule.tabLick(lickToBeSaved);
+            } catch (err) {
+                await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
+                ctx.status = 500; // SERVER ERROR
+                ctx.body = { errors: {error: "Error: Failed to tab audio file."}};
+                return;
+            }
         }
 
         // finally, save the lick to the database
@@ -157,14 +160,12 @@ export class LickController {
     /**
      * PUT /api/lick/share/{id}
      *
-     * Share a lick with another user by id.
+     * Share a lick (by id) with another user via their email.
      */
     public static async shareLick(ctx: Context): Promise<void> {
 
         const lickID = +ctx.params.id || 0;
         const userEmailToShareWith = ctx.request.body.userEmail || "";
-
-        console.log(userEmailToShareWith)
 
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
         const lickToBeShared: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['owner', 'sharedWith']});

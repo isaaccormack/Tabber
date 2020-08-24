@@ -26,36 +26,39 @@ const testDataDir = __dirname + '/../../../test/data/';
  * user and lick controllers.
  * 
  * NOTES:
- * - These tests assume the the user.spec.ts and lick.spec.ts integration tests all pass.
- *   Specifically, the ability to create, get, and delete licks is needed in setup for these
- *   tests. These tests also test the sharing functionality of these endpoints.
- * 
  * - These tests are directly dependent on each other. It is sometimes noted when the dependency
  *   is obscure, but mostly this is implied (ie. getting a shared lick must come after a lick was
  *   shared).
  * 
- * PRECONDITION:
+ * PRECONDITIONS:
+ * - The user.spec.ts and lick.spec.ts integration tests must all pass.
+ *   Specifically, the ability to create, get, and delete licks is needed in setup for these
+ *   tests. These tests also test the sharing functionality of these endpoints.
+ * 
  * - The database must not contain any records on any of the data used in this test before the 
  *   test is run. To make things easy, the database should be empty intially.
  * 
- * LAST MODIFIED: June 21 2020
+ * LAST MODIFIED: Aug 24 2020
  */
 describe('Integration: Users shared licks', () => {
     let app: Koa
     let db: Connection
     let testUserID: number
+    let testUserEmail = "tabber.test.user@gmail.com"
     let lickIDs = []
 
     const licks = [
         {
             name: "lick1",
-            tuning: "standard",
+            tuning: "Standard",
+            capo: 0,
             isPublic: "false", // must send as string, recieve as bool
             audioFilePath: testDataDir + '700KB_mp3_file_27s.mp3'
         },
         {
             name: "lick2",
-            tuning: "drop d",
+            tuning: "Drop D",
+            capo: 0,
             isPublic: "false", // must send as string, recieve as bool
             audioFilePath: testDataDir + '400KB_wav_file_2s.wav'
         }
@@ -67,6 +70,8 @@ describe('Integration: Users shared licks', () => {
             .type('form')
             .field('name', lick.name)
             .field('tuning', lick.tuning)
+            .field('capo', lick.capo)
+            .field('skipTabbing', "true")
             .field('isPublic', lick.isPublic)
             .attach('file', lick.audioFilePath)
             .set("Cookie", "ti="+identityToken)
@@ -121,7 +126,7 @@ describe('Integration: Users shared licks', () => {
         const shareRes: request.Response = await request(app.callback())
             .put('/api/lick/share/' + lickIDs[0])
             .type('form')
-            .field('userID', testUserID)
+            .field('userEmail', testUserEmail)
             .set("Cookie", "ti="+identityToken);
 
         // expect the newly created lick to only be shared with test user
@@ -149,7 +154,7 @@ describe('Integration: Users shared licks', () => {
         const shareRes: request.Response = await request(app.callback())
             .put('/api/lick/share/' + lickIDs[0])
             .type('form')
-            .field('userID', testUserID)
+            .field('userEmail', testUserEmail)
             .set("Cookie", "ti="+identityToken);
 
         // expect the shared with state of the lick to be the same as before
@@ -176,7 +181,7 @@ describe('Integration: Users shared licks', () => {
         const shareRes: request.Response = await request(app.callback())
         .put('/api/lick/share/' + lickIDs[1])
         .type('form')
-        .field('userID', testUserID)
+        .field('userEmail', testUserEmail)
         .set("Cookie", "ti="+identityToken);
 
         // expect the newly created lick to only be shared with test user

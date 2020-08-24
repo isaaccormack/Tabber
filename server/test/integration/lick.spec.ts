@@ -33,7 +33,8 @@ describe('Integration: Licks endpoint', () => {
         name: "sweet integration lick",
         description: "", // not sent
         audioLength: 27, // not sent
-        tuning: "standard",
+        tuning: "Standard",
+        capo: 0,
         isPublic: "false"// must send as string, recieve as bool
     }
 
@@ -64,6 +65,8 @@ describe('Integration: Licks endpoint', () => {
             .type('form')
             .field('name', lickBody.name)
             .field('tuning', lickBody.tuning)
+            .field('capo', lickBody.capo)
+            .field('skipTabbing', "true")
             .field('isPublic', lickBody.isPublic)
             .attach('file', audioFilePath)
             .set("Cookie", "ti="+identityToken);
@@ -75,6 +78,7 @@ describe('Integration: Licks endpoint', () => {
             expect(response.body.dateUploaded).toBeDefined();
             expect(response.body.audioLength).toBeCloseTo(lickBody.audioLength, 0);
             expect(response.body.tuning).toBe(lickBody.tuning);
+            expect(response.body.capo).toBe(lickBody.capo);
             expect(response.body.isPublic).toBe(JSON.parse(lickBody.isPublic));
             expect(response.body.owner).toBeDefined();
             expect(response.body.owner.email).toBe(tokenParams.email);
@@ -90,6 +94,8 @@ describe('Integration: Licks endpoint', () => {
             .type('form')
             .field('name', lickBody.name)
             .field('tuning', lickBody.tuning)
+            .field('capo', lickBody.capo)
+            .field('skipTabbing', "true")
             .field('isPublic', lickBody.isPublic)
             .set("Cookie", "ti="+identityToken);
 
@@ -104,6 +110,8 @@ describe('Integration: Licks endpoint', () => {
             .type('form')
             .field('name', lickBody.name)
             .field('tuning', lickBody.tuning)
+            .field('capo', lickBody.capo)
+            .field('skipTabbing', "true")
             .field('isPublic', lickBody.isPublic)
             .attach('file', longAudioFilePath)
             .set("Cookie", "ti="+identityToken);
@@ -119,6 +127,8 @@ describe('Integration: Licks endpoint', () => {
             .type('form')
             .field('name', lickBody.name)
             .field('tuning', lickBody.tuning)
+            .field('capo', lickBody.capo)
+            .field('skipTabbing', "true")
             .field('isPublic', lickBody.isPublic)
             .attach('file', textFilePath)
             .set("Cookie", "ti="+identityToken);
@@ -134,6 +144,8 @@ describe('Integration: Licks endpoint', () => {
             .type('form')
             .field('name', lickBody.name)
             .field('tuning', lickBody.tuning)
+            .field('capo', lickBody.capo)
+            .field('skipTabbing', "true")
             .field('isPublic', lickBody.isPublic)
             .attach('file', audioFilePath)
 
@@ -156,6 +168,7 @@ describe('Integration: Licks endpoint', () => {
             expect(response.body.dateUploaded).toBeDefined();
             expect(response.body.audioLength).toBeCloseTo(lickBody.audioLength, 0);
             expect(response.body.tuning).toBe(lickBody.tuning);
+            expect(response.body.capo).toBe(lickBody.capo);
             expect(response.body.isPublic).toBe(JSON.parse(lickBody.isPublic));
             expect(response.body.owner).toBeDefined();
             expect(response.body.owner.email).toBe(tokenParams.email);
@@ -270,6 +283,8 @@ describe('Integration: Licks endpoint', () => {
             .type('form')
             .field('name', lickBody.name)
             .field('tuning', lickBody.tuning)
+            .field('capo', lickBody.capo)
+            .field('skipTabbing', "true")
             .field('isPublic', "true")
             .attach('file', audioFilePath)
             .set("Cookie", "ti="+identityToken);
@@ -281,6 +296,7 @@ describe('Integration: Licks endpoint', () => {
             expect(response.body.dateUploaded).toBeDefined();
             expect(response.body.audioLength).toBeCloseTo(lickBody.audioLength, 0);
             expect(response.body.tuning).toBe(lickBody.tuning);
+            expect(response.body.capo).toBe(lickBody.capo);
             expect(response.body.isPublic).toBe(!JSON.parse(lickBody.isPublic));
             expect(response.body.owner).toBeDefined();
             // doesn't work since user schema isnt consistant with database
@@ -305,6 +321,7 @@ describe('Integration: Licks endpoint', () => {
             expect(response.body.dateUploaded).toBeDefined();
             expect(response.body.audioLength).toBeCloseTo(lickBody.audioLength, 0);
             expect(response.body.tuning).toBe(lickBody.tuning);
+            expect(response.body.capo).toBe(lickBody.capo);
             expect(response.body.isPublic).toBe(!JSON.parse(lickBody.isPublic));
             expect(response.body.owner).toBeDefined();
 
@@ -361,4 +378,3 @@ describe('Integration: Licks endpoint', () => {
 
     // TODO: (in addition to all edit tests) shouldnt be able to edit lick user doesnt own
 });
-
