@@ -1,23 +1,7 @@
 @import "mainstyles.css";
 
-.sidenav {
-  height: 100%;
-  width: var(--sidebar-size);
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  background-color: #111;
-  overflow-x: hidden;
-  padding-top: 20px;
-}
-
-.main {
-  margin-left: var(--sidebar-size);
-}
-
 .app {
-  background-color: var(--background-dark);
+  background-color: var(--background-light);
   min-height: 100vh;
   color: var(--font-color-light);
   font-size: 16px;

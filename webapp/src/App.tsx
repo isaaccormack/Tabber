@@ -24,9 +24,7 @@ function App() {
     return (
       <Provider store={rootStore}>
         <div className="app-wrapper">
-            <div className="sidenav">
-                <Navigation />
-            </div>
+            <Navigation />
             <div className="main">
                 <Container fluid className="app">
                     <Switch>
@@ -42,7 +40,7 @@ function App() {
                         <Route exact path="/oauth" component={OAuth2Page} />
                         <Route exact path="/login" component={LoginPage} />
                         <Route exact path="/">
-                            <Redirect to="/create" />
+                            <Redirect to="/library" />
                         </Route>
                         <Route exact path="/404" component={NotFoundPage} />
                         <Route path="*">

@@ -1,7 +1,11 @@
 import React, {useCallback, useEffect} from 'react';
+import Navbar from 'react-bootstrap/Navbar';
+import Nav from 'react-bootstrap/Nav';
 import Container from 'react-bootstrap/Container';
+import Tooltip from 'react-bootstrap/Tooltip';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 
 import './Navigation.css';
 import RootState from "../../../../store/root-state";
@@ -9,19 +13,11 @@ import {useDispatch, useSelector} from "react-redux";
 import {useHistory} from "react-router";
 import {DeleteUser} from "../../user/actions/UserActions";
 
-import AccountIcon from "../icons/account.svg";
-import CreateIcon from "../icons/create.svg";
-import LibraryIcon from "../icons/library.svg";
-import SharedIcon from "../icons/shared.svg";
-import LogoutIcon from "../icons/logout.svg";
+import RecordIcon from "../icons/record.svg";
+import UploadIcon from "../icons/upload.svg";
 import {UserInterface} from "../../user/interface/UserInterface";
 
-interface SelectorInterface {
-    accountSelector: string
-    createSelector: string
-    librarySelector: string
-    sharedSelector: string
-}
+import UploadButton from "./UploadButton";
 
 export default function Navigation() {
 
@@ -29,12 +25,6 @@ export default function Navigation() {
     const dispatch = useDispatch();
 
     const pathname = window.location.pathname;
-
-    const {
-        accountSelector,
-        createSelector,
-        librarySelector,
-        sharedSelector } = getSelector(pathname);
 
     const logout = useCallback(() => {
         dispatch(DeleteUser());
@@ -66,48 +56,40 @@ export default function Navigation() {
     }, [logout, user])
 
     return (
-        <Container>
-            <Row>
-                <Col xs={{offset: 2}}>
-                    <Row className="logo">
-                        Tabber
-                    </Row>
-                    <Row className="nav-selection" id={accountSelector} onClick={()=>{history.push("/account")}}>
-                        <img src={AccountIcon} className="icon" alt="account" /> Account
-                    </Row>
-                    <Row className="nav-selection" id={createSelector} onClick={()=>{history.push("/create")}}>
-                        <img src={CreateIcon} className="icon" alt="create" /> Create
-                    </Row>
-                    <Row className="nav-selection" id={librarySelector} onClick={()=>{history.push("/library")}}>
-                        <img src={LibraryIcon} className="icon" alt="library" /> Library
-                    </Row>
-                    <Row className="nav-selection bottom" id={sharedSelector} onClick={()=>{history.push("/shared")}}>
-                        <img src={SharedIcon} className="icon" alt="shared" /> Shared
-                    </Row>
-                    <Row className="nav-selection" onClick={logout}>
-                        <img src={LogoutIcon} className="icon" alt="logout" /> Logout
-                    </Row>
-                </Col>
-            </Row>
-        </Container>
+        <Navbar bg="primary" variant="dark">
+            <Container>
+            <Navbar.Brand href="/" className="logo">
+                Tabber
+            </Navbar.Brand>
+            {user &&
+            <Nav className="ml-auto">
+                <OverlayTrigger
+                    placement="bottom"
+                    delay={{ show: 250, hide: 400 }}
+                    overlay={<Tooltip id="button-tooltip">Record a Lick</Tooltip>}
+                    >
+                    <Nav.Link href="/create/record" bsPrefix="navItem">
+                        <img src={RecordIcon} style={{height: 22}} alt="record"/>
+                    </Nav.Link>
+                </OverlayTrigger>
+                <OverlayTrigger
+                    placement="bottom"
+                    delay={{ show: 250, hide: 400 }}
+                    overlay={<Tooltip id="button-tooltip">Upload a Lick</Tooltip>}
+                    >
+                    <Nav.Link href="/" bsPrefix="navItem"> 
+                        {/* <img src={UploadIcon} style={{height: 30}}/> */}
+                        <UploadButton/>
+                    </Nav.Link>
+                </OverlayTrigger>
+                <Nav.Link onClick={logout} bsPrefix="navItem" style={{display: "flex", alignItems: "center"}}>
+                    <div className="sign-out">
+                        Sign Out
+                    </div>
+                </Nav.Link>
+            </Nav>
+            }
+            </Container>
+      </Navbar>
     );
-}
-
-function getSelector(pathname: String): SelectorInterface {
-    const selector: SelectorInterface = {
-        accountSelector: "",
-        createSelector: "",
-        librarySelector: "",
-        sharedSelector: "",
-    }
-    if (pathname.startsWith("/account")) {
-        selector.accountSelector = "selected";
-    } else if (pathname.startsWith("/create")) {
-        selector.createSelector = "selected";
-    } else if (pathname.startsWith("/library")) {
-        selector.librarySelector = "selected";
-    } else if (pathname.startsWith(("/shared"))) {
-        selector.sharedSelector = "selected";
-    }
-    return selector;
 }

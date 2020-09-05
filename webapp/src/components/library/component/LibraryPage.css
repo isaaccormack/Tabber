@@ -1,6 +1,6 @@
 @import "../../../mainstyles.css";
 
-.library-title {
+.menu {
     font-size: var(--font-size-8);
     font-family: var(--font-body);
     margin-bottom: 10px;
@@ -9,4 +9,29 @@
 .library-table-wrapper {
     width: 60%;
     height: 60vh;
+}
+
+.nav {
+    padding-top: 20px;
+}
+
+.col {
+    display: flex;
+    justify-content: center;
+}
+
+.recordIcon:hover {
+    transform: scale(1.1);
+    transition: 0.1s;
+}
+
+.uploadIcon:hover {
+    transform: scale(1.1);
+    transition: 0.1s;
+}
+
+.dateUploaded {
+    font-size: var(--font-size-1);
+    float: right;
+    margin-bottom: 10px;
 }

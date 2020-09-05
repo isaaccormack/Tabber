@@ -29,7 +29,8 @@ export default function LibraryPlayer(props?: LibraryPlayerProps) {
             <ReactPlayer url={audioPath}
                          controls={true}
                          config={{file: {forceAudio: true}}}
-                         height={"50px"}/>
+                         height={"30px"}
+                         width={"250px"}/>
         )
     } else {
         return (<div>Failed to play the lick</div>);

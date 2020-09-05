@@ -1,40 +1,33 @@
 @import '../../../../mainstyles.css';
 
-.logo {
+
+ /* NEED TO find a better way to override default than !important */
+.navbar-brand {
     font-family: var(--font-header);
-    color: var(--font-color-light);
-    font-size: var(--font-size-8);
-    margin-bottom: 50%;
+    font-size: var(--font-size-5) !important;
 }
 
-#selected {
-    filter: brightness(50%) sepia(1) hue-rotate(309deg) saturate(10);
-    pointer-events: none;
-}
-
-.icon {
-    margin-right: 5px;
-    height: 30px;
-}
-
-.nav-selection {
-    font-family: var(--font-body);
-    font-size: var(--font-size-3);
-    color: var(--font-color-light);
-    margin-bottom: 10px;
-}
-
-.nav-selection:hover {
-    filter: brightness(50%) sepia(1) hue-rotate(180deg) saturate(10);
+.navbar-brand:hover {
+    /* font-size: var(--font-size-7) !important; */
+    margin-left: 3px;
+    transition: 0.1s;
     cursor: pointer;
 }
 
-.bottom {
-    margin-bottom: 50%;
+.navItem {
+    margin-left: 20px;
 }
 
-.center-align {
-    position: absolute;
-    left: 50%;
-    transform: translate(-50%);
+.navItem:hover {
+    /* filter: brightness(10%) saturate(10); */
+    margin-right: 3px;
+    transition: 0.1s;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.sign-out {
+    font-family: var(--font-body);
+    color: #fff;
+    font-size: var(--font-size-2) !important;
 }
