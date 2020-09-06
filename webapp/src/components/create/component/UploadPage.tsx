@@ -27,6 +27,7 @@ export default function UploadPage() {
             form.append("tuning", metadata.licktuning);
             form.append("capo", metadata.lickcapo.toString());
             form.append("isPublic", metadata.lickpublic.toString());
+            form.append("skipTabbing", "true");
             fetch("/api/licks",{
                 method: "POST",
                 body: form

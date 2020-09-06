@@ -5,23 +5,23 @@
 .navbar-brand {
     font-family: var(--font-header);
     font-size: var(--font-size-5) !important;
+    transition: 0.1s;
 }
 
 .navbar-brand:hover {
     /* font-size: var(--font-size-7) !important; */
     margin-left: 3px;
-    transition: 0.1s;
     cursor: pointer;
 }
 
 .navItem {
     margin-left: 20px;
+    transition: 0.1s;
 }
 
 .navItem:hover {
     /* filter: brightness(10%) saturate(10); */
     margin-right: 3px;
-    transition: 0.1s;
     cursor: pointer;
     text-decoration: none;
 }
