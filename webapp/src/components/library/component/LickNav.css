@@ -1,0 +1,36 @@
+.nav {
+    margin-top: 5px;
+}
+
+/* need this since icons have 10px padding for background */
+.nav-link {
+    margin-top: 10px;
+}
+
+.checkbox.nav-item {
+    padding: 10px;
+}
+
+.icon-box {
+    display: flex;
+    align-items: start;
+}
+
+.icon.nav-item {
+    padding: 10px;
+    margin-right: 3px;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.icon.nav-item:hover {
+    background-color: rgb(198, 198, 198);
+}
+
+.central-nav {
+    display: flex;
+    position: absolute;
+    /* apparently this causes an issue sometimes? */
+    /* width: 100%; */
+    left: 43%;
+}

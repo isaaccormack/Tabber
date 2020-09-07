@@ -1,0 +1,42 @@
+/* .col {
+    display: flex;
+    justify-content: center;
+} */
+
+
+.card.lick-card {
+    width: 18rem;
+    margin-top: 25px;
+    transition: .3s;
+    border-color: #ced4da;
+}
+
+.card.lick-card:hover {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.2);
+}
+
+.share-btn {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 50%;
+    transition: 0.2s;
+    /* justify-content: left; */
+}
+
+.share-btn:hover {
+    background-color: rgb(198, 198, 198);
+}
+
+.lick-details {
+    margin-bottom: 0px;
+}
+
+input[type="checkbox"]{
+    width: 20px;
+    height: 20px;
+}
+
+.no-licks {
+    margin: 70px 0px;
+}
+
