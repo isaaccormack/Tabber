@@ -19,6 +19,7 @@ export interface LickCardsProps {
     selected: string[];
     handleSelectOne: (event: any) => void;
     setShowShareModal: (a: boolean) => void;
+    handlePlayLick: (lickID: number) => void;
 }
 
 export default function LickCards(props: LickCardsProps) {
@@ -29,6 +30,7 @@ export default function LickCards(props: LickCardsProps) {
     const selected = props.selected;
     const handleSelectOne = props.handleSelectOne;
     const setShowShareModal = props.setShowShareModal;
+    const handlePlayLick = props.handlePlayLick;
 
     const handleSortLicks = (a: LickInterface, b: LickInterface): number => {
             const greater = ascending ? 1 : -1;
@@ -83,7 +85,7 @@ export default function LickCards(props: LickCardsProps) {
                         </Row>
                         <Row>
                             <Col xs={6}>
-                                <img src={PlayIcon} height={70} alt="play lick"/>
+                                <img src={PlayIcon} height={60} onClick={() => {handlePlayLick(lick.id)}} alt="play lick"/>
                             </Col>
                             <Col xs={6} className="text-right my-auto">
                                 <h1 className="lick-details">{formatLickLength(lick.audioLength)}</h1>

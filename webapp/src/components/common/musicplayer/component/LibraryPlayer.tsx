@@ -27,8 +27,7 @@ export default function LibraryPlayer(props?: LibraryPlayerProps) {
     if (audioPath) {
         return (
             <ReactPlayer url={audioPath}
-                         controls={true}
-                         config={{file: {forceAudio: true}}}
+                         playing={audioPath ? true : false}
                          height={"30px"}
                          width={"250px"}/>
         )

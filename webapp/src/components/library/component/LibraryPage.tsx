@@ -1,9 +1,13 @@
 import React, {useEffect, useState} from "react";
 import Container from 'react-bootstrap/Container';
-import Button from 'react-bootstrap/Button';
-import Modal from 'react-bootstrap/Modal';
+import Collapse from 'react-bootstrap/Collapse';
+import Navbar from 'react-bootstrap/Navbar';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 import {useHistory} from "react-router";
 import {useDispatch} from "react-redux";
+import { Slider, SliderBar, SliderHandle } from 'react-player-controls'
+import { Button, PlayerIcon } from 'react-player-controls'
 
 import {getAudioFile} from "../../common/musicplayer/component/MusicHelper";
 import {LickInterface} from "../../common/lick/interface/LickInterface";
@@ -15,6 +19,7 @@ import LickDisplayControl from "./LickDisplayControl";
 import ShareLickModal from "./ShareLickModal";
 import DeleteLickModal from "./DeleteLickModal";
 import UnfollowLickModal from "./UnfollowLickModal";
+import LibraryPlayer from "../../common/musicplayer/component/LibraryPlayer";
 
 
 export default function LibraryPage() {  
@@ -45,13 +50,13 @@ export default function LibraryPage() {
         getLibrary();
     }, [])
 
-    useEffect(() => {
-        if (licks.length > 0) {
-            getAudioFile(licks[0]).then((file: Blob) => {
-                setSelectedFile(file);
-            })
-        }
-    }, [licks])
+    // useEffect(() => {
+    //     if (licks.length > 0) {
+    //         getAudioFile(licks[0]).then((file: Blob) => {
+    //             setSelectedFile(file);
+    //         })
+    //     }
+    // }, [licks])
     
     const [showShareModal, setShowShareModal] = useState(false);
     const handleCloseShareModal = () => {setShowShareModal(false)}
@@ -81,8 +86,37 @@ export default function LibraryPage() {
         }
     }
 
+    // export function getAudioFile(selected: LickInterface) {
+    //     return fetch("/api/licks/audio/" + selected.id, {
+    //         method: "GET"
+    //     }).then((response) => {
+    //         return response.blob();
+    //     })
+    // }
+
+    const handlePlayLick = (lickID: number) => {
+        fetch("/api/licks/audio/" + lickID, {
+            method: "GET"
+        }).then((response) => {
+            return response.blob();
+        }).then((file: Blob) => {
+            setSelectedFile(file);
+        }).then(() => {console.log(selectedFile)})
+    }
+
     return (
         <Container>
+            {/* <Container>
+                <Row className="text-center footer">
+                    <Col style={{backgroundColor: "grey", zIndex: 1, position: "fixed", width: "100%", left: 0, bottom: 0}}>
+                        <h1>
+                            hello
+                        </h1>
+                    </Col>
+                </Row>
+            </Container> */}
+
+
             {/* have to make share modal component */}
             <ShareLickModal selectedLickIDs={selectedLickIDs}
                              showShareModal={showShareModal}
@@ -127,6 +161,7 @@ export default function LibraryPage() {
                                     selected={selectedLickIDs}
                                     handleSelectOne={handleSelectOne}
                                     setShowShareModal={setShowShareModal}
+                                    handlePlayLick={handlePlayLick}
                         />
                         :
                         <LickTable licks={licks}
@@ -137,6 +172,32 @@ export default function LibraryPage() {
                     }
                 </Container>
             }
+            {/* {selectedFile && <div style={{height: 100}}/> } */}
+
+
+            {/* <Collapse in={selectedFile != undefined}>
+                <Navbar fixed="bottom" expand="lg" variant="light" bg="light">
+                    <Container fluid className="text-center">
+                        <Row className="justify-content-center">
+                            <Col xs={6}>
+                            <h1 className="text-right">hello</h1>
+                            </Col>
+                            <Col>
+                            <h1>world</h1>
+                            </Col>
+                        </Row>
+                    </Container>
+                    <Navbar.Brand href="#">Navbar</Navbar.Brand>
+                </Navbar>
+            </Collapse> */}
+
+            <Container>
+                <Row className="text-center footer">
+                    <Col>
+                        <LibraryPlayer audioFile={selectedFile} />
+                    </Col>
+                </Row>
+            </Container>
         </Container>
     )
-}
+} 
