@@ -3,9 +3,10 @@
 }
 
 /* need this since icons have 10px padding for background */
-.nav-link {
-    margin-top: 10px;
-}
+/* commented out since messing up nav bar */
+/*.nav-link {*/
+/*    margin-top: 10px;*/
+/*}*/
 
 .checkbox.nav-item {
     padding: 10px;

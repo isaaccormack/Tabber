@@ -18,6 +18,7 @@ import CreateDescriptionPage from "./components/create/component/CreateDescripti
 import EditPage from "./components/edit/component/EditPage";
 import ViewPage from "./components/view/component/ViewPage";
 import RecordPage from './components/create/component/RecordPage';
+import LandingPage from "./components/landing/component/LandingPage";
 
 
 function App() {
@@ -39,9 +40,7 @@ function App() {
                         <Route exact path="/shared" component={SharedPage} />
                         <Route exact path="/oauth" component={OAuth2Page} />
                         <Route exact path="/login" component={LoginPage} />
-                        <Route exact path="/">
-                            <Redirect to="/library" />
-                        </Route>
+                        <Route exact path="/" component={LandingPage} />
                         <Route exact path="/404" component={NotFoundPage} />
                         <Route path="*">
                             <Redirect to="/404" />
