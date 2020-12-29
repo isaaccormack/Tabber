@@ -5,6 +5,8 @@
   background-color: #ffffff;
   font-size: 16px;
   font-family: 'Open Sans', sans-serif;
+  /* hacky workaround to get footer to stick to bottom */
+  min-height: calc(100vh - 195px);
 }
 
 h1, h2, h3, h4, h5, h6, p {

@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 
 export default function Footer() {
 
+  // TODO: make this be at the bottom alwats
     return (
       <Container>
         <Row style={{borderTop: 'solid', borderWidth: '1px', borderColor: 'lightgray', paddingTop: '15px', marginTop: '15px'}}>
