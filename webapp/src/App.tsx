@@ -1,6 +1,6 @@
 import React from 'react';
 import Container from "react-bootstrap/Container";
-import {Provider} from "react-redux";
+import { Provider } from "react-redux";
 import {Redirect, Route, Switch} from "react-router";
 
 import './App.css';

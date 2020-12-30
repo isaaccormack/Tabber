@@ -3,27 +3,21 @@ import Container from "react-bootstrap/Container";
 import { Col, Row } from "react-bootstrap";
 import UploadIcon from "../icons/file-upload.svg";
 import MicrophoneIcon from "../icons/microphone.svg";
-
+import VinylsIcon from "../icons/vinyls.svg";
+import FriendsIcon from "../icons/friends.svg";
 import NavigationCard from "./NavigationCard";
 import NavigationButton from "./NavigationButton";
 import TitleBlock from "./TitleBlock";
 
-export default function HomePage() {
-  const iconHeight = 200;
+
+// TODO: type this, or find better way to just pass user as props
+export default function UserHomePage(props: any) {
+  const iconHeight: number = 150;
 
   return (
     <Container>
-      <TitleBlock title={"Start Tabbing"} desc={
-        <>
-          Tabber is only able to process licks in which a
-          <span style={{fontWeight: 'bold', color: '#929292'}}>{' single note '}</span>
-          is played at a time <br/>
-          Double stops and chords
-          <span style={{fontWeight: 'bold', color: '#929292'}}>{' can not '}</span>
-          be tabbed
-        </>}
-      />
-      <Row style={{marginTop: '150px'}}>
+      <TitleBlock title={"Hello " + props.user.given_name} desc={"What would you like to do?"}/>
+      <Row style={{marginTop: '50px'}}>
         <Col xs={6}>
           <NavigationCard
             icon={UploadIcon}
@@ -40,6 +34,26 @@ export default function HomePage() {
             name={"Record"}
             desc={<>Play a lick directly into your <br /> computers microphone</>}
             button={<NavigationButton variant={"warning"} desc={"Start Recording"}/>}
+          />
+        </Col>
+      </Row>
+      <Row style={{marginTop: '50px'}}>
+        <Col xs={6}>
+          <NavigationCard
+            icon={VinylsIcon}
+            iconHeight={iconHeight}
+            name={"Library"}
+            desc={"View your library"}
+            button={<NavigationButton variant={"success"} desc={"View Library"}/>}
+          />
+        </Col>
+        <Col>
+          <NavigationCard
+            icon={FriendsIcon}
+            iconHeight={iconHeight}
+            name={"Shared With"}
+            desc={"View licks shared with you"}
+            button={<NavigationButton variant={"info"} desc={"View Shared Licks"}/>}
           />
         </Col>
       </Row>

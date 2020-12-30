@@ -1,1 +1,5 @@
 @import "../../../mainstyles.css";
+
+.row {
+    justify-content: center;
+}
