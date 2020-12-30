@@ -16,7 +16,7 @@ export default function HomePage() {
   // TODO: when you go back from either upload or record page, it brings you all the way back to landing page,
   //  but it should only bring you back to this page
   return (
-    <Container>
+    <>
       <TitleBlock title={"Start Tabbing"} desc={
         <>
           Tabber is only able to process licks in which a
@@ -55,6 +55,6 @@ export default function HomePage() {
           />
         </Col>
       </Row>
-    </Container>
+    </>
   )
 }

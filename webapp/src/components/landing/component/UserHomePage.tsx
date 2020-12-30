@@ -17,7 +17,7 @@ export default function UserHomePage(props: any) {
   const iconHeight: number = 150;
 
   return (
-    <Container>
+    <>
       <TitleBlock title={"Hello " + props.user.given_name} desc={"What would you like to do?"}/>
       <Row style={{marginTop: '50px'}}>
         <Col xs={6}>
@@ -75,6 +75,6 @@ export default function UserHomePage(props: any) {
           />
         </Col>
       </Row>
-    </Container>
+    </>
   )
 }

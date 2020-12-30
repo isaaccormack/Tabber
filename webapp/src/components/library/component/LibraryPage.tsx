@@ -1,203 +1,157 @@
-import React, {useEffect, useState} from "react";
-import Container from 'react-bootstrap/Container';
-import Collapse from 'react-bootstrap/Collapse';
-import Navbar from 'react-bootstrap/Navbar';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
-import {useHistory} from "react-router";
-import {useDispatch} from "react-redux";
-import { Slider, SliderBar, SliderHandle } from 'react-player-controls'
-import { Button, PlayerIcon } from 'react-player-controls'
+import React, { useEffect, useState } from "react";
+import { LickInterface } from "../../common/lick/interface/LickInterface";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Col from "react-bootstrap/Col";
+import { Table } from "react-bootstrap";
+import { formatCapo, formatDate, formatLickLength } from "./FormattingHelpers";
+import TurntableIcon from "../icons/turntable.svg"
+import AscSortIcon from "../icons/desc-sort.svg"
+import DescSortIcon from "../icons/asc-sort.svg"
+import "./LibraryPage.css";
+import { useHistory } from "react-router";
 
-import {getAudioFile} from "../../common/musicplayer/component/MusicHelper";
-import {LickInterface} from "../../common/lick/interface/LickInterface";
-import LickCards from "./LickCards";
-import LickTable from "./LickTable";
-import LickNav from "./LickNav";
-import RequestLickUpload from "./RequestLickUpload";
-import LickDisplayControl from "./LickDisplayControl";
-import ShareLickModal from "./ShareLickModal";
-import DeleteLickModal from "./DeleteLickModal";
-import UnfollowLickModal from "./UnfollowLickModal";
-import LibraryPlayer from "../../common/musicplayer/component/LibraryPlayer";
+export default function LibraryPage() {
+  const history = useHistory();
 
 
-export default function LibraryPage() {  
+  const [licks, setLicks] = useState<LickInterface[]>([])
+  const [sortColumn, setSortColumn] = useState<string>("dateUploaded")
+  const [asc, setAsc] = useState<boolean>(false)
 
-    const [licks, setLicks] = useState<LickInterface[]>([])
-    const [selectedFile, setSelectedFile] = useState<Blob>()
-    const [sortBy, setSortBy] = useState('Date Created');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [displayCards, setDisplayCards] = useState(true);
-    const [ascending, setAscending] = useState(false);
-    const [selectedLickIDs, setSelectedLickIDs] = useState<string[]>([]);
-    
-    function getLibrary() {
-        fetch("/api/user/licks", {
-            method: "GET"
-        }).then((response) => {
-            if (response.status === 200) { //remove this later
-                return response.json();
-            }
-        }).then((responseJson) => {
-            if (responseJson) {
-                setLicks(responseJson);
-            }
-        })
-    }
+  const [selectedFile, setSelectedFile] = useState<Blob>()
 
-    useEffect(() => {
-        getLibrary();
-    }, [])
+  function getLibrary() {
+    fetch("/api/user/licks", {
+      method: "GET"
+    }).then((response) => {
+      if (response.status === 200) { //remove this later
+        return response.json();
+      }
+    }).then((responseJson: LickInterface[]) => {
+      if (responseJson) {
+        // manually sort before setting
+        setLicks(responseJson.sort((a, b) => a.dateUploaded > b.dateUploaded ? 1 : -1));
+      }
+    })
+  }
 
-    // useEffect(() => {
-    //     if (licks.length > 0) {
-    //         getAudioFile(licks[0]).then((file: Blob) => {
-    //             setSelectedFile(file);
-    //         })
-    //     }
-    // }, [licks])
-    
-    const [showShareModal, setShowShareModal] = useState(false);
-    const handleCloseShareModal = () => {setShowShareModal(false)}
-    const handleShareSelectedLicks = () => {setShowShareModal(false); console.log("Sharing licks...")} // and make the API call
-    
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const handleCloseDeleteModal = () => {setShowDeleteModal(false)}
-    const handleDeleteSelectedLicks = () => {setShowDeleteModal(false); console.log("Deleting licks...")} // and make the API call
-    
-    const [showUnfollowModal, setShowUnfollowModal] = useState(false);
-    const handleCloseUnfollowModal = () => {setShowUnfollowModal(false)}
-    const handleUnfollowSelectedLicks = () => {setShowUnfollowModal(false); console.log("Unfollowing licks...")} // and make the API call
+  useEffect(() => {
+    getLibrary();
+  }, []) // state variable which should trigger change
 
-    const handleSelectAll = (event: any) => {
-        if (event.target.checked) {
-            setSelectedLickIDs(licks.map(lick => lick.id.toString()));
-        } else {
-            setSelectedLickIDs([]);
-        }
-    }
+  const handlePlayLick = (lickID: number) => {
+    fetch("/api/licks/audio/" + lickID, {
+      method: "GET"
+    }).then((response) => {
+      return response.blob();
+    }).then((file: Blob) => {
+      setSelectedFile(file);
+    }).then(() => {console.log(selectedFile)})
+  }
 
-    const handleSelectOne = (event: any) => {
-        if (event.target.checked) {
-            setSelectedLickIDs(selectedLickIDs.concat(event.target.id))
-        } else {
-            setSelectedLickIDs(selectedLickIDs.filter(e => e !== event.target.id))
-        }
-    }
+  const sortLicks = (field: string, asc: boolean) => {
+    setLicks(licks => licks.sort((a, b) => {
+      let aField = a[field as keyof LickInterface];
 
-    // export function getAudioFile(selected: LickInterface) {
-    //     return fetch("/api/licks/audio/" + selected.id, {
-    //         method: "GET"
-    //     }).then((response) => {
-    //         return response.blob();
-    //     })
-    // }
+      if (typeof(aField) === 'string') {
+        aField = aField as string;
+        const bField = b[field as keyof LickInterface] as string;
+        const comp = aField.toLocaleLowerCase() > bField.toLocaleLowerCase() ? 1 : -1;
+        return asc ? comp : -1*comp;
+      }
+      aField = aField as number;
+      const bField = b[field as keyof LickInterface] as number;
+      const comp = aField > bField ? 1 : -1;
+      return asc ? comp : -1*comp;
+    }))
+  }
 
-    const handlePlayLick = (lickID: number) => {
-        fetch("/api/licks/audio/" + lickID, {
-            method: "GET"
-        }).then((response) => {
-            return response.blob();
-        }).then((file: Blob) => {
-            setSelectedFile(file);
-        }).then(() => {console.log(selectedFile)})
-    }
+  const sortByColumn = (thisColumn: string) => {
+      if (sortColumn !== thisColumn) {
+        sortLicks(thisColumn, true);
+        setAsc(false); // set the value which should be used next time
+      } else {
+        sortLicks(thisColumn, asc);
+        setAsc((asc) => !asc);
+      }
+      setSortColumn(thisColumn);
+  }
+
+  const renderTableHeader = () => {
+    const headerKVs: {key: string, value: string}[] = [
+      {key: 'Title', value: 'name'},
+      {key: 'Length', value: 'audioLength'},
+      {key: 'Date Uploaded', value: 'dateUploaded'},
+      {key: 'Tuning', value: 'tuning'},
+      {key: 'Capo', value: 'capo'}
+    ];
 
     return (
-        <Container>
-            {/* <Container>
-                <Row className="text-center footer">
-                    <Col style={{backgroundColor: "grey", zIndex: 1, position: "fixed", width: "100%", left: 0, bottom: 0}}>
-                        <h1>
-                            hello
-                        </h1>
-                    </Col>
-                </Row>
-            </Container> */}
+      <thead>
+        <tr>
+          {headerKVs.map(({key, value}) => renderTableHeaderColumns(key, value))}
+        </tr>
+      </thead>
+    );
+  }
 
+  const renderTableHeaderColumns = (name: string, columnName: string) => {
+    const SortIcon = asc ? AscSortIcon : DescSortIcon;
+    const renderSortIcon =
+      (name === 'Title' && sortColumn === 'name') ||
+      (name === 'Length' && sortColumn === 'audioLength') ||
+      (name === 'Date Uploaded' && sortColumn === 'dateUploaded') ||
+      (name === 'Tuning' && sortColumn === 'tuning') ||
+      (name === 'Capo' && sortColumn === 'capo');
 
-            {/* have to make share modal component */}
-            <ShareLickModal selectedLickIDs={selectedLickIDs}
-                             showShareModal={showShareModal}
-                             handleCloseShareModal={handleCloseShareModal}
-                             handleShareSelectedLicks={handleShareSelectedLicks}
-                             />
-            <DeleteLickModal selectedLickIDs={selectedLickIDs}
-                             showDeleteModal={showDeleteModal}
-                             handleCloseDeleteModal={handleCloseDeleteModal}
-                             handleDeleteSelectedLicks={handleDeleteSelectedLicks}
-                             />
-            <UnfollowLickModal selectedLickIDs={selectedLickIDs}
-                               showUnfollowModal={showUnfollowModal}
-                               handleCloseUnfollowModal={handleCloseUnfollowModal}
-                               handleUnfollowSelectedLicks={handleUnfollowSelectedLicks}
-                               />
+    return (
+      <th onClick={() => sortByColumn(columnName)} style={{verticalAlign: 'middle'}}>
+        <h3 style={{display: "inline"}}>{name}</h3>
+        {renderSortIcon &&
+        <img src={SortIcon} height={30} alt="sort icon"
+             style={{opacity: 0.8, marginBottom: '5px', marginLeft: '10px'}}/>
+        }
+      </th>
+    );
+  }
 
-            <LickNav licks={licks}
-                     selectedLickIDs={selectedLickIDs}
-                     handleSelectAll={handleSelectAll}
-                     setShowShareModal={setShowShareModal}
-                     setShowDeleteModal={setShowDeleteModal}
-                     setShowUnfollowModal={setShowUnfollowModal}
-            />
-            {licks.length === 0 ?
-                <RequestLickUpload/>
-                :
-                <Container>
-                    <LickDisplayControl displayCards={displayCards}
-                                        sortBy={sortBy}
-                                        ascending={ascending}
-                                        setDisplayCards={setDisplayCards}
-                                        setSearchQuery={setSearchQuery}
-                                        setSortBy={setSortBy}
-                                        setAscending={setAscending}
-                    />
-                    {displayCards ?
-                        <LickCards licks={licks}
-                                    searchQuery={searchQuery}
-                                    sortBy={sortBy}
-                                    ascending={ascending}
-                                    selected={selectedLickIDs}
-                                    handleSelectOne={handleSelectOne}
-                                    setShowShareModal={setShowShareModal}
-                                    handlePlayLick={handlePlayLick}
-                        />
-                        :
-                        <LickTable licks={licks}
-                                    searchQuery={searchQuery}
-                                    selected={selectedLickIDs}
-                                    handleSelectOne={handleSelectOne}
-                        />
-                    }
-                </Container>
-            }
-            {/* {selectedFile && <div style={{height: 100}}/> } */}
-
-
-            {/* <Collapse in={selectedFile != undefined}>
-                <Navbar fixed="bottom" expand="lg" variant="light" bg="light">
-                    <Container fluid className="text-center">
-                        <Row className="justify-content-center">
-                            <Col xs={6}>
-                            <h1 className="text-right">hello</h1>
-                            </Col>
-                            <Col>
-                            <h1>world</h1>
-                            </Col>
-                        </Row>
-                    </Container>
-                    <Navbar.Brand href="#">Navbar</Navbar.Brand>
-                </Navbar>
-            </Collapse> */}
-
-            <Container>
-                <Row className="text-center footer">
-                    <Col>
-                        <LibraryPlayer audioFile={selectedFile} />
-                    </Col>
-                </Row>
-            </Container>
-        </Container>
-    )
-} 
+  // TODO: break table off into its own component so it can be used between lib and share page
+  // TODO: could make column width fixed so changing placement of icon doesn't mess everything up
+  return (
+    <Container>
+      {/* TODO: add IconTitleBlock component */}
+      <Row style={{marginTop: '40px'}}>
+        <Col className="align-self-center">
+          <Row className="justify-content-md-end">
+            <img src={TurntableIcon} height={120} alt="record player lick" style={{marginRight: '20px'}}/>
+          </Row>
+        </Col>
+        <Col className="align-self-center">
+          <Row>
+            <h1>Library</h1>
+          </Row>
+          <Row>
+            <h3 style={{color: 'lightgrey', textAlign: 'center'}}>4 licks, 2m 30s</h3>
+          </Row>
+        </Col>
+      </Row>
+      <Table hover style={{marginTop: "20px"}}>
+        {renderTableHeader()}
+        <tbody>
+        {licks.map((lick) => {
+          return (
+            <tr key={lick.id} onClick={() => history.push("/edit/" + lick.id)}>
+              <td>{lick.name}</td>
+              <td>{formatLickLength(lick.audioLength)}</td>
+              <td>{formatDate(lick.dateUploaded)}</td>
+              <td>{lick.tuning}</td>
+              <td>{formatCapo(lick.capo)}</td>
+            </tr>
+          );
+        })}
+        </tbody>
+      </Table>
+    </Container>
+  );
+}

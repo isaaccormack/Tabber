@@ -56,7 +56,7 @@ export default function LandingPage() {
 
   const renderLandingPage = () => {
     return (
-      <Container>
+      <>
         <TitleBlock title={"Play Licks, Get Tabs"} desc={"Upload or record a lick, have it tabbed automatically"}/>
         <Row style={{marginTop: '50px'}}>
           <Col xs={6}>
@@ -171,14 +171,14 @@ export default function LandingPage() {
             </Row>
           </Col>
         </Row>
-      </Container>
+      </>
     );
   }
 
   // note these <> can be used when we really dont need a wrapping component, ie. we would need a wrapping component for
   // css selection for example if we want to target children of tag, or just for common logical grouping stuff, ie. <li> tag
   return (
-    <>
+    <Container className={"landing-page"}>
       {user ?
         <UserHomePage user={user}/>
       :
@@ -190,6 +190,6 @@ export default function LandingPage() {
         }
         </>
       }
-    </>
+    </Container>
   )
 }

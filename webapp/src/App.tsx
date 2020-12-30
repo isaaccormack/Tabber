@@ -2,6 +2,7 @@ import React from 'react';
 import Container from "react-bootstrap/Container";
 import { Provider } from "react-redux";
 import {Redirect, Route, Switch} from "react-router";
+import PrivateRoute from "./PrivateRoute";
 
 import './App.css';
 import rootStore from "./store";
@@ -20,6 +21,7 @@ import ViewPage from "./components/view/component/ViewPage";
 import RecordPage from './components/create/component/RecordPage';
 import LandingPage from "./components/landing/component/LandingPage";
 import Footer from "./components/common/footer/component/Footer";
+import OldLibraryPage from "./components/old_library/component/LibraryPage";
 
 
 function App() {
@@ -35,7 +37,9 @@ function App() {
                         <Route exact path="/create/record" component={RecordPage} />
                         <Route exact path="/create" component={CreatePage} />
                         <Route exact path="/account" component={AccountPage} />
-                        <Route exact path="/library" component={LibraryPage} />
+                        <PrivateRoute exact path="/library" component={LibraryPage} />
+                        {/* below is for dev */}
+                        <Route exact path="/old-library" component={OldLibraryPage} />
                         <Route exact path="/edit/:id" component={EditPage} />
                         <Route exact path="/view/:id" component={ViewPage} />
                         <Route exact path="/shared" component={SharedPage} />

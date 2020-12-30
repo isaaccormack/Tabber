@@ -5,7 +5,7 @@ import {LickInterface} from "../../common/lick/interface/LickInterface";
 import {History} from "history";
 import moment from "moment";
 
-import "../../library/component/LibraryTable.css";
+import "../../old_library/component/LibraryTable.css";
 import "./SharedTable.css";
 
 export interface SharedTableProps {
