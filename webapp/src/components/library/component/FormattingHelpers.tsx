@@ -30,3 +30,10 @@ export function formatCapo(capo: number): string {
 export function formatDate(date: string) {
   return moment(date).format("h:mma MMM D YYYY");
 }
+
+export function formatSumOfLickLengths(lickLengths: number): string {
+  if (lickLengths < 60) {
+    return lickLengths + " seconds"
+  }
+  return Math.floor(lickLengths / 60) + "m " + lickLengths % 60 + "s";
+}

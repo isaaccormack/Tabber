@@ -4,16 +4,17 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import { Table } from "react-bootstrap";
-import { formatCapo, formatDate, formatLickLength } from "./FormattingHelpers";
+import { formatCapo, formatDate, formatLickLength, formatSumOfLickLengths } from "./FormattingHelpers";
 import TurntableIcon from "../icons/turntable.svg"
 import AscSortIcon from "../icons/desc-sort.svg"
 import DescSortIcon from "../icons/asc-sort.svg"
 import "./LibraryPage.css";
 import { useHistory } from "react-router";
 
+// TODO: make this handle no licks
+
 export default function LibraryPage() {
   const history = useHistory();
-
 
   const [licks, setLicks] = useState<LickInterface[]>([])
   const [sortColumn, setSortColumn] = useState<string>("dateUploaded")
@@ -105,6 +106,7 @@ export default function LibraryPage() {
       (name === 'Tuning' && sortColumn === 'tuning') ||
       (name === 'Capo' && sortColumn === 'capo');
 
+    // if desired, could have one conditional check to see if name is 'Length', if so, render icon instead of h3, everything else same
     return (
       <th onClick={() => sortByColumn(columnName)} style={{verticalAlign: 'middle'}}>
         <h3 style={{display: "inline"}}>{name}</h3>
@@ -114,6 +116,14 @@ export default function LibraryPage() {
         }
       </th>
     );
+  }
+
+  const getLickLengths = () => {
+    return licks.reduce((prev, curr) => {return prev + curr.audioLength}, 0)
+
+    let sum = 0;
+    licks.map(lick => sum += lick.audioLength);
+    return sum;
   }
 
   // TODO: break table off into its own component so it can be used between lib and share page
@@ -132,7 +142,12 @@ export default function LibraryPage() {
             <h1>Library</h1>
           </Row>
           <Row>
-            <h3 style={{color: 'lightgrey', textAlign: 'center'}}>4 licks, 2m 30s</h3>
+            <h3 style={{color: 'lightgrey', textAlign: 'center'}}>
+              {/* put this here for now to fix 0 - 0 problem... */}
+              {licks.length > 0 &&
+                <>{licks.length} licks, {formatSumOfLickLengths(getLickLengths())}</>
+              }
+            </h3>
           </Row>
         </Col>
       </Row>
