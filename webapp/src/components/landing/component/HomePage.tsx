@@ -7,10 +7,14 @@ import MicrophoneIcon from "../icons/microphone.svg";
 import NavigationCard from "./NavigationCard";
 import NavigationButton from "./NavigationButton";
 import TitleBlock from "./TitleBlock";
+import { useHistory } from "react-router";
 
 export default function HomePage() {
+  const history = useHistory();
   const iconHeight = 200;
 
+  // TODO: when you go back from either upload or record page, it brings you all the way back to landing page,
+  //  but it should only bring you back to this page
   return (
     <Container>
       <TitleBlock title={"Start Tabbing"} desc={
@@ -30,7 +34,11 @@ export default function HomePage() {
             iconHeight={iconHeight}
             name={"Upload"}
             desc={<>Upload a lick you've already <br /> saved on your computer</>}
-            button={<NavigationButton variant={"primary"} desc={"Get Uploading"}/>}
+            button={<NavigationButton
+              variant={"primary"}
+              desc={"Get Uploading"}
+              onClick={() => history.push("/create/upload")}
+            />}
           />
         </Col>
         <Col>
@@ -39,7 +47,11 @@ export default function HomePage() {
             iconHeight={iconHeight}
             name={"Record"}
             desc={<>Play a lick directly into your <br /> computers microphone</>}
-            button={<NavigationButton variant={"warning"} desc={"Start Recording"}/>}
+            button={<NavigationButton
+              variant={"warning"}
+              desc={"Start Recording"}
+              onClick={() => history.push("/create/record")}
+            />}
           />
         </Col>
       </Row>

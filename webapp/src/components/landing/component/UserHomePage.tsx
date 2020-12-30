@@ -8,10 +8,12 @@ import FriendsIcon from "../icons/friends.svg";
 import NavigationCard from "./NavigationCard";
 import NavigationButton from "./NavigationButton";
 import TitleBlock from "./TitleBlock";
+import { useHistory } from "react-router";
 
 
 // TODO: type this, or find better way to just pass user as props
 export default function UserHomePage(props: any) {
+  const history = useHistory();
   const iconHeight: number = 150;
 
   return (
@@ -24,7 +26,11 @@ export default function UserHomePage(props: any) {
             iconHeight={iconHeight}
             name={"Upload"}
             desc={<>Upload a lick you've already <br /> saved on your computer</>}
-            button={<NavigationButton variant={"primary"} desc={"Get Uploading"}/>}
+            button={<NavigationButton
+              variant={"primary"}
+              desc={"Get Uploading"}
+              onClick={() => history.push("/create/upload")}
+            />}
           />
         </Col>
         <Col>
@@ -33,7 +39,11 @@ export default function UserHomePage(props: any) {
             iconHeight={iconHeight}
             name={"Record"}
             desc={<>Play a lick directly into your <br /> computers microphone</>}
-            button={<NavigationButton variant={"warning"} desc={"Start Recording"}/>}
+            button={<NavigationButton
+              variant={"warning"}
+              desc={"Start Recording"}
+              onClick={() => history.push("/create/record")}
+            />}
           />
         </Col>
       </Row>
@@ -44,7 +54,11 @@ export default function UserHomePage(props: any) {
             iconHeight={iconHeight}
             name={"Library"}
             desc={"View your library"}
-            button={<NavigationButton variant={"success"} desc={"View Library"}/>}
+            button={<NavigationButton
+              variant={"success"}
+              desc={"View Library"}
+              onClick={() => history.push("/library")}
+            />}
           />
         </Col>
         <Col>
@@ -53,7 +67,11 @@ export default function UserHomePage(props: any) {
             iconHeight={iconHeight}
             name={"Shared With"}
             desc={"View licks shared with you"}
-            button={<NavigationButton variant={"info"} desc={"View Shared Licks"}/>}
+            button={<NavigationButton
+              variant={"info"}
+              desc={"View Shared Licks"}
+              onClick={() => history.push("/shared")}
+            />}
           />
         </Col>
       </Row>
