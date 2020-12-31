@@ -1,21 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { LickInterface } from "../../common/lick/interface/LickInterface";
-import Container from "react-bootstrap/Container";
 import { formatCapo, formatDate, formatLickLength } from "./FormattingHelpers";
-import TurntableIcon from "../icons/turntable.svg"
-import "./LibraryPage.css";
+import Container from "react-bootstrap/Container";
 import IconTitleBlock from "./IconTitleBlock";
+import DanceIcon from "../icons/dance.svg";
 import LibraryTable from "./LibraryTable";
 import { useHistory } from "react-router";
 
-// TODO: make this handle no licks
-export default function LibraryPage() {
+export default function SharedPage() {
   const history = useHistory();
 
   const [licks, setLicks] = useState<LickInterface[]>([])
 
-  function getLibrary() {
-    fetch("/api/user/licks", {
+  // TODO: edit backend so that there is a date shared field on the many-to-many relationship
+  function getSharedLicks() {
+    fetch("/api/user/licks-shared-with-me", {
       method: "GET"
     }).then((response) => {
       if (response.status === 200) {
@@ -23,17 +22,18 @@ export default function LibraryPage() {
       }
     }).then((responseJson: LickInterface[]) => {
       if (responseJson) {
-        setLicks(responseJson.sort((a, b) => a.dateUploaded > b.dateUploaded ? 1 : -1));
+        setLicks(responseJson.sort((a, b) => a.name > b.name ? 1 : -1));
       }
     })
   }
 
   useEffect(() => {
-    getLibrary();
+    getSharedLicks();
   }, [])
 
   const headerCols: {key: string, value: string}[] = [
     {key: 'Title', value: 'name'},
+    {key: 'Author', value: 'owner'},
     {key: 'Length', value: 'audioLength'},
     {key: 'Date Uploaded', value: 'dateUploaded'},
     {key: 'Tuning', value: 'tuning'},
@@ -43,8 +43,7 @@ export default function LibraryPage() {
   // bodyRows must match up with headerCols + lick.id as first entry
   // const getBodyRows = () => {
   //   {/* TODO: change dateUploaded -> dateShared */}
-  //   return licks.map((lick) =>
-  //     [lick.id, lick.name, formatLickLength(lick.audioLength), formatDate(lick.dateUploaded), lick.tuning, formatCapo(lick.capo)])
+  //   return licks.map((lick) => [lick.id, lick.name, lick.owner.name, formatLickLength(lick.audioLength), formatDate(lick.dateUploaded)])
   // }
 
   const renderTableBody = () => {
@@ -53,6 +52,7 @@ export default function LibraryPage() {
         {licks.map((lick) =>
           <tr key={lick.id} onClick={() => history.push("/view/" + lick.id)}>
             <td>{lick.name}</td>
+            <td>{lick.owner.name}</td>
             <td>{formatLickLength(lick.audioLength)}</td>
             <td>{formatDate(lick.dateUploaded)}</td>
             <td>{lick.tuning}</td>
@@ -63,12 +63,13 @@ export default function LibraryPage() {
     );
   }
 
-  // TODO: break table off into its own component so it can be used between lib and share page
-  // TODO: could make column width fixed so changing placement of icon doesn't mess everything up
+  // TODO: sort by owner is broken, as the owner which is returned is an object of type User -> a lick probably needs a
+  //   simple ownerName field rather than an owner: User so that the owner name can easily be displayed. Do this at the
+  //   same time as fixing table relation for date shared
   return (
     <Container>
-      <IconTitleBlock icon={TurntableIcon} title="Library" lickLengthArr={licks.map((lick) => lick.audioLength)}/>
-      <LibraryTable headerCols={headerCols} setLicks={setLicks} defaultSortColumn={"dateUploaded"} renderTableBody={renderTableBody}/>
+      <IconTitleBlock icon={DanceIcon} title="Shared With You" lickLengthArr={licks.map((lick) => lick.audioLength)}/>
+      <LibraryTable headerCols={headerCols} setLicks={setLicks} defaultSortColumn={"name"} renderTableBody={renderTableBody}/>
     </Container>
   );
 }

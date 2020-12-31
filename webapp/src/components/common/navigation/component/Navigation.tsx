@@ -87,6 +87,7 @@ export default function Navigation() {
         <Container>
           <Navbar variant="dark">
             {tabberBrand()}
+            {/* TODO: figure out how to display which page is selected */}
             <Nav className="ml-auto">
               <Nav.Link href="/create/record" style={{color: 'white'}}>Record</Nav.Link>
               <Nav.Link href="/create/upload" style={{color: 'white'}}>Upload</Nav.Link>
@@ -95,7 +96,6 @@ export default function Navigation() {
               <NavDropdown title="Isaac Cormack" id="basic-nav-dropdown" style={{marginLeft: '10px'}}>
                 <NavDropdown.Item onClick={logout}>
                   Sign Out
-                  {/*<img src={LightUserIcon} height={22} alt="user icon" style={{marginLeft: '8px'}}/>*/}
                 </NavDropdown.Item>
               </NavDropdown>
             </Nav>

@@ -14,7 +14,7 @@ import UploadPage from "./components/create/component/UploadPage";
 import NotFoundPage from "./components/notfound/component/NotFoundPage";
 import AccountPage from "./components/account/component/AccountPage";
 import LibraryPage from "./components/library/component/LibraryPage";
-import SharedPage from "./components/shared/component/SharedPage";
+import SharedPage from "./components/library/component/SharedPage";
 import CreateDescriptionPage from "./components/create/component/CreateDescriptionPage";
 import EditPage from "./components/edit/component/EditPage";
 import ViewPage from "./components/view/component/ViewPage";
