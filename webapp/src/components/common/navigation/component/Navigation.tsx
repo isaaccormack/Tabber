@@ -2,10 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import Container from 'react-bootstrap/Container';
-import Tooltip from 'react-bootstrap/Tooltip';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
-import Button from 'react-bootstrap/Button';
-import Row from 'react-bootstrap/Row';
 
 import './Navigation.css';
 import RootState from "../../../../store/root-state";
@@ -15,23 +11,13 @@ import { DeleteUser } from "../../user/actions/UserActions";
 
 import CircleIcon from "../icons/circle.svg";
 import UserIcon from "../icons/user.svg";
-import LightUserIcon from "../icons/light-user.svg"
-
-import UploadIcon from "../icons/upload.svg";
 import { UserInterface } from "../../user/interface/UserInterface";
-
-import UploadButton from "./UploadButton";
-import GoogleLoginButton from "../../../login/component/GoogleLoginButton";
-import Col from "react-bootstrap/Col";
-import Form from "react-bootstrap/Form";
-import { FormControl, NavDropdown } from "react-bootstrap";
+import { NavDropdown } from "react-bootstrap";
 
 export default function Navigation() {
 
   const history = useHistory();
   const dispatch = useDispatch();
-
-  const pathname = window.location.pathname;
 
   const logout = useCallback(() => {
     dispatch(DeleteUser());
@@ -49,6 +35,7 @@ export default function Navigation() {
   }
 
   const [loginUrl, setLoginURL] = useState("");
+  const [activeKey, setActiveKey] = useState(() => { return window.location.pathname });
 
   useEffect(() => {
     fetch("/api/loginUrl")
@@ -81,18 +68,42 @@ export default function Navigation() {
     );
   }
 
+  useEffect(() => {
+    console.log("mounted");
+    console.log(activeKey)
+  })
+
+  // Note: href will re-render the entire app forcing all components to remount which resets state here
   const loggedInNavBar = () => {
+    const recordPath = "/create/record";
+    const uploadPath = "/create/upload";
+    const libraryPath = "/library";
+    const sharedPath = "/shared";
+
     return (
       <div style={{backgroundColor: '#75a9f9', color: 'white'}}>
         <Container>
           <Navbar variant="dark">
             {tabberBrand()}
             {/* TODO: figure out how to display which page is selected */}
-            <Nav className="ml-auto">
-              <Nav.Link href="/create/record" style={{color: 'white'}}>Record</Nav.Link>
-              <Nav.Link href="/create/upload" style={{color: 'white'}}>Upload</Nav.Link>
-              <Nav.Link href="/library" style={{color: 'white'}}>Library</Nav.Link>
-              <Nav.Link href="/shared" style={{color: 'white'}}>Shared</Nav.Link>
+            {/*  see for how to do: https://stackoverflow.com/questions/36342220/tabs-in-react-bootstrap-navbar */}
+            <Nav variant="pills" className="ml-auto" activeKey={activeKey}>
+              <Nav.Link eventKey={recordPath} style={{color: 'white'}} onSelect={() => {
+                setActiveKey(recordPath)
+                history.push(recordPath)
+              }}>Record</Nav.Link>
+              <Nav.Link eventKey={uploadPath} style={{color: 'white'}} onSelect={() => {
+                setActiveKey(uploadPath)
+                history.push(uploadPath)
+              }}>Upload</Nav.Link>
+              <Nav.Link eventKey={libraryPath} style={{color: 'white'}} onSelect={() => {
+                setActiveKey(libraryPath)
+                history.push(libraryPath)
+              }}>Library</Nav.Link>
+              <Nav.Link eventKey={sharedPath} style={{color: 'white'}} onSelect={() => {
+                setActiveKey(sharedPath)
+                history.push(sharedPath)
+              }}>Shared</Nav.Link>
               <NavDropdown title="Isaac Cormack" id="basic-nav-dropdown" style={{marginLeft: '10px'}}>
                 <NavDropdown.Item onClick={logout}>
                   Sign Out

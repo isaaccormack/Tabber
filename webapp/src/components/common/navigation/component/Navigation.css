@@ -34,3 +34,10 @@
     color: #fff;
     font-size: var(--font-size-2) !important;
 }
+
+a.nav-link.active {
+    outline: 3px solid white;
+    outline-offset: -4px;
+    /* must be !important to override bootstrap defaults */
+    background-color: transparent !important;
+}
