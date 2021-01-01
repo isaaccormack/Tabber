@@ -4,7 +4,7 @@
     border-color: grey;
     border-radius: 5px;
     border-width: 1px;
-    height: 170px;
+    height: 180px;
     font-family: "Lucida Console", "Courier New", monospace;
     white-space: nowrap;
     padding-top: 5px;
@@ -21,4 +21,8 @@
 
 #pencil-icon:hover, #trash-icon:hover, #download-icon:hover {
     transform: scale(1.1);
+}
+
+#lick-url-display {
+    margin-bottom: 0px;
 }

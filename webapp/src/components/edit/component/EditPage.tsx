@@ -22,7 +22,11 @@ import LibraryPlayer from "../../common/musicplayer/component/LibraryPlayer";
 import ReactPlayer from "react-player";
 import { Simulate } from "react-dom/test-utils";
 import DeleteLickModal from "./DeleteLickModal";
-
+import DetailsForm from "./DetailsForm";
+import ReTabForm from "./ReTabForm";
+import VisibilityForm from "./VisibilityForm";
+import ShareForm from "./ShareForm";
+import TitleBlock from "./TitleBlock";
 
 
 interface EditFormProps {
@@ -106,49 +110,49 @@ export default function EditPage(props: match<EditFormProps>) {
                          handleCloseDeleteModal={handleCloseDeleteModal}
         />
         <ReactPlayer url={lickURL} playing={playing} style={{display: "none"}} onEnded={() => { setPlaying(false); setIcon(PlayIcon) }}/>
-        <Row style={{marginTop: '40px'}}>
-          <Col xs={5} className="align-self-center">
-            <Row className="justify-content-md-end">
-              <img id="play-button" src={icon} height={100} alt="play lick audio" style={{marginRight: '20px'}} onClick={handleAudio}/>
-            </Row>
-          </Col>
-          <Col xs={7} className="align-self-center">
-            <Row>
-              <h1 style={{color: '#404040'}}>{lick?.name}</h1>
-            </Row>
-            <Row>
-              <Button disabled variant="danger" style={{opacity: 1}}>Private</Button>
-              <h3 style={{color: 'grey', textAlign: 'center', marginLeft: '10px'}}>{lick && formatDateNoTime(lick.dateUploaded)}</h3>
-            </Row>
-          </Col>
-        </Row>
-        <Row style={{marginTop: '30px', paddingLeft: "25px"}}>
+        <TitleBlock icon={icon} handleAudio={handleAudio} lickName={lick.name} dateLickUploaded={lick.dateUploaded} isLickPublic={lick.isPublic}/>
+        {/*<Row style={{marginTop: '30px', paddingLeft: "25px"}}>*/}
+        {/*  <Col>*/}
+        {/*    <Row>*/}
+        {/*      <h5 style={{color: 'lightgrey'}}>{lick?.description}</h5>*/}
+        {/*    </Row>*/}
+        {/*  </Col>*/}
+        {/*  <Col>*/}
+        {/*    <Row style={{paddingRight: '30px'}} className="justify-content-md-end">*/}
+        {/*      /!* TODO: add css to change opacity on hover *!/*/}
+        {/*      <img id="pencil-icon" src={PencilIcon} height={25} alt="edit lick" style={{marginLeft: '20px'}}/>*/}
+        {/*      <img id="trash-icon" src={TrashIcon} height={25} alt="delete lick" style={{marginLeft: '10px'}} onClick={() => setShowDeleteModal(true)}/>*/}
+        {/*    </Row>*/}
+        {/*  </Col>*/}
+        {/*</Row>*/}
+        {/*<Row style={{marginTop: '10px', paddingLeft: "25px"}}>*/}
+        {/*    <Col>*/}
+        {/*        <Row>*/}
+        {/*          <h4 style={{color: 'grey'}}>{lick?.tuning + ' Tuning | ' + formatCapo(lick?.capo)}</h4>*/}
+        {/*        </Row>*/}
+        {/*    </Col>*/}
+        {/*    <Col>*/}
+        {/*        <Row style={{paddingRight: '30px'}} className="justify-content-md-end">*/}
+        {/*          <h4 style={{color: 'grey'}}>Download Tabs</h4>*/}
+        {/*          <img id="download-icon" src={DownloadIcon} height={25} alt="download tabs" style={{marginLeft: '10px'}}/>*/}
+        {/*        </Row>*/}
+        {/*    </Col>*/}
+        {/*</Row>*/}
+
+        <Row style={{marginTop: '30px'}}>
           <Col>
-            <Row>
-              <h5 style={{color: 'lightgrey'}}>{lick?.description}</h5>
-            </Row>
+            <DetailsForm />
+            <ReTabForm />
           </Col>
           <Col>
-            <Row style={{paddingRight: '30px'}} className="justify-content-md-end">
-              {/* TODO: add css to change opacity on hover */}
-              <img id="pencil-icon" src={PencilIcon} height={25} alt="edit lick" style={{marginLeft: '20px'}}/>
-              <img id="trash-icon" src={TrashIcon} height={25} alt="delete lick" style={{marginLeft: '10px'}} onClick={() => setShowDeleteModal(true)}/>
-            </Row>
+            <VisibilityForm setLick={setLick} isLickPublic={lick.isPublic} lickId={lick.id}/>
+            <ShareForm />
           </Col>
         </Row>
-        <Row style={{marginTop: '10px', paddingLeft: "25px"}}>
-            <Col>
-                <Row>
-                  <h4 style={{color: 'grey'}}>{lick?.tuning + ' Tuning | ' + formatCapo(lick?.capo)}</h4>
-                </Row>
-            </Col>
-            <Col>
-                <Row style={{paddingRight: '30px'}} className="justify-content-md-end">
-                  <h4 style={{color: 'grey'}}>Download Tabs</h4>
-                  <img id="download-icon" src={DownloadIcon} height={25} alt="download tabs" style={{marginLeft: '10px'}}/>
-                </Row>
-            </Col>
-        </Row>
+
+
+        {/* END */}
+
         <Row>
           {/*<textarea className="lick-tab-field" onClick={() => {console.log("hello")}}>*/}
           {/*  {'e|----------------------------------------------------------------------------------------------------\n' +*/}

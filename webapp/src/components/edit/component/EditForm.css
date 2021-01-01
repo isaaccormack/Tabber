@@ -38,3 +38,8 @@
     outline: none;
     border-bottom: var(--red) solid 1px;
 }
+
+#re-tab-button {
+    color: white;
+    margin-bottom: 0px !important;
+}

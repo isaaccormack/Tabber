@@ -9,7 +9,7 @@ export interface DeleteLickModalProps {
     handleCloseDeleteModal: () => void;
 }
 
-
+// TODO: update the UI to match moqups
 // this component will actually have to make an API call to delete the lick IDs passed to it
 export default function DeleteLickModal(props: DeleteLickModalProps) {
     const history = useHistory();
