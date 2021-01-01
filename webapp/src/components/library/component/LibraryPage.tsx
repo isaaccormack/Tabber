@@ -51,7 +51,7 @@ export default function LibraryPage() {
     return (
       <tbody>
         {licks.map((lick) =>
-          <tr key={lick.id} onClick={() => history.push("/view/" + lick.id)}>
+          <tr key={lick.id} onClick={() => history.push("/edit/" + lick.id)}>
             <td>{lick.name}</td>
             <td>{formatLickLength(lick.audioLength)}</td>
             <td>{formatDate(lick.dateUploaded)}</td>

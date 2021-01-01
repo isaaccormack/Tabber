@@ -6,7 +6,9 @@ export function formatLickLength(length: number): string {
     length < 60 ? "0:" + length.toString() : "1:00"
 }
 
-export function formatCapo(capo: number): string {
+export function formatCapo(capo: number | undefined): string {
+  if (capo === undefined) return "";
+
   let formattedCapo = capo === 1 ? "1st" :
     capo === 2 ? "2nd" :
       capo === 3 ? "3rd" :
@@ -28,7 +30,11 @@ export function formatCapo(capo: number): string {
 }
 
 export function formatDate(date: string) {
-  return moment(date).format("h:mma MMM D YYYY");
+  return moment(date).format("h:mma MMM. D, YYYY");
+}
+
+export function formatDateNoTime(date: string) {
+  return moment(date).format("MMM. D, YYYY");
 }
 
 export function formatSumOfLickLengths(lickLengths: number): string {

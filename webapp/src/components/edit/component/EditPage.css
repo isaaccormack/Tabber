@@ -1,14 +1,24 @@
-
-.edit-title {
-    font-size: var(--font-size-8);
-    font-family: var(--font-body);
-    margin-bottom: 10px;
-}
-
-/* monospace font list from https://stackoverflow.com/a/2032658 */
 .lick-tab-field {
     width: 100%;
-    background-color: lightsteelblue;
-    height: 300px;
-    font-family:Consolas,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,monospace;
+    background-color: white;
+    border-color: grey;
+    border-radius: 5px;
+    border-width: 1px;
+    height: 170px;
+    font-family: "Lucida Console", "Courier New", monospace;
+    white-space: nowrap;
+    padding-top: 5px;
+    padding-left: 10px;
+}
+
+#play-button, #pencil-icon, #trash-icon, #download-icon {
+    transition: 0.1s;
+}
+
+#play-button:hover  {
+    transform: scale(1.03);
+}
+
+#pencil-icon:hover, #trash-icon:hover, #download-icon:hover {
+    transform: scale(1.1);
 }
