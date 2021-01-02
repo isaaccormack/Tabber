@@ -35,7 +35,7 @@ export default function SharedPage() {
     {key: 'Title', value: 'name'},
     {key: 'Author', value: 'owner'},
     {key: 'Length', value: 'audioLength'},
-    {key: 'Date Uploaded', value: 'dateUploaded'},
+    // {key: 'Date Uploaded', value: 'dateUploaded'},
     {key: 'Tuning', value: 'tuning'},
     {key: 'Capo', value: 'capo'}
   ];
@@ -54,7 +54,7 @@ export default function SharedPage() {
             <td>{lick.name}</td>
             <td>{lick.owner.name}</td>
             <td>{formatLickLength(lick.audioLength)}</td>
-            <td>{formatDate(lick.dateUploaded)}</td>
+            {/*<td>{formatDate(lick.dateUploaded)}</td>*/}
             <td>{lick.tuning}</td>
             <td>{formatCapo(lick.capo)}</td>
           </tr>

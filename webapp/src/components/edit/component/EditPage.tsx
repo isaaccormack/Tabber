@@ -52,6 +52,10 @@ export default function EditPage(props: match<EditFormProps>) {
   const [alert, setAlert] = useState<AlertInterface>();
   const [alertQueue, setAlertQueue] = useState<number>(0);
 
+  const [lickDownloadURL, setLickDownloadURL] = useState<string>();
+
+
+
 
   useEffect(() => {
     // @ts-ignore //For some reason my IDE says that match doesn't exist but it does
@@ -75,6 +79,12 @@ export default function EditPage(props: match<EditFormProps>) {
       getAudioFile(lick).then((file: Blob) => {
         setLickURL(URL.createObjectURL(file));
       })
+
+      // save lick as downloadable txt file and set URL to download
+      const myURL = window.URL || window.webkitURL //window.webkitURL works in Chrome and window.URL works in Firefox
+      const blob = new Blob([lick.tab], { type: 'text/csv' });
+      const csvUrl = myURL.createObjectURL(blob);
+      setLickDownloadURL(csvUrl);
     }
   }, [lick])
 
@@ -196,7 +206,9 @@ export default function EditPage(props: match<EditFormProps>) {
         <Row>
             <Col>
                 <h4 style={{color: 'grey', display: 'inline'}}>Download Tabs</h4>
-                <img id="download-icon" src={DownloadIcon} height={25} alt="download tabs" style={{marginLeft: '10px', marginBottom: '5px'}}/>
+                <a download={lick.name + '.txt'} href={lickDownloadURL}>
+                  <img id="download-icon" src={DownloadIcon} height={25} alt="download tabs" style={{marginLeft: '10px', marginBottom: '5px'}}/>
+                </a>
             </Col>
             <Col>
               <Row className="justify-content-md-end" style={{marginRight: '0px', marginBottom: '5px'}}>
