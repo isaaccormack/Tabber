@@ -2,19 +2,24 @@ import { validate, ValidationError } from "class-validator";
 const fs = require('fs');
 import * as audioDuration from 'get-audio-duration';
 import { Context } from "koa";
-import { getManager, Repository } from "typeorm";
 import { v4 as uuidv4 } from "uuid";
 import * as util from 'util';
 const ffmpeg = require('fluent-ffmpeg');
 
-
 import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
-import { UserController } from './user'
 const TabModule = require('../tabbing/tabLick');
 
 import { StatusCodes } from "http-status-codes";
-import { assertLickExists } from "./lickAssertions";
+import {
+    assertLickExists,
+    assertRequesterCanAccessLick,
+    assertRequesterIsLickOwner,
+    assertUserExists,
+    assertUserIsNotRequester,
+    assertLickValid
+} from "./lickAssertions";
+import { getManager, Repository } from "typeorm";
 
 export class LickController {
 
@@ -98,6 +103,8 @@ export class LickController {
             await LickController.attemptToDeleteFile(lick.audioFileLocation);
         }
 
+        // Override default OK status
+        ctx.status = StatusCodes.CREATED;
     }
 
     /**
@@ -109,7 +116,7 @@ export class LickController {
 
         const lick: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lick) || !LickController.assertRequesterCanAccessLick(ctx, lick)) {
+        if (!assertLickExists(ctx, lick) || !assertRequesterCanAccessLick(ctx, lick)) {
             return;
         }
 
@@ -127,7 +134,7 @@ export class LickController {
 
         const lick: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lick) || !LickController.assertRequesterCanAccessLick(ctx, lick)) {
+        if (!assertLickExists(ctx, lick) || !assertRequesterCanAccessLick(ctx, lick)) {
             return;
         }
 
@@ -145,12 +152,12 @@ export class LickController {
 
         const lickToBeShared: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lickToBeShared) ||  !LickController.assertRequesterIsLickOwner(ctx, lickToBeShared)) {
+        if (!assertLickExists(ctx, lickToBeShared) || !assertRequesterIsLickOwner(ctx, lickToBeShared)) {
             return;
         }
 
-        const userToShareWith: User | undefined  = await LickController.assertUserExists(ctx);
-        if (userToShareWith === undefined || !await LickController.assertUserIsNotRequester(ctx, userToShareWith)) { return; }
+        const userToShareWith: User | undefined  = await assertUserExists(ctx);
+        if (userToShareWith === undefined || !await assertUserIsNotRequester(ctx, userToShareWith)) { return; }
 
         if (!lickToBeShared.sharedWith.some(user => user.id === userToShareWith.id)) {
             lickToBeShared.sharedWith.push(userToShareWith)
@@ -168,11 +175,11 @@ export class LickController {
 
         const lickToBeUnshared: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lickToBeUnshared) ||  !LickController.assertRequesterIsLickOwner(ctx, lickToBeUnshared)) {
+        if (!assertLickExists(ctx, lickToBeUnshared) || !assertRequesterIsLickOwner(ctx, lickToBeUnshared)) {
             return;
         }
 
-        const userToUnShareWith: User | undefined  = await LickController.assertUserExists(ctx);
+        const userToUnShareWith: User | undefined  = await assertUserExists(ctx);
         if (userToUnShareWith === undefined) { return; }
 
         // filters users shared with by ID, works if lick was never shared with user in the first place
@@ -210,7 +217,7 @@ export class LickController {
 
         const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lickToUpdate) || !LickController.assertRequesterIsLickOwner(ctx, lickToUpdate)) {
+        if (!assertLickExists(ctx, lickToUpdate) || !assertRequesterIsLickOwner(ctx, lickToUpdate)) {
             return;
         }
 
@@ -233,7 +240,7 @@ export class LickController {
             lickToUpdate.capo = parseInt(body.newCapo);
         }
 
-        if (!await LickController.assertLickValid(ctx, lickToUpdate)) {
+        if (!await assertLickValid(ctx, lickToUpdate)) {
             return;
         }
 
@@ -249,7 +256,7 @@ export class LickController {
 
         const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lickToUpdate) ||  !LickController.assertRequesterIsLickOwner(ctx, lickToUpdate)) {
+        if (!assertLickExists(ctx, lickToUpdate) ||  !assertRequesterIsLickOwner(ctx, lickToUpdate)) {
             return;
         }
 
@@ -280,7 +287,7 @@ export class LickController {
 
         const lickToRemove: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lickToRemove) ||  !LickController.assertRequesterIsLickOwner(ctx, lickToRemove)) {
+        if (!assertLickExists(ctx, lickToRemove) ||  !assertRequesterIsLickOwner(ctx, lickToRemove)) {
             return;
         }
 
@@ -297,81 +304,22 @@ export class LickController {
         await LickController.trySaveLickAndSetResponse(ctx, lickToRemove);
     }
 
-
     /**
      * HELPERS
      */
-    // private static assertLickExists(ctx: Context, lick: Lick | undefined): boolean {
-    //     if (lick) { return true; }
-    //
-    //     ctx.status = StatusCodes.BAD_REQUEST;
-    //     ctx.body = { errors: {error: "Error: The lick you are trying to retrieve doesn't exist."}}
-    //     return false;
-    // }
-
-    private static assertRequesterCanAccessLick(ctx: Context, lick: Lick | undefined): boolean {
-        if (LickController.canUserAccess(ctx.state.user, lick)) { return true; }
-
-        ctx.status = StatusCodes.FORBIDDEN;
-        ctx.body = { errors: {error: "Error: You do not have permission to access this lick."}}
-    }
-
-    private static assertRequesterIsLickOwner(ctx: Context, lick: Lick | undefined): boolean {
-        if (ctx.state.user.id === lick.owner.id) { return true; }
-
-        ctx.status = StatusCodes.FORBIDDEN;
-        // TODO: maybe change this error message to Error: A lick can only be edited by its owner
-        ctx.body = { errors: {error: "Error: You do not have permission to edit this lick."}}
-        return false;
-    }
-
-    private static async assertUserExists(ctx: Context): Promise<User | undefined> {
-        const userByEmail: User | undefined = await UserController.getUserByEmail(ctx.request.body.userEmail || "");
-        const userById: User | undefined = await UserController.getUserByID(+ctx.request.body.userID || 0);
-
-        if (userByEmail) { return userByEmail; }
-        if (userById) {return  userById; }
-
-        ctx.status = StatusCodes.BAD_REQUEST;
-        ctx.body = { errors: {error: "Error: The user you are trying to (un)share with doesn't exist in the db"}}
-        return undefined;
-    }
-
-    private static async assertUserIsNotRequester(ctx: Context, user: User): Promise<boolean> {
-        if (user.id === ctx.state.user.id) {
-            ctx.status = StatusCodes.BAD_REQUEST;
-            ctx.body = { errors: {error: "Error: Cannot (un)share a lick with yourself."}}
-            return false;
-        }
-
-        return true;
-    }
-
-    private static async assertLickValid(ctx: Context, lick: Lick | undefined): Promise<boolean> {
-        const errors: ValidationError[] = await validate(lick);
-
-        if (errors.length > 0) {
-            ctx.status = StatusCodes.BAD_REQUEST;
-            ctx.body = { errors };
-            return false;
-        }
-
-        return true;
-    }
-
     // TODO: this should really go in DAO layer, not here
-    private static async getLickFromDbById(lickId: number): Promise<Lick | undefined> {
+    public static async getLickFromDbById(lickId: number): Promise<Lick | undefined> {
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
         return await lickRepository.findOne({ where: {id: (lickId)}, relations: ['owner', 'sharedWith']});
     }
 
     // TODO: this should really go in DAO layer, not here
-    private static async saveLickToDb(lick: Lick): Promise<Lick | undefined> {
+    public static async saveLickToDb(lick: Lick): Promise<Lick | undefined> {
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
         return await lickRepository.save(lick);
     }
 
-    private static async trySaveLickAndSetResponse(ctx: Context, lick: Lick): Promise<boolean> {
+    public static async trySaveLickAndSetResponse(ctx: Context, lick: Lick): Promise<boolean> {
         const updatedLick: Lick | undefined = await LickController.saveLickToDb(lick);
 
         if (!updatedLick) {
@@ -385,7 +333,7 @@ export class LickController {
         return true;
     }
 
-    private static async trySaveLickAndSetEmptyResponse(ctx: Context, lick: Lick) {
+    public static async trySaveLickAndSetEmptyResponse(ctx: Context, lick: Lick) {
         const updatedLick: Lick | undefined = await LickController.saveLickToDb(lick);
 
         if (!updatedLick) {
@@ -396,6 +344,7 @@ export class LickController {
 
         ctx.status = StatusCodes.NO_CONTENT;
     }
+
 
     /**
      * UTILS
@@ -431,7 +380,7 @@ export class LickController {
         })
     }
 
-    private static canUserAccess(user: User, lick: Lick): boolean {
+    public static canUserAccess(user: User, lick: Lick): boolean {
         // The owner and sharedWith relations MUST exist be loaded on the lick passed in
         if (!lick.owner || !lick.sharedWith) {
             throw new Error('The owner and sharedWith relations MUST be loaded on lick parameter')

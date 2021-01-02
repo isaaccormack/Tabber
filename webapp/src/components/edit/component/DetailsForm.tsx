@@ -10,8 +10,6 @@ export default function DetailsForm(props: any) {
   const [desc, setDesc] = useState<string>(props.lickDesc);
 
   const updateDetails = (newLickName: string, newLickDesc: string) => {
-    history.push('/404');
-
     fetch("/api/lick/" + props.lickId, {
       method: "PUT",
       headers: {
@@ -31,7 +29,6 @@ export default function DetailsForm(props: any) {
         }
       })
       .then((responseJson) => {
-        history.push('/edit/' + responseJson.id);
         props.setAlert({msg: 'Details saved!', variant: 'success'})
         props.setLick(responseJson);
       })
