@@ -104,7 +104,7 @@ export default function Navigation() {
                 setActiveKey(sharedPath)
                 history.push(sharedPath)
               }}>Shared</Nav.Link>
-              <NavDropdown title="Isaac Cormack" id="basic-nav-dropdown" style={{marginLeft: '10px'}}>
+              <NavDropdown title={user && user.name} id="basic-nav-dropdown" style={{marginLeft: '10px'}}>
                 <NavDropdown.Item onClick={logout}>
                   Sign Out
                 </NavDropdown.Item>

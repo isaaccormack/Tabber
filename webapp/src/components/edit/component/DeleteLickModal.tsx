@@ -5,8 +5,8 @@ import { useHistory } from "react-router";
 
 export interface DeleteLickModalProps {
     lickName: string | undefined;
-    showDeleteModal: boolean;
-    handleCloseDeleteModal: () => void;
+    showModal: boolean;
+    handleCloseModal: () => void;
 }
 
 // TODO: update the UI to match moqups
@@ -15,17 +15,17 @@ export default function DeleteLickModal(props: DeleteLickModalProps) {
     const history = useHistory();
 
     const lickName = props.lickName;
-    const showDeleteModal = props.showDeleteModal;
-    const handleCloseDeleteModal = props.handleCloseDeleteModal;
+    const showModal = props.showModal;
+    const handleCloseModal = props.handleCloseModal;
 
     return (
-        <Modal show={showDeleteModal} onHide={handleCloseDeleteModal}>
+        <Modal show={showModal} onHide={handleCloseModal}>
         <Modal.Header closeButton>
             <Modal.Title>Delete {lickName}?</Modal.Title>
         </Modal.Header>
         <Modal.Body>This lick will be permanently deleted. Are you sure?</Modal.Body>
         <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseDeleteModal}>
+            <Button variant="secondary" onClick={handleCloseModal}>
                 Close
             </Button>
             {/* TODO: actually delete lick via API call */}

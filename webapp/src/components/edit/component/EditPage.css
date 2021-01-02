@@ -16,7 +16,7 @@
 }
 
 #play-button:hover  {
-    transform: scale(1.03);
+    transform: scale(1.02);
 }
 
 #pencil-icon:hover, #trash-icon:hover, #download-icon:hover {
@@ -25,4 +25,25 @@
 
 #lick-url-display {
     margin-bottom: 0px;
+}
+
+::-webkit-scrollbar-track {
+    /*box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);*/
+    background-color: transparent; /* make scrollbar transparent */
+    display: none;
+}
+
+::-webkit-scrollbar {
+    /*width: 0px;*/
+    /*background-color: white; !* make scrollbar transparent *!*/
+}
+
+/*.unshare-button:hover {*/
+/*    cursor: pointer;*/
+/*}*/
+
+.unshare-button:hover {
+    cursor: pointer;
+    transform: scale(1.05);
+    transition: 0.1s;
 }

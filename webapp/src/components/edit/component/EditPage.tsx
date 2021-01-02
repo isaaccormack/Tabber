@@ -1,4 +1,4 @@
-import { Button, Col, Container, Row, Form } from "react-bootstrap";
+import { Button, Col, Container, Row, Form, Alert } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
 import { match } from "react-router";
 import { getAudioFile } from "../../common/musicplayer/component/MusicHelper";
@@ -22,15 +22,22 @@ import LibraryPlayer from "../../common/musicplayer/component/LibraryPlayer";
 import ReactPlayer from "react-player";
 import { Simulate } from "react-dom/test-utils";
 import DeleteLickModal from "./DeleteLickModal";
+import ReTabLickModal from "./ReTabLickModal";
 import DetailsForm from "./DetailsForm";
 import ReTabForm from "./ReTabForm";
 import VisibilityForm from "./VisibilityForm";
 import ShareForm from "./ShareForm";
 import TitleBlock from "./TitleBlock";
+import Modal from "react-bootstrap/Modal";
 
 
 interface EditFormProps {
   id: string
+}
+
+interface AlertInterface {
+  msg: string,
+  variant: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "dark" | "light" | undefined;
 }
 
 export default function EditPage(props: match<EditFormProps>) {
@@ -40,34 +47,11 @@ export default function EditPage(props: match<EditFormProps>) {
   const [playing, setPlaying] = useState<boolean>(false);
   const [icon, setIcon] = useState(PlayIcon);
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [showReTabModal, setShowReTabModal] = useState<boolean>(false);
 
+  const [alert, setAlert] = useState<AlertInterface>();
+  const [alertQueue, setAlertQueue] = useState<number>(0);
 
-  // must receieve the whole data and parse out whats needed here
-  const submitEditLick = (data: any) => {
-
-    fetch("/api/lick/" + lick!.id, {
-      method: "PUT",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        newName: data.lickname,
-        newDescription: data.lickdescription,
-        newTuning: data.licktuning,
-        newCapo: data.lickcapo
-      })
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          throw new Error('Couldnt update lick');
-        }
-      })
-      .then((responseJson) => {
-        setLick(responseJson);
-      })
-  }
 
   useEffect(() => {
     // @ts-ignore //For some reason my IDE says that match doesn't exist but it does
@@ -85,11 +69,11 @@ export default function EditPage(props: match<EditFormProps>) {
     // @ts-ignore //again, typescript says match doesn't exist
   }, [props.match.params.id])
 
+  // TODO: this should just chained onto first use effect
   useEffect(() => {
     if (lick) {
       getAudioFile(lick).then((file: Blob) => {
         setLickURL(URL.createObjectURL(file));
-        // setLickAudio(file);
       })
     }
   }, [lick])
@@ -99,18 +83,56 @@ export default function EditPage(props: match<EditFormProps>) {
     setIcon((icon) => icon === PlayIcon ? PauseIcon : PlayIcon)
   }
 
-  const handleCloseDeleteModal = () => {
-    setShowDeleteModal(false);
+  // theres a bug here when state changes while alert is still present it wont keep alert up for longer
+  const renderAlert = () => {
+
+    // this wont work, probably because of call stack issue, where this timeout doesnt get called until...
+    // TODO: find another way to do this -> probably without a strategy like this, or just give up on this
+    setTimeout(() => {
+      console.log(alertQueue)
+      if (alertQueue === 0) {
+        setAlert(undefined)
+      } else {
+        setAlertQueue((queue) => queue--)
+      }
+    }, 5000);
+
+    return (
+      <Alert variant={alert!.variant} style={{marginTop: '5px'}} dismissible onClose={() => setAlert(undefined)}>
+        {alert && alert.msg}
+      </Alert>
+    );
   }
+  const incAlertQueue = () => {
+    setAlertQueue((queue) => queue++);
+  }
+
   if (lick) {
     return (
       <Container>
+        {alert && renderAlert()}
+        {/* TODO: think these are broken... */}
         <DeleteLickModal lickName={lick?.name}
-                         showDeleteModal={showDeleteModal}
-                         handleCloseDeleteModal={handleCloseDeleteModal}
+                         showModal={showDeleteModal}
+                         handleCloseModal={() => setShowDeleteModal(false)}
         />
-        <ReactPlayer url={lickURL} playing={playing} style={{display: "none"}} onEnded={() => { setPlaying(false); setIcon(PlayIcon) }}/>
-        <TitleBlock icon={icon} handleAudio={handleAudio} lickName={lick.name} dateLickUploaded={lick.dateUploaded} isLickPublic={lick.isPublic}/>
+        <ReTabLickModal lickName={lick?.name}
+                        showModal={showReTabModal}
+                        handleCloseModal={() => setShowReTabModal(false)}
+        />
+        <ReactPlayer
+          style={{display: "none"}}
+          url={lickURL}
+          playing={playing}
+          onEnded={() => { setPlaying(false); setIcon(PlayIcon)}}
+        />
+        <TitleBlock
+          icon={icon}
+          handleAudio={handleAudio}
+          lickName={lick.name}
+          isLickPublic={lick.isPublic}
+          dateLickUploaded={lick.dateUploaded}
+        />
         {/*<Row style={{marginTop: '30px', paddingLeft: "25px"}}>*/}
         {/*  <Col>*/}
         {/*    <Row>*/}
@@ -139,19 +161,50 @@ export default function EditPage(props: match<EditFormProps>) {
         {/*    </Col>*/}
         {/*</Row>*/}
 
+        {/* TODO: should not be passing setLick into each of these, should pass each a fcn they can call to hit api, that way set lick is kept in this component */}
         <Row style={{marginTop: '30px'}}>
           <Col>
-            <DetailsForm />
-            <ReTabForm />
+            <DetailsForm
+              setLick={setLick}
+              setAlert={setAlert}
+              lickId={lick.id}
+              lickName={lick.name}
+              lickDesc={lick.description}
+            />
+            <ReTabForm setShowReTabModal={setShowReTabModal}/>
           </Col>
           <Col>
-            <VisibilityForm setLick={setLick} isLickPublic={lick.isPublic} lickId={lick.id}/>
-            <ShareForm />
+            <VisibilityForm
+              setLick={setLick}
+              setAlert={setAlert}
+              lickId={lick.id}
+              isLickPublic={lick.isPublic}
+            />
+            <ShareForm
+              setLick={setLick}
+              setAlert={setAlert}
+              incAlertQueue={incAlertQueue}
+              lickId={lick.id}
+              sharedWith={lick.sharedWith}
+            />
           </Col>
         </Row>
 
 
         {/* END */}
+
+        <Row>
+            <Col>
+                <h4 style={{color: 'grey', display: 'inline'}}>Download Tabs</h4>
+                <img id="download-icon" src={DownloadIcon} height={25} alt="download tabs" style={{marginLeft: '10px', marginBottom: '5px'}}/>
+            </Col>
+            <Col>
+              <Row className="justify-content-md-end" style={{marginRight: '0px', marginBottom: '5px'}}>
+                <Button style={{marginRight: '20px'}} variant="danger" onClick={() => setShowDeleteModal(true)}>Delete Tab</Button>
+                <Button variant="secondary">Save Tab</Button>
+              </Row>
+            </Col>
+        </Row>
 
         <Row>
           {/*<textarea className="lick-tab-field" onClick={() => {console.log("hello")}}>*/}
