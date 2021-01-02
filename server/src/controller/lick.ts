@@ -13,6 +13,9 @@ import { User } from "../entity/user";
 import { UserController } from './user'
 const TabModule = require('../tabbing/tabLick');
 
+import { StatusCodes } from "http-status-codes";
+import { assertLickExists } from "./lickAssertions";
+
 export class LickController {
 
     /**
@@ -26,7 +29,7 @@ export class LickController {
 
         const err: Error = LickController.validateAudioFile(audioFile);
         if (err) {
-            ctx.status = 400; // BAD REQUEST
+            ctx.status = StatusCodes.BAD_REQUEST;
             ctx.body = { errors: {error: err.message}}
             return
         }
@@ -34,74 +37,67 @@ export class LickController {
         const body = ctx.request.body;
 
         // add user specified attributes to lick to be validated
-        const lickToBeSaved: Lick = new Lick();
-        lickToBeSaved.name = ctx.request.body.name;
-        lickToBeSaved.description = body.description ? body.description : "";
-        lickToBeSaved.dateUploaded = new Date();
-        lickToBeSaved.tab = ""; // initally empty, tab not generated yet
-        lickToBeSaved.tuning = body.tuning;
-        lickToBeSaved.capo = parseInt(body.capo);
-        lickToBeSaved.isPublic = body.isPublic == "true" ? true : false;
-        lickToBeSaved.owner = ctx.state.user;
-        lickToBeSaved.sharedWith = []; // TODO - list of shared with users will be sent from client upon lick creation
+        const lick: Lick = new Lick();
+        lick.name = ctx.request.body.name;
+        lick.description = body.description ? body.description : "";
+        lick.dateUploaded = new Date();
+        lick.tab = ""; // initally empty, tab not generated yet
+        lick.tuning = body.tuning;
+        lick.capo = parseInt(body.capo);
+        lick.isPublic = body.isPublic == "true" ? true : false;
+        lick.owner = ctx.state.user;
+        lick.sharedWith = []; // TODO - list of shared with users will be sent from client upon lick creation
 
-        const errors: ValidationError[] = await validate(lickToBeSaved);
+        const errors: ValidationError[] = await validate(lick);
 
         if (errors.length > 0) {
-            ctx.status = 400; // BAD REQUEST
+            ctx.status = StatusCodes.BAD_REQUEST;
             ctx.body = { errors };
             return
         }
 
         try {
-            lickToBeSaved.audioFileLocation = await LickController.saveAudioFile(audioFile);
+            lick.audioFileLocation = await LickController.saveAudioFile(audioFile);
         } catch (err) {
-            ctx.status = 500; // SERVER ERROR
+            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
             ctx.body = { errors: {error: err.message}}
             return
         }
 
         try {
-            lickToBeSaved.audioLength = await audioDuration.getAudioDurationInSeconds(lickToBeSaved.audioFileLocation)
+            lick.audioLength = await audioDuration.getAudioDurationInSeconds(lick.audioFileLocation)
         } catch (err) {
-            await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
-            ctx.status = 500; // SERVER ERROR
+            await LickController.attemptToDeleteFile(lick.audioFileLocation);
+            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
             ctx.body = { errors: {error: "Error: Cant get length of audio file."}}
             return
         }
 
-        if (lickToBeSaved.audioLength > 60) { // lick is too long
-            await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
-            ctx.status = 400; // BAD REQUEST
+        if (lick.audioLength > 60) { // lick is too long
+            await LickController.attemptToDeleteFile(lick.audioFileLocation);
+            ctx.status = StatusCodes.BAD_REQUEST;
             ctx.body = { errors: {error: "Error: Audio file is longer than 60 seconds."}}
             return
         }
 
-        lickToBeSaved.tab = "";
+        lick.tab = "";
+        // TODO: this conditional clause is for dev, probably can remove
         if (!body.skipTabbing) {
             try {
                 // Generate tab for lick after other data is handled
-                lickToBeSaved.tab = await TabModule.tabLick(lickToBeSaved);
+                lick.tab = await TabModule.tabLick(lick);
             } catch (err) {
-                await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
-                ctx.status = 500; // SERVER ERROR
+                await LickController.attemptToDeleteFile(lick.audioFileLocation);
+                ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
                 ctx.body = { errors: {error: "Error: Failed to tab audio file."}};
                 return;
             }
         }
 
-        // finally, save the lick to the database
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-        const lick: Lick | undefined = await lickRepository.save(lickToBeSaved);
-
-        if (!lick) {
-            await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
-            ctx.status = 500; // SERVER ERROR
-            ctx.body = { errors: {error: "Error: Cant save lick to database."}}
-        } else {
-            ctx.status = 201; // CREATED
-            ctx.body = lick;
+        if (!await LickController.trySaveLickAndSetResponse(ctx, lick)) {
+            await LickController.attemptToDeleteFile(lick.audioFileLocation);
         }
+
     }
 
     /**
@@ -111,24 +107,15 @@ export class LickController {
      */
     public static async getLick(ctx: Context): Promise<void> {
 
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-        const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner', 'sharedWith']});
+        const lick: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (lick) {
-            const isPermitted = LickController.canUserAccess(ctx.state.user, lick);
-            if (isPermitted) {
-                ctx.status = 200; // OK
-
-                // should hide some attributes of lick.owner here, like email, not sure what so save for later
-                ctx.body = lick;
-            } else {
-                ctx.status = 403; // FORBIDDEN
-                ctx.body = { errors: {error: "Error: You do not have permission to access this lick."}}
-            }
-        } else {
-            ctx.status = 400; // BAD REQUEST
-            ctx.body = { errors: {error: "Error: The lick you are trying to retrieve doesn't exist."}}
+        if (!assertLickExists(ctx, lick) || !LickController.assertRequesterCanAccessLick(ctx, lick)) {
+            return;
         }
+
+        // TODO: maybe hide attributes of lick.owner here, like email, not sure what so save for later
+        ctx.status = StatusCodes.OK;
+        ctx.body = lick;
     }
 
     /**
@@ -138,23 +125,15 @@ export class LickController {
      */
     public static async getLickAudio(ctx: Context): Promise<void> {
 
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-        const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner', 'sharedWith']});
+        const lick: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (lick) {
-            const isPermitted = LickController.canUserAccess(ctx.state.user, lick);
-            if (isPermitted) {
-                ctx.status = 200; // OK
-                const readFile = util.promisify(fs.readFile);
-                ctx.body = await readFile(lick.audioFileLocation);
-            } else {
-                ctx.status = 403; // FORBIDDEN
-                ctx.body = { errors: {error: "Error: You do not have permission to access the audio for this lick."}}
-            }
-        } else {
-            ctx.status = 400; // BAD REQUEST
-            ctx.body = { errors: {error: "Error: The audio for the lick you are trying to retrieve doesn't exist."}}
+        if (!assertLickExists(ctx, lick) || !LickController.assertRequesterCanAccessLick(ctx, lick)) {
+            return;
         }
+
+        ctx.status = StatusCodes.OK;
+        const readFile = util.promisify(fs.readFile);
+        ctx.body = await readFile(lick.audioFileLocation);
     }
 
     /**
@@ -164,43 +143,20 @@ export class LickController {
      */
     public static async shareLick(ctx: Context): Promise<void> {
 
-        const lickID = +ctx.params.id || 0;
-        const userEmailToShareWith = ctx.request.body.userEmail || "";
+        const lickToBeShared: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-        const lickToBeShared: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['owner', 'sharedWith']});
-
-        if (!lickToBeShared) {
-            ctx.status = 400; // BAD REQUEST
-            ctx.body = { errors: {error: "Error: The lick you are trying to share doesn't exist."}}
-        } else if (ctx.state.user.id !== lickToBeShared.owner.id) {
-            ctx.status = 403; // FORBIDDEN
-            ctx.body = { errors: {error: "Error: A lick can only be shared by its owner."}}
-        } else {
-            const sharedWithUser: User | undefined = await UserController.getUserByEmail(userEmailToShareWith);
-
-            if (!sharedWithUser) {
-                ctx.status = 400; // BAD REQUEST
-                ctx.body = { errors: {error: "Error: The user you are trying to share with doesn't exist in the db"}}
-            } else if (sharedWithUser.id == ctx.state.user.id) {
-                ctx.status = 400; // BAD REQUEST
-                ctx.body = { errors: {error: "Error: Cannot share a lick with yourself."}}
-                return
-            } else {
-                if (!lickToBeShared.sharedWith.some(user => user.id === sharedWithUser.id)) {
-                    lickToBeShared.sharedWith.push(sharedWithUser)
-                }
-                // relation cascades on update, so only need to update lick entity
-                const sharedLick: Lick | undefined = await lickRepository.save(lickToBeShared);
-                if (!sharedLick) {
-                    ctx.status = 500; // SERVER ERROR
-                    ctx.body = { errors: {error: "Error: Could not update lick to be shared with user in db"}}
-                } else {
-                    ctx.status = 200; // OK
-                    ctx.body = sharedLick;
-                }
-            }
+        if (!assertLickExists(ctx, lickToBeShared) ||  !LickController.assertRequesterIsLickOwner(ctx, lickToBeShared)) {
+            return;
         }
+
+        const userToShareWith: User | undefined  = await LickController.assertUserExists(ctx);
+        if (userToShareWith === undefined || !await LickController.assertUserIsNotRequester(ctx, userToShareWith)) { return; }
+
+        if (!lickToBeShared.sharedWith.some(user => user.id === userToShareWith.id)) {
+            lickToBeShared.sharedWith.push(userToShareWith)
+        }
+
+        await LickController.trySaveLickAndSetResponse(ctx, lickToBeShared)
     }
 
     /**
@@ -210,42 +166,21 @@ export class LickController {
      */
     public static async unshareLick(ctx: Context): Promise<void> {
 
-        const lickID = +ctx.params.id || 0;
+        const lickToBeUnshared: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-        const lickToBeUnshared: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['owner', 'sharedWith']});
-
-        if (!lickToBeUnshared) {
-            ctx.status = 400; // BAD REQUEST
-            ctx.body = { errors: {error: "Error: The lick you are trying to unshare doesn't exist."}}
-        } else if (ctx.state.user.id !== lickToBeUnshared.owner.id) {
-            ctx.status = 403; // FORBIDDEN
-            ctx.body = { errors: {error: "Error: A lick can only be unshared by its owner."}}
-        } else {
-            const userToUnshare: User | undefined = await UserController.getUserByID(+ctx.request.body.userID || 0);
-
-            if (!userToUnshare) {
-                ctx.status = 400; // BAD REQUEST
-                ctx.body = { errors: {error: "Error: The user you are trying to unshare with doesn't exist in the db"}}
-            } else {
-                // filter out user to unshare with by ID
-                // allows a lick to be unshared with user if not shared with in the first place
-                lickToBeUnshared.sharedWith =
-                lickToBeUnshared.sharedWith.filter((user) => {
-                    return user.id !== userToUnshare.id
-                });
-                // relation cascades on update, so only need to update lick entity
-                const unsharedLick: Lick | undefined = await lickRepository.save(lickToBeUnshared);
-                if (!unsharedLick) {
-                    ctx.status = 500; // SERVER ERROR
-                    ctx.body = { errors: {error: "Error: Could not update lick to unshared with user in db"}}
-                } else {
-                    ctx.status = 200; // OK
-                    ctx.body = unsharedLick;
-                }
-            }
+        if (!assertLickExists(ctx, lickToBeUnshared) ||  !LickController.assertRequesterIsLickOwner(ctx, lickToBeUnshared)) {
+            return;
         }
-    }
+
+        const userToUnShareWith: User | undefined  = await LickController.assertUserExists(ctx);
+        if (userToUnShareWith === undefined) { return; }
+
+        // filters users shared with by ID, works if lick was never shared with user in the first place
+        lickToBeUnshared.sharedWith =
+            lickToBeUnshared.sharedWith.filter((user) => user.id !== userToUnShareWith.id);
+
+        await LickController.trySaveLickAndSetResponse(ctx, lickToBeUnshared)
+}
 
     /**
      * PUT /api/lick/unfollow/{id}
@@ -254,31 +189,16 @@ export class LickController {
      */
     public static async unfollowLick(ctx: Context): Promise<void> {
 
-        const lickID = +ctx.params.id || 0;
-        const thisUserID = ctx.state.user.id;
+        const lickToUnfollow: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-        const lickToUnfollow: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['sharedWith']});
+        if (!assertLickExists(ctx, lickToUnfollow)) { return; }
 
-        if (!lickToUnfollow) {
-            ctx.status = 400; // BAD REQUEST
-            ctx.body = { errors: {error: "Error: The lick you are trying to unfollow doesn't exist."}}
-        } else {
-            // filter out the user trying to unfollow by ID
-            // allows a lick to be unfollowed by user if not shared with in the first place
-            lickToUnfollow.sharedWith =
-                lickToUnfollow.sharedWith.filter((user) => {
-                    return user.id !== thisUserID
-                });
-            // relation cascades on update, so only need to update lick entity
-            const unfollowedLick: Lick | undefined = await lickRepository.save(lickToUnfollow);
-            if (!unfollowedLick) {
-                ctx.status = 500; // SERVER ERROR
-                ctx.body = { errors: {error: "Error: Could not update lick to allow user to unfollow in db"}}
-            } else {
-                ctx.status = 204; // NO CONTENT
-            }
-        }
+        // works if lick was never shared with auth user in the first place
+        const authUserId = ctx.state.user.id;
+        lickToUnfollow.sharedWith =
+            lickToUnfollow.sharedWith.filter((user) => user.id !== authUserId);
+
+        await LickController.trySaveLickAndSetEmptyResponse(ctx, lickToUnfollow)
     }
 
     /**
@@ -288,56 +208,67 @@ export class LickController {
      */
     public static async updateLick(ctx: Context): Promise<void> {
 
-        const lickID = +ctx.params.id || 0;
+        const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-        const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (lickID)}, relations: ['owner', 'sharedWith']});
-
-        if (lick) {
-            if (ctx.state.user.id === lick.owner.id) {
-                const body = ctx.request.body;
-
-                if (body.makePublic !== undefined) {
-                    lick.isPublic = body.makePublic;
-                }
-                // assert the name isnt empty
-                if (body.newName) {
-                    lick.name = body.newName;
-                }
-                if (body.newDescription !== undefined) {
-                    lick.description = body.newDescription;
-                }
-                if (body.newTuning) {
-                    lick.tuning = body.newTuning;
-                }
-                if (body.newCapo) {
-                    lick.capo = parseInt(body.newCapo);
-                }
-
-                const errors: ValidationError[] = await validate(lick);
-
-                if (errors.length > 0) {
-                    ctx.status = 400; // BAD REQUEST
-                    ctx.body = { errors };
-                    return;
-                }
-
-                const updatedLick: Lick | undefined = await lickRepository.save(lick);
-                if (!updatedLick) {
-                    ctx.status = 500; // SERVER ERROR
-                    ctx.body = { errors: {error: "Error: Could not update lick in db"}}
-                } else {
-                    ctx.status = 200; // OK
-                    ctx.body = updatedLick;
-                }
-            } else {
-                ctx.status = 403; // FORBIDDEN
-                ctx.body = { errors: {error: "Error: You do not have permission to edit this lick."}}
-            }
-        } else {
-            ctx.status = 400; // BAD REQUEST
-            ctx.body = { errors: {error: "Error: The lick you are trying to retrieve doesn't exist."}}
+        if (!assertLickExists(ctx, lickToUpdate) || !LickController.assertRequesterIsLickOwner(ctx, lickToUpdate)) {
+            return;
         }
+
+        const body = ctx.request.body;
+
+        if (body.makePublic !== undefined) {
+            lickToUpdate.isPublic = body.makePublic;
+        }
+        // assert the name isnt empty
+        if (body.newName) {
+            lickToUpdate.name = body.newName;
+        }
+        if (body.newDescription !== undefined) {
+            lickToUpdate.description = body.newDescription;
+        }
+        if (body.newTuning) {
+            lickToUpdate.tuning = body.newTuning;
+        }
+        if (body.newCapo) {
+            lickToUpdate.capo = parseInt(body.newCapo);
+        }
+
+        if (!await LickController.assertLickValid(ctx, lickToUpdate)) {
+            return;
+        }
+
+        await LickController.trySaveLickAndSetResponse(ctx, lickToUpdate);
+    }
+
+    /**
+     * PUT /api/lick/update-tab/{id}
+     *
+     * Update a licks tab after a user has manually edited it.
+     */
+    public static async updateTab(ctx: Context): Promise<void> {
+
+        const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+
+        if (!assertLickExists(ctx, lickToUpdate) ||  !LickController.assertRequesterIsLickOwner(ctx, lickToUpdate)) {
+            return;
+        }
+
+        const body = ctx.request.body;
+        if (body.newTab !== undefined) {
+            lickToUpdate.tab = body.newTab;
+        }
+
+        await LickController.trySaveLickAndSetResponse(ctx, lickToUpdate);
+    }
+
+    /**
+     * PUT /api/licks/retab/{id}
+     *
+     * Re-Tab a lick given a new tuning and / or capo
+     */
+    public static async reTabLick(ctx: Context): Promise<void> {
+        // if body tuning == tuning and capo == capo, send back same tab
+
     }
 
     /**
@@ -347,39 +278,127 @@ export class LickController {
      */
     public static async deleteLick(ctx: Context): Promise<void> {
 
-        const lickRepository = getManager().getRepository(Lick);
-        const lickToRemove: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner']});
+        const lickToRemove: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!lickToRemove) {
-            ctx.status = 400; // BAD REQUEST
-            ctx.body = { errors: {error: "Error: The lick you are trying to delete doesn't exist."}}
-        } else if (ctx.state.user.id !== lickToRemove.owner.id) {
-            ctx.status = 403; // FORBIDDEN
-            ctx.body = { errors: {error: "Error: A lick can only be deleted by its owner."}}
-        } else {
-            const err: NodeJS.ErrnoException = await LickController.unlinkAsync(lickToRemove.audioFileLocation);
-            if (err) {
-                // ENOENT == file doesn't exist, let that case fail silently
-                if (err.code != 'ENOENT') {
-                    ctx.status = 500;
-                    ctx.body = { errors: {error: "Error: Cant unlink lick from file system."}}
-                    return
-                }
-            }
+        if (!assertLickExists(ctx, lickToRemove) ||  !LickController.assertRequesterIsLickOwner(ctx, lickToRemove)) {
+            return;
+        }
 
-            const removedLick: Lick | undefined = await lickRepository.remove(lickToRemove);
-            if (!removedLick) {
-                ctx.status = 500; // SERVER ERROR
-                ctx.body = { errors: {error: "Error: Cant remove lick from database."}}
-            } else {
-                ctx.status = 200; // OK
-                ctx.body = removedLick;
+        const err: NodeJS.ErrnoException = await LickController.unlinkAsync(lickToRemove.audioFileLocation);
+        if (err) {
+            // ENOENT == file doesn't exist, let that case fail silently
+            if (err.code != 'ENOENT') {
+                ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
+                ctx.body = { errors: {error: "Error: Cant unlink lick from file system."}}
+                return
             }
         }
+
+        await LickController.trySaveLickAndSetResponse(ctx, lickToRemove);
     }
+
 
     /**
      * HELPERS
+     */
+    // private static assertLickExists(ctx: Context, lick: Lick | undefined): boolean {
+    //     if (lick) { return true; }
+    //
+    //     ctx.status = StatusCodes.BAD_REQUEST;
+    //     ctx.body = { errors: {error: "Error: The lick you are trying to retrieve doesn't exist."}}
+    //     return false;
+    // }
+
+    private static assertRequesterCanAccessLick(ctx: Context, lick: Lick | undefined): boolean {
+        if (LickController.canUserAccess(ctx.state.user, lick)) { return true; }
+
+        ctx.status = StatusCodes.FORBIDDEN;
+        ctx.body = { errors: {error: "Error: You do not have permission to access this lick."}}
+    }
+
+    private static assertRequesterIsLickOwner(ctx: Context, lick: Lick | undefined): boolean {
+        if (ctx.state.user.id === lick.owner.id) { return true; }
+
+        ctx.status = StatusCodes.FORBIDDEN;
+        // TODO: maybe change this error message to Error: A lick can only be edited by its owner
+        ctx.body = { errors: {error: "Error: You do not have permission to edit this lick."}}
+        return false;
+    }
+
+    private static async assertUserExists(ctx: Context): Promise<User | undefined> {
+        const userByEmail: User | undefined = await UserController.getUserByEmail(ctx.request.body.userEmail || "");
+        const userById: User | undefined = await UserController.getUserByID(+ctx.request.body.userID || 0);
+
+        if (userByEmail) { return userByEmail; }
+        if (userById) {return  userById; }
+
+        ctx.status = StatusCodes.BAD_REQUEST;
+        ctx.body = { errors: {error: "Error: The user you are trying to (un)share with doesn't exist in the db"}}
+        return undefined;
+    }
+
+    private static async assertUserIsNotRequester(ctx: Context, user: User): Promise<boolean> {
+        if (user.id === ctx.state.user.id) {
+            ctx.status = StatusCodes.BAD_REQUEST;
+            ctx.body = { errors: {error: "Error: Cannot (un)share a lick with yourself."}}
+            return false;
+        }
+
+        return true;
+    }
+
+    private static async assertLickValid(ctx: Context, lick: Lick | undefined): Promise<boolean> {
+        const errors: ValidationError[] = await validate(lick);
+
+        if (errors.length > 0) {
+            ctx.status = StatusCodes.BAD_REQUEST;
+            ctx.body = { errors };
+            return false;
+        }
+
+        return true;
+    }
+
+    // TODO: this should really go in DAO layer, not here
+    private static async getLickFromDbById(lickId: number): Promise<Lick | undefined> {
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        return await lickRepository.findOne({ where: {id: (lickId)}, relations: ['owner', 'sharedWith']});
+    }
+
+    // TODO: this should really go in DAO layer, not here
+    private static async saveLickToDb(lick: Lick): Promise<Lick | undefined> {
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        return await lickRepository.save(lick);
+    }
+
+    private static async trySaveLickAndSetResponse(ctx: Context, lick: Lick): Promise<boolean> {
+        const updatedLick: Lick | undefined = await LickController.saveLickToDb(lick);
+
+        if (!updatedLick) {
+            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
+            ctx.body = { errors: {error: "Error: Could not update lick in db"}}
+            return false;
+        }
+
+        ctx.status = StatusCodes.OK;
+        ctx.body = updatedLick;
+        return true;
+    }
+
+    private static async trySaveLickAndSetEmptyResponse(ctx: Context, lick: Lick) {
+        const updatedLick: Lick | undefined = await LickController.saveLickToDb(lick);
+
+        if (!updatedLick) {
+            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
+            ctx.body = { errors: {error: "Error: Could not update lick in db"}}
+            return;
+        }
+
+        ctx.status = StatusCodes.NO_CONTENT;
+    }
+
+    /**
+     * UTILS
      */
     private static validateAudioFile(audioFile: any): Error | null {
 

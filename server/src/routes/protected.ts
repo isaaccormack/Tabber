@@ -17,11 +17,14 @@ protectedRouter.get("/users", UserController.getUsers);
 protectedRouter.get("/users/:id", UserController.getUser);
 protectedRouter.put("/users/:id", UserController.updateUser);
 
+// TODO: change /licks to /lick for post and delete requests
 protectedRouter.post("/licks", LickController.createLick);
 protectedRouter.put("/lick/share/:id", LickController.shareLick);
 protectedRouter.put("/lick/unshare/:id", LickController.unshareLick);
 protectedRouter.put("/lick/unfollow/:id", LickController.unfollowLick);
 protectedRouter.put("/lick/:id", LickController.updateLick);
+protectedRouter.put("/lick/retab/:id", LickController.reTabLick);
+protectedRouter.put("/lick/update-tab/:id", LickController.updateTab);
 protectedRouter.delete("/licks/:id", LickController.deleteLick);
 
 export { protectedRouter };
