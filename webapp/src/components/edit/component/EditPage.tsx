@@ -1,6 +1,6 @@
 import { Button, Col, Container, Row, Form, Alert } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
-import { match } from "react-router";
+import { match, useHistory } from "react-router";
 import { getAudioFile } from "../../common/musicplayer/component/MusicHelper";
 
 import "./EditPage.css";
@@ -33,6 +33,7 @@ import Modal from "react-bootstrap/Modal";
 
 interface EditFormProps {
   id: string
+  location: any
 }
 
 interface AlertInterface {
@@ -40,7 +41,11 @@ interface AlertInterface {
   variant: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "dark" | "light" | undefined;
 }
 
-export default function EditPage(props: match<EditFormProps>) {
+export default function EditPage(props: any) {
+
+  const history = useHistory();
+
+
   const [lick, setLick] = useState<LickInterface>();
   const [lickAudio, setLickAudio] = useState<Blob>()
   const [lickURL, setLickURL] = useState<string>();
@@ -54,7 +59,23 @@ export default function EditPage(props: match<EditFormProps>) {
 
   const [lickDownloadURL, setLickDownloadURL] = useState<string>();
 
+  const [tab, setTab] = useState<string>();
 
+  const [tuning, setTuning] = useState<string>();
+  const [capo, setCapo] = useState<number>();
+
+
+  useEffect(() => {
+    console.log(props.location)
+    if (props.location.state && props.location.state.from === "404") {
+      setAlert({msg: "Lick tabbed successfully!", variant: "success"})
+      history.push({
+        state: {
+          from: ''
+        }
+      });
+    }
+  }, [])
 
 
   useEffect(() => {
@@ -69,6 +90,9 @@ export default function EditPage(props: match<EditFormProps>) {
       })
       .then((responseJson) => {
         setLick(responseJson);
+        setTab(responseJson.tab);
+        setTuning(responseJson.tuning);
+        setCapo(responseJson.capo);
       });
     // @ts-ignore //again, typescript says match doesn't exist
   }, [props.match.params.id])
@@ -117,6 +141,68 @@ export default function EditPage(props: match<EditFormProps>) {
     setAlertQueue((queue) => queue++);
   }
 
+  // TODO: move this into component which is only rendered when lick exists so dont need lick!.id
+  const updateTab = () => {
+    fetch("/api/lick/update-tab/" + lick!.id, {
+      method: "PUT",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        newTab: tab
+      })
+    })
+    // TODO: set alert that says cant update lick for some reason, ie. bad req, server error (maybe?)
+    .then((response) => {
+      if (response.status === 200) {
+        return response.json();
+      } else {
+        throw new Error('Couldn\'t update lick');
+      }
+    })
+    .then((responseJson) => {
+      setAlert({msg: 'Tab saved!', variant: 'success'})
+      setLick(responseJson);
+      setTab(responseJson.tab);
+    })
+  }
+
+  // TODO: move this into component which is only rendered when lick exists so dont need lick!.id
+  const reTabLick = () => {
+    history.push('/404'); // redirect to upload page instead
+
+    fetch("/api/lick/re-tab/" + lick!.id, {
+      method: "PUT",
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        newTuning: tuning,
+        newCapo: capo
+      })
+    })
+      // TODO: set alert that says cant update lick for some reason, ie. bad req, server error (maybe?)
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json();
+        } else {
+          throw new Error('Couldn\'t update lick');
+        }
+      })
+      .then((responseJson) => {
+        history.push({
+            pathname: '/edit/' + responseJson.id,
+            state: {
+              from: '404'
+            }
+          });
+      })
+      .catch((error) => {
+        history.push('/'); // redirect to error page eventually
+        console.error(error)
+      })
+  }
+
   if (lick) {
     return (
       <Container>
@@ -129,6 +215,7 @@ export default function EditPage(props: match<EditFormProps>) {
         <ReTabLickModal lickName={lick?.name}
                         showModal={showReTabModal}
                         handleCloseModal={() => setShowReTabModal(false)}
+                        reTabLick={reTabLick}
         />
         <ReactPlayer
           style={{display: "none"}}
@@ -181,7 +268,15 @@ export default function EditPage(props: match<EditFormProps>) {
               lickName={lick.name}
               lickDesc={lick.description}
             />
-            <ReTabForm setShowReTabModal={setShowReTabModal}/>
+            <ReTabForm
+              initTuning={lick.tuning}
+              tuning={tuning}
+              setTuning={setTuning}
+              initCapo={lick.capo}
+              capo={capo}
+              setCapo={setCapo}
+              setShowReTabModal={setShowReTabModal}
+            />
           </Col>
           <Col>
             <VisibilityForm
@@ -213,7 +308,11 @@ export default function EditPage(props: match<EditFormProps>) {
             <Col>
               <Row className="justify-content-md-end" style={{marginRight: '0px', marginBottom: '5px'}}>
                 <Button style={{marginRight: '20px'}} variant="danger" onClick={() => setShowDeleteModal(true)}>Delete Tab</Button>
-                <Button variant="secondary">Save Tab</Button>
+                <Button
+                  // variant={tab === lick.tab ? "secondary" : "success"}
+                  variant={"success"}
+                  disabled={tab === lick.tab}
+                  onClick={updateTab}>Save Tab</Button>
               </Row>
             </Col>
         </Row>
@@ -227,8 +326,10 @@ export default function EditPage(props: match<EditFormProps>) {
           {/*  'A|---------------------------------4------------------------------------------------------------------\n' +*/}
           {/*  'E|----------------------------------------------------------------------------------------------------'}*/}
           {/*  </textarea>*/}
-          <textarea className="lick-tab-field" onClick={() => {console.log(lick?.tab)}}>
-            {lick.tab ? lick.tab : "No tab available"}
+          <textarea
+            className="lick-tab-field"
+            value={tab ? tab : "No tab available"}
+            onChange={(event) => setTab(event.target.value)}>
           </textarea>
         </Row>
       </Container>

@@ -23,7 +23,7 @@ export function formatCapo(capo: number | undefined): string {
                         capo === 12 ? "12th" : "No Capo"
 
   if (formattedCapo !== "No Capo") {
-    formattedCapo += " fret"
+    formattedCapo += " Fret"
   }
 
   return formattedCapo;

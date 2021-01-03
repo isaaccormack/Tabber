@@ -35,7 +35,7 @@ export default function ShareForm(props: any) {
       })
       .catch((error) => {
         props.setAlert({msg: 'Lick could not be shared with ' + shareWithEmail, variant: 'danger'})
-        props.incAlertQueue()
+        props.incAlertQueue() // TODO: doesnt work
         console.log(error)
       })
       .finally(() => setShareWithEmail(""))
@@ -103,7 +103,11 @@ export default function ShareForm(props: any) {
               onChange={(event => setShareWithEmail(event.target.value))}
             />
             <InputGroup.Append>
-              <Button variant="success" onClick={handleShare}>Share</Button>
+              <Button
+                // variant={shareWithEmail ? "success" : "secondary"}
+                variant={"success"}
+                disabled={!shareWithEmail}
+                onClick={handleShare}>Share</Button>
             </InputGroup.Append>
           </InputGroup>
         </Form.Group>

@@ -4,8 +4,6 @@ import { useHistory } from "react-router";
 import { LickInterface } from "../../common/lick/interface/LickInterface";
 
 export default function DetailsForm(props: any) {
-  const history = useHistory();
-
   const [title, setTitle] = useState<string>(props.lickName);
   const [desc, setDesc] = useState<string>(props.lickDesc);
 
@@ -20,24 +18,28 @@ export default function DetailsForm(props: any) {
         newDescription: newLickDesc
       })
     })
-      // TODO: set alert that says cant update lick for some reason, ie. bad req, server error (maybe?)
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          throw new Error('Couldnt update lick');
-        }
-      })
-      .then((responseJson) => {
-        props.setAlert({msg: 'Details saved!', variant: 'success'})
-        props.setLick(responseJson);
-      })
+    // TODO: set alert that says cant update lick for some reason, ie. bad req, server error (maybe?)
+    .then((response) => {
+      if (response.status === 200) {
+        return response.json();
+      } else {
+        throw new Error('Couldnt update lick');
+      }
+    })
+    .then((responseJson) => {
+      props.setAlert({msg: 'Details saved!', variant: 'success'})
+      props.setLick(responseJson);
+    })
   }
 
   const renderSaveDetailsButton = () => {
     const detailsUpdated = !((title === props.lickName) && (desc === props.lickDesc) || (title === ""));
     return (
-      <Button variant={detailsUpdated ? "success" : "secondary"} type="submit" disabled={!detailsUpdated}>
+      <Button
+        // variant={detailsUpdated ? "success" : "secondary"}
+        variant={"success"}
+        type="submit"
+        disabled={!detailsUpdated}>
         Save Details
       </Button>
     );

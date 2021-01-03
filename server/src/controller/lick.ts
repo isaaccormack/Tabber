@@ -90,7 +90,7 @@ export class LickController {
         if (!body.skipTabbing) {
             try {
                 // Generate tab for lick after other data is handled
-                lick.tab = await TabModule.tabLick(lick);
+                lick.tab = await TabModule.tabLick(lick.audioFileLocation, lick.tuning, lick.capo);
             } catch (err) {
                 await LickController.attemptToDeleteFile(lick.audioFileLocation);
                 ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
@@ -269,13 +269,47 @@ export class LickController {
     }
 
     /**
-     * PUT /api/licks/retab/{id}
+     * PUT /api/licks/re-tab/{id}
      *
      * Re-Tab a lick given a new tuning and / or capo
      */
     public static async reTabLick(ctx: Context): Promise<void> {
-        // if body tuning == tuning and capo == capo, send back same tab
+        const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
+        if (!assertLickExists(ctx, lickToUpdate) ||  !assertRequesterIsLickOwner(ctx, lickToUpdate)) {
+            return;
+        }
+
+        const body = ctx.request.body;
+        if (!body.newTuning || body.newCapo === undefined) {
+            ctx.status = StatusCodes.BAD_REQUEST;
+            ctx.body = { errors: {error: "Error: No tuning or capo position provided"}}
+            return;
+        }
+
+        if (lickToUpdate.tuning === body.newTuning && lickToUpdate.capo === body.newCapo) {
+            // no work to do
+            ctx.status = StatusCodes.OK;
+            ctx.body = lickToUpdate;
+            return;
+        }
+
+        lickToUpdate.tuning = body.newTuning;
+        lickToUpdate.capo = body.newCapo;
+
+        if (!await assertLickValid(ctx, lickToUpdate)) {
+            return;
+        }
+
+        try {
+            lickToUpdate.tab = await TabModule.tabLick(lickToUpdate.audioFileLocation, body.newTuning, body.newCapo);
+        } catch (err) {
+            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
+            ctx.body = { errors: {error: "Error: Failed to tab audio file."}};
+            return;
+        }
+
+        await LickController.trySaveLickAndSetResponse(ctx, lickToUpdate);
     }
 
     /**
