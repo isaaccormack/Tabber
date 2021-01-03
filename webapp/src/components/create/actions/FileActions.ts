@@ -1,5 +1,5 @@
 import {CLEAR_FILESTATE, DELETE_FILE, FileActionTypes, UPDATE_FILE, UPDATE_METADATA} from "./FileActiontypes";
-import {LickFormInterface} from "../../edit/component/EditForm";
+import {LickFormInterface} from "../../edit/component/EditFormOLD";
 
 export function UpdateFile(file: File) {
     return {

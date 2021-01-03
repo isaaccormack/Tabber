@@ -1,5 +1,5 @@
 import React from "react";
-import EditForm, {LickFormInterface} from "../../edit/component/EditForm";
+import EditFormOLD, {LickFormInterface} from "../../edit/component/EditFormOLD";
 import MusicPlayer from "../../common/musicplayer/component/MusicPlayer";
 import {useDispatch} from "react-redux";
 import {UpdateMetaData} from "../actions/FileActions";
@@ -20,7 +20,7 @@ export default function CreateDescriptionPage() {
    return(
         <div className="centered">
             <img src={TryAgain} className='tryAgainButton' alt='try again button' onClick={() => {history.goBack()}}/>
-            <EditForm onSubmit={submitForm} formTitle="Tell us about your lick!"  uploading={true}/>
+            <EditFormOLD onSubmit={submitForm} formTitle="Tell us about your lick!" uploading={true}/>
             <br />
             <MusicPlayer/>
         </div>

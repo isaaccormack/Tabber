@@ -34,12 +34,9 @@ export default function DetailsForm(props: any) {
 
   const renderSaveDetailsButton = () => {
     const detailsUpdated = !((title === props.lickName) && (desc === props.lickDesc) || (title === ""));
+
     return (
-      <Button
-        // variant={detailsUpdated ? "success" : "secondary"}
-        variant={"success"}
-        type="submit"
-        disabled={!detailsUpdated}>
+      <Button type="submit" variant={"success"} disabled={!detailsUpdated}>
         Save Details
       </Button>
     );

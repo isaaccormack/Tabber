@@ -3,7 +3,7 @@ import React, {useEffect, useState} from "react";
 import {LickInterface} from "../../common/lick/interface/LickInterface";
 import {getAudioFile} from "../../common/musicplayer/component/MusicHelper";
 import {Button, Col, Container, Row, Modal} from "react-bootstrap";
-import EditForm from "../../edit/component/EditForm";
+import EditFormOLD from "../../edit/component/EditFormOLD";
 import LibraryPlayer from "../../common/musicplayer/component/LibraryPlayer";
 import {useHistory} from "react-router";
 
@@ -72,7 +72,7 @@ export default function ViewPage(props: match<ViewPageProps>) {
                 </div>
                 <Row>
                     <Col xs={6}>
-                        <EditForm formTitle={lick.name + " - " + lick.owner.name} onSubmit={() => {}} defaultLick={lick} disabled={true}  uploading={false}/>
+                        <EditFormOLD formTitle={lick.name + " - " + lick.owner.name} onSubmit={() => {}} defaultLick={lick} disabled={true} uploading={false}/>
                     </Col>
                     <Col xs={6}>
                         <Button

@@ -1,4 +1,4 @@
-import {LickFormInterface} from "../../edit/component/EditForm";
+import {LickFormInterface} from "../../edit/component/EditFormOLD";
 
 export default interface FileStateInterface {
     file: File | undefined

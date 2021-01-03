@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Alert, Button, Col, Container, Form, FormControl, InputGroup, Row, Table } from "react-bootstrap";
 import RemoveIcon from "../icons/remove.svg";
 import { UserInterface } from "../../common/user/interface/UserInterface";
-import { Simulate } from "react-dom/test-utils";
 
 export default function ShareForm(props: any) {
 
@@ -35,7 +34,6 @@ export default function ShareForm(props: any) {
       })
       .catch((error) => {
         props.setAlert({msg: 'Lick could not be shared with ' + shareWithEmail, variant: 'danger'})
-        props.incAlertQueue() // TODO: doesnt work
         console.log(error)
       })
       .finally(() => setShareWithEmail(""))
@@ -104,9 +102,8 @@ export default function ShareForm(props: any) {
             />
             <InputGroup.Append>
               <Button
-                // variant={shareWithEmail ? "success" : "secondary"}
                 variant={"success"}
-                disabled={!shareWithEmail}
+                disabled={shareWithEmail === ""}
                 onClick={handleShare}>Share</Button>
             </InputGroup.Append>
           </InputGroup>
