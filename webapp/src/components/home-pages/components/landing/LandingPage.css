@@ -1,0 +1,5 @@
+/* TODO: consolidate all css into one file since there is not much */
+
+.landing-page .row {
+    justify-content: center;
+}

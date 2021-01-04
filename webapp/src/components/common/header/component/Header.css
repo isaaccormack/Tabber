@@ -1,0 +1,33 @@
+@import '../../../../mainstyles.css';
+
+
+ /* NEED TO find a better way to override default than !important */
+.navbar-brand {
+    font-family: var(--font-header);
+    font-size: var(--font-size-5) !important;
+    transition: 0.1s;
+}
+.nav-link {
+    margin-left: 20px;
+}
+
+#basic-nav-dropdown {
+    color: white;
+}
+
+.sign-out {
+    font-family: var(--font-body);
+    color: #fff;
+    font-size: var(--font-size-2) !important;
+}
+
+a.nav-link.active {
+    outline: 3px solid white;
+    outline-offset: -4px;
+    /* must be !important to override bootstrap defaults */
+    background-color: transparent !important;
+}
+
+a.nav-link {
+    color: white !important;
+}

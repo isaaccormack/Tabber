@@ -1,5 +1,5 @@
 import { combineReducers } from 'redux';
-import NavigationReducer from "../components/common/navigation/reducers/NavigationReducer";
+import NavigationReducer from "../components/common/header/reducers/NavigationReducer";
 import UserReducer from "../components/common/user/reducers/UserReducer";
 import FileReducer from "../components/create/reducers/FileReducer";
 

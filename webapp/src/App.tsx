@@ -6,29 +6,27 @@ import PrivateRoute from "./PrivateRoute";
 
 import './App.css';
 import rootStore from "./store";
-import Navigation from "./components/common/navigation/component/Navigation";
+import Header from "./components/common/header/component/Header";
 import OAuth2Page from "./components/oauth/component/OAuth2Page";
 import CreatePage from "./components/create/component/CreatePage";
 import LoginPage from "./components/login/component/LoginPage";
 import UploadPage from "./components/create/component/UploadPage";
 import NotFoundPage from "./components/notfound/component/NotFoundPage";
-import AccountPage from "./components/account/component/AccountPage";
-import LibraryPage from "./components/library/component/LibraryPage";
-import SharedPage from "./components/library/component/SharedPage";
+import LibraryPage from "./components/library-pages/components/LibraryPage";
+import SharedPage from "./components/library-pages/components/SharedPage";
 import CreateDescriptionPage from "./components/create/component/CreateDescriptionPage";
-import EditPage from "./components/edit/component/EditPage";
-import ViewPage from "./components/edit/component/ViewPage";
+import EditPage from "./components/lick-pages/components/edit/EditPage";
+import ViewPage from "./components/lick-pages/components/view/ViewPage";
 import RecordPage from './components/create/component/RecordPage';
-import LandingPage from "./components/landing/component/LandingPage";
+import LandingPage from "./components/home-pages/components/landing/LandingPage";
 import Footer from "./components/common/footer/component/Footer";
-import OldLibraryPage from "./components/old_library/component/LibraryPage";
 
 
 function App() {
     return (
       <Provider store={rootStore}>
         <div className="app-wrapper">
-            <Navigation />
+            <Header />
             <div className="main">
                 <Container fluid className="app">
                     <Switch>
@@ -36,10 +34,7 @@ function App() {
                         <Route exact path="/create/description" component={CreateDescriptionPage} />
                         <Route exact path="/create/record" component={RecordPage} />
                         <Route exact path="/create" component={CreatePage} />
-                        <Route exact path="/account" component={AccountPage} />
                         <PrivateRoute exact path="/library" component={LibraryPage} />
-                        {/* below is for dev */}
-                        <Route exact path="/old-library" component={OldLibraryPage} />
                         <Route exact path="/edit/:id" component={EditPage} />
                         <Route exact path="/view/:id" component={ViewPage} />
                         <Route exact path="/shared" component={SharedPage} />

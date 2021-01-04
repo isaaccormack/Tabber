@@ -1,4 +1,10 @@
-import {LickFormInterface} from "../../edit/component/EditFormOLD";
+export interface LickFormInterface {
+    lickname: string
+    lickdescription: string
+    licktuning: string
+    lickcapo: number
+    lickpublic: boolean
+}
 
 export default interface FileStateInterface {
     file: File | undefined
