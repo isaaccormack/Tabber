@@ -5,19 +5,29 @@ import { useHistory } from "react-router";
 import { Row } from "react-bootstrap";
 import TrashIcon from "../icons/trash.svg";
 
-export interface DeleteLickModalProps {
-  showModal: boolean;
-  handleCloseModal: () => void;
-}
-
-export default function DeleteLickModal(props: DeleteLickModalProps) {
+export default function DeleteLickModal(props: any) {
   const history = useHistory();
 
   const showModal = props.showModal;
   const handleCloseModal = props.handleCloseModal;
 
   const deleteLick = () => {
-    // make API call here
+    fetch("/api/lick/" + props.lickId, {
+      method: "DELETE"
+    })
+      .then((response) => {
+        if (response.status === 204) {
+          history.push({
+            pathname: '/library',
+            state: { from: 'delete' }
+          });
+        }
+        throw new Error('Lick could not be deleted: ' + response.status + ' (' + response.statusText + ')');
+      })
+      .catch((err: Error) => {
+        handleCloseModal();
+        props.setAlert({msg: err.message, variant: 'danger'})
+      })
   }
 
   return (
@@ -44,7 +54,7 @@ export default function DeleteLickModal(props: DeleteLickModalProps) {
           </Button>
           {/* TODO: actually delete lick via API call */}
           {/* TODO: this should show a dropdown when /library is rendered telling user lick was deleted */}
-          <Button variant="danger" onClick={() => {deleteLick(); history.push("/library")}}>
+          <Button variant="danger" onClick={() => deleteLick()}>
             Delete
           </Button>
         </Row>

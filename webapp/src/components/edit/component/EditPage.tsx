@@ -33,6 +33,7 @@ export default function EditPage(props: any) {
     }
   }, [])
 
+  // Attempt to fetch lick, then lick audio using lick id
   useEffect(() => {
     const lickId = props.match.params.id;
 
@@ -47,14 +48,20 @@ export default function EditPage(props: any) {
     })
     .then((responseJson: LickInterface) => {
       setLick(responseJson);
-      return getAudioFile(responseJson.id)
+      return responseJson.id;
+    })
+    .catch((err: Error) => {
+      // TODO: redirect to error page eventually -- probably want to send err.message via history.state too
+      history.push('/');
+    })
+    .then((lickId: number | void) => {
+      return getAudioFile(lickId || -1)
     })
     .then((file: Blob) => {
       setLickAudioURL(URL.createObjectURL(file));
     })
     .catch((err: Error) => {
-      // TODO: redirect to error page eventually -- probably want to send err.message via history.state too
-      history.push('/');
+      setAlert({msg: err.message, variant: 'danger'})
     })
   }, [props.match.params.id])
 
@@ -85,12 +92,9 @@ export default function EditPage(props: any) {
           lickAudioURL={lickAudioURL}
         />
         <ViewLickBlock
-          lickName={lick.name}
-          lickDesc={lick.description}
-          lickTuning={lick.tuning}
-          lickCapo={lick.capo}
-          lickTab={lick.tab}
+          lick={lick}
           showEditForm={showEditForm}
+          setAlert={setAlert}
           setShowEditForm={setShowEditForm}
         />
         {showEditForm &&

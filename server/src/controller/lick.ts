@@ -142,29 +142,6 @@ export class LickController {
         const readFile = util.promisify(fs.readFile);
         ctx.body = await readFile(lick.audioFileLocation);
     }
-    //
-    // /**
-    //  * PUT /api/lick/share/{id}
-    //  *
-    //  * Share a lick (by id) with another user via their email.
-    //  */
-    // public static async shareLick(ctx: Context): Promise<void> {
-    //
-    //     const lickToBeShared: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
-    //
-    //     if (!assertLickExists(ctx, lickToBeShared) || !assertRequesterIsLickOwner(ctx, lickToBeShared)) {
-    //         return;
-    //     }
-    //
-    //     const userToShareWith: User | undefined  = await getUserByEmailOrErrorResponse(ctx);
-    //     if (userToShareWith === undefined || !await assertUserIsNotRequester(ctx, userToShareWith)) { return; }
-    //
-    //     if (!lickToBeShared.sharedWith.some(user => user.id === userToShareWith.id)) {
-    //         lickToBeShared.sharedWith.push(userToShareWith)
-    //     }
-    //
-    //     await LickController.trySaveLickAndSetResponse(ctx, lickToBeShared)
-    // }
 
     /**
      * PUT /api/lick/update-shared-with/{id}
@@ -314,7 +291,7 @@ export class LickController {
     }
 
     /**
-     * DELETE /api/licks/{id}
+     * DELETE /api/lick/{id}
      *
      * Delete a lick by id.
      */
@@ -326,6 +303,8 @@ export class LickController {
             return;
         }
 
+        // TODO: need to actually delete lick from database...
+
         const err: NodeJS.ErrnoException = await LickController.unlinkAsync(lickToRemove.audioFileLocation);
         if (err) {
             // ENOENT == file doesn't exist, let that case fail silently
@@ -336,7 +315,7 @@ export class LickController {
             }
         }
 
-        await LickController.trySaveLickAndSetResponse(ctx, lickToRemove);
+        await LickController.trySaveLickAndSetEmptyResponse(ctx, lickToRemove);
     }
 
     /**

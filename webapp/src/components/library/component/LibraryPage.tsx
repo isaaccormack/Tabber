@@ -7,12 +7,34 @@ import "./LibraryPage.css";
 import IconTitleBlock from "./IconTitleBlock";
 import LibraryTable from "./LibraryTable";
 import { useHistory } from "react-router";
+import { Alert } from "react-bootstrap";
+
+interface AlertInterface {
+  msg: string,
+  variant: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "dark" | "light" | undefined;
+}
 
 // TODO: make this handle no licks
-export default function LibraryPage() {
+export default function LibraryPage(props: any) {
   const history = useHistory();
 
   const [licks, setLicks] = useState<LickInterface[]>([])
+  const [alert, setAlert] = useState<AlertInterface>();
+  const [alertTimeout, setAlertTimeout] = useState();
+
+  useEffect(() => {
+    if (props.location.state && props.location.state.from === "delete") {
+      setAlert({msg: "Lick deleted!", variant: "success"})
+      history.push({ state: { from: '' } });
+    }
+  }, [])
+
+  useEffect(() => {
+    if (alert) {
+      clearTimeout(alertTimeout);
+      setAlertTimeout(setTimeout(() => { setAlert(undefined) }, 5000));
+    }
+  }, [alert])
 
   function getLibrary() {
     fetch("/api/user/licks", {
@@ -67,6 +89,16 @@ export default function LibraryPage() {
   // TODO: could make column width fixed so changing placement of icon doesn't mess everything up
   return (
     <Container>
+      {alert &&
+      <Alert
+        style={{marginTop: '5px'}}
+        dismissible
+        variant={alert.variant}
+        onClose={() => setAlert(undefined)}
+      >
+        {alert.msg}
+      </Alert>
+      }
       <IconTitleBlock icon={TurntableIcon} title="Library" lickLengthArr={licks.map((lick) => lick.audioLength)}/>
       <LibraryTable headerCols={headerCols} setLicks={setLicks} defaultSortColumn={"dateUploaded"} renderTableBody={renderTableBody}/>
     </Container>

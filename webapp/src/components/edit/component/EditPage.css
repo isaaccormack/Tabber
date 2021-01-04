@@ -11,15 +11,22 @@
     padding-left: 10px;
 }
 
-#play-button, #pencil-icon, #trash-icon, #download-icon {
+#edit-lick-span, #delete-lick-span {
+    cursor: pointer;
+    display: flex;
+}
+
+#edit-lick-span:hover, #delete-lick-span:hover {
     transition: 0.1s;
+    transform: scale(1.03);
 }
 
 #play-button:hover  {
     transform: scale(1.02);
 }
 
-#pencil-icon:hover, #trash-icon:hover, #download-icon:hover {
+#download-icon:hover {
+    transition: 0.1s;
     transform: scale(1.1);
 }
 

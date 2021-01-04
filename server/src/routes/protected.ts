@@ -23,6 +23,6 @@ protectedRouter.put("/lick/unfollow/:id", LickController.unfollowLick);
 protectedRouter.put("/lick/:id", LickController.updateLick);
 protectedRouter.put("/lick/re-tab/:id", LickController.reTabLick);
 protectedRouter.put("/lick/update-tab/:id", LickController.updateTab);
-protectedRouter.delete("/licks/:id", LickController.deleteLick);
+protectedRouter.delete("/lick/:id", LickController.deleteLick);
 
 export { protectedRouter };
