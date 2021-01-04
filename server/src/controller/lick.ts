@@ -15,7 +15,7 @@ import {
     assertLickExists,
     assertRequesterCanAccessLick,
     assertRequesterIsLickOwner,
-    assertUserExists,
+    getUserByEmailOrErrorResponse,
     assertUserIsNotRequester,
     assertLickValid
 } from "./lickAssertions";
@@ -142,52 +142,59 @@ export class LickController {
         const readFile = util.promisify(fs.readFile);
         ctx.body = await readFile(lick.audioFileLocation);
     }
+    //
+    // /**
+    //  * PUT /api/lick/share/{id}
+    //  *
+    //  * Share a lick (by id) with another user via their email.
+    //  */
+    // public static async shareLick(ctx: Context): Promise<void> {
+    //
+    //     const lickToBeShared: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+    //
+    //     if (!assertLickExists(ctx, lickToBeShared) || !assertRequesterIsLickOwner(ctx, lickToBeShared)) {
+    //         return;
+    //     }
+    //
+    //     const userToShareWith: User | undefined  = await getUserByEmailOrErrorResponse(ctx);
+    //     if (userToShareWith === undefined || !await assertUserIsNotRequester(ctx, userToShareWith)) { return; }
+    //
+    //     if (!lickToBeShared.sharedWith.some(user => user.id === userToShareWith.id)) {
+    //         lickToBeShared.sharedWith.push(userToShareWith)
+    //     }
+    //
+    //     await LickController.trySaveLickAndSetResponse(ctx, lickToBeShared)
+    // }
 
     /**
-     * PUT /api/lick/share/{id}
+     * PUT /api/lick/update-shared-with/{id}
      *
-     * Share a lick (by id) with another user via their email.
+     * Share or unshare a lick with another user by their email.
      */
-    public static async shareLick(ctx: Context): Promise<void> {
+    public static async updateLickSharedWith(ctx: Context): Promise<void> {
 
-        const lickToBeShared: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+        const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lickToBeShared) || !assertRequesterIsLickOwner(ctx, lickToBeShared)) {
+        if (!assertLickExists(ctx, lickToUpdate) || !assertRequesterIsLickOwner(ctx, lickToUpdate)) {
             return;
         }
 
-        const userToShareWith: User | undefined  = await assertUserExists(ctx);
-        if (userToShareWith === undefined || !await assertUserIsNotRequester(ctx, userToShareWith)) { return; }
+        const userToUpdate: User | undefined  = await getUserByEmailOrErrorResponse(ctx);
+        if (userToUpdate === undefined || !await assertUserIsNotRequester(ctx, userToUpdate)) { return; }
 
-        if (!lickToBeShared.sharedWith.some(user => user.id === userToShareWith.id)) {
-            lickToBeShared.sharedWith.push(userToShareWith)
+        const body = ctx.request.body;
+
+        if (body.share === true) {
+            if (!lickToUpdate.sharedWith.some(user => user.id === userToUpdate.id)) {
+                lickToUpdate.sharedWith.push(userToUpdate)
+            }
+        } else if (body.share === false) {
+            lickToUpdate.sharedWith =
+                lickToUpdate.sharedWith.filter((user) => user.id !== userToUpdate.id);
         }
 
-        await LickController.trySaveLickAndSetResponse(ctx, lickToBeShared)
+        await LickController.trySaveLickAndSetResponse(ctx, lickToUpdate)
     }
-
-    /**
-     * PUT /api/lick/unshare/{id}
-     *
-     * Unshare a lick with another user by id.
-     */
-    public static async unshareLick(ctx: Context): Promise<void> {
-
-        const lickToBeUnshared: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
-
-        if (!assertLickExists(ctx, lickToBeUnshared) || !assertRequesterIsLickOwner(ctx, lickToBeUnshared)) {
-            return;
-        }
-
-        const userToUnShareWith: User | undefined  = await assertUserExists(ctx);
-        if (userToUnShareWith === undefined) { return; }
-
-        // filters users shared with by ID, works if lick was never shared with user in the first place
-        lickToBeUnshared.sharedWith =
-            lickToBeUnshared.sharedWith.filter((user) => user.id !== userToUnShareWith.id);
-
-        await LickController.trySaveLickAndSetResponse(ctx, lickToBeUnshared)
-}
 
     /**
      * PUT /api/lick/unfollow/{id}

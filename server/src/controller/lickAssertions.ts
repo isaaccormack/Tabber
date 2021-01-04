@@ -31,21 +31,31 @@ export const assertRequesterIsLickOwner = (ctx: Context, lick: Lick | undefined)
     return false;
 }
 
-export const assertUserExists = async (ctx: Context): Promise<User | undefined> => {
+export const getUserByEmailOrErrorResponse = async (ctx: Context): Promise<User | undefined> => {
     const userByEmail: User | undefined = await UserController.getUserByEmail(ctx.request.body.userEmail || "");
-    const userById: User | undefined = await UserController.getUserByID(+ctx.request.body.userID || 0);
 
     if (userByEmail) { return userByEmail; }
-    if (userById) { return userById; }
 
-    ctx.status = StatusCodes.BAD_REQUEST;
+    ctx.status = StatusCodes.PRECONDITION_FAILED;
     ctx.body = { errors: {error: "Error: The user you are trying to (un)share with doesn't exist in the db"}}
     return undefined;
 }
 
+// export const assertUserExists = async (ctx: Context): Promise<User | undefined> => {
+//     const userByEmail: User | undefined = await UserController.getUserByEmail(ctx.request.body.userEmail || "");
+//     const userById: User | undefined = await UserController.getUserByID(+ctx.request.body.userID || 0);
+//
+//     if (userByEmail) { return userByEmail; }
+//     if (userById) { return userById; }
+//
+//     ctx.status = StatusCodes.BAD_REQUEST;
+//     ctx.body = { errors: {error: "Error: The user you are trying to (un)share with doesn't exist in the db"}}
+//     return undefined;
+// }
+
 export const assertUserIsNotRequester = async (ctx: Context, user: User): Promise<boolean> => {
     if (user.id === ctx.state.user.id) {
-        ctx.status = StatusCodes.BAD_REQUEST;
+        ctx.status = StatusCodes.IM_A_TEAPOT; // funny response code for a funny case
         ctx.body = { errors: {error: "Error: Cannot (un)share a lick with yourself."}}
         return false;
     }
