@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { LickInterface } from "../../common/lick/interface/LickInterface";
 import { formatCapo, formatLickLength } from "./FormattingHelpers";
 import Container from "react-bootstrap/Container";
@@ -6,53 +6,21 @@ import IconTitleBlock from "./IconTitleBlock";
 import DanceIcon from "../icons/dance.svg";
 import LibraryTable from "./LibraryTable";
 import { useHistory } from "react-router";
-import { Alert } from "react-bootstrap";
+import { useGetLibrary } from "../utils/useGetLibrary";
+import { AlertInterface, useAlertTimeouts } from "../../common/utils/useAlertTimeouts";
+import { useRedirectAlerts } from "../../common/utils/useRedirectAlerts";
+import renderAlert from "../../common/utils/renderAlert";
 
-// TODO: consolidate this somewhere
-interface AlertInterface {
-  msg: string,
-  variant: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "dark" | "light" | undefined;
-}
-
-// TODO: just move all alert stuff into /common/alerts
-export default function SharedPage(props: any) {
+export default function SharedPage() {
   const history = useHistory();
 
-  const [licks, setLicks] = useState<LickInterface[]>([])
+  const [licks, setLicks] = useState<LickInterface[]>([]);
   const [alert, setAlert] = useState<AlertInterface>();
   const [alertTimeout, setAlertTimeout] = useState();
 
-  useEffect(() => {
-    if (props.location.state && props.location.state.from === "unfollow") {
-      setAlert({msg: props.location.state.lickName + " was unfollowed!", variant: "success"})
-      history.push({ state: { from: '' } });
-    }
-  }, [])
-
-  useEffect(() => {
-    if (alert) {
-      clearTimeout(alertTimeout);
-      setAlertTimeout(setTimeout(() => { setAlert(undefined) }, 5000));
-    }
-  }, [alert])
-
-  function getSharedLicks() {
-    fetch("/api/user/licks-shared-with-me", {
-      method: "GET"
-    }).then((response) => {
-      if (response.status === 200) {
-        return response.json();
-      }
-    }).then((responseJson: LickInterface[]) => {
-      if (responseJson) {
-        setLicks(responseJson.sort((a, b) => a.name > b.name ? 1 : -1));
-      }
-    })
-  }
-
-  useEffect(() => {
-    getSharedLicks();
-  }, [])
+  useGetLibrary("/api/user/licks-shared-with-me", setLicks, setAlert);
+  useAlertTimeouts(alert, setAlert, alertTimeout, setAlertTimeout);
+  useRedirectAlerts(setAlert, "unfollow", " was unfollowed!");
 
   const headerCols: {key: string, value: string}[] = [
     {key: 'Title', value: 'name'},
@@ -91,16 +59,7 @@ export default function SharedPage(props: any) {
   //   same time as fixing table relation for date shared
   return (
     <Container>
-      {alert &&
-        <Alert
-          style={{marginTop: '5px'}}
-          dismissible
-          variant={alert.variant}
-          onClose={() => setAlert(undefined)}
-        >
-          {alert.msg}
-        </Alert>
-      }
+      {renderAlert(alert, setAlert)}
       <IconTitleBlock icon={DanceIcon} title="Shared With You" lickLengthArr={licks.map((lick) => lick.audioLength)}/>
       <LibraryTable headerCols={headerCols} setLicks={setLicks} defaultSortColumn={"name"} renderTableBody={renderTableBody}/>
     </Container>

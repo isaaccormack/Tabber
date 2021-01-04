@@ -9,7 +9,7 @@ export class UserController {
 
     /**
      * GET /user
-     * 
+     *
      * Get state of the currently authenticated user. Should not assume that owned licks
      * or licks shared with me are loaded in the users state.
      */
@@ -20,14 +20,14 @@ export class UserController {
         ctx.body = ctx.state.user;
         ctx.status = 200;
 
-        // may need to do a query here to get more data about user depending 
+        // may need to do a query here to get more data about user depending
         // on what data the user page will display
     }
 
     // Called in middleware every request
     public static async getOrCreateUser(payload: TokenPayload): Promise<User> {
         const userRepository: Repository<User> = getManager().getRepository(User);
-        
+
         let user: User = await userRepository.findOne(
             {
                 where:
@@ -51,7 +51,7 @@ export class UserController {
                 user = await userRepository.save(user);
             } catch {
                 // Most likely error case to be caught here is when the jwt token provided
-                // does not provide information required by the user entity, such as 
+                // does not provide information required by the user entity, such as
                 // email, given_name, or family_name
                 return null;
             }
@@ -62,7 +62,7 @@ export class UserController {
     // For testing
     /**
      * GET /users
-     * 
+     *
      * Find all users.
      */
     public static async getUsers(ctx: Context): Promise<void> {
@@ -81,7 +81,7 @@ export class UserController {
     // For development
     /**
      * GET /users/{id}
-     * 
+     *
      * Find user by id.
      */
     public static async getUser(ctx: Context): Promise<void> {
@@ -110,6 +110,7 @@ export class UserController {
      */
     public static async getAuthUserLicks(ctx: Context): Promise<void> {
 
+        // TODO: refactor this eventually
         const userRepository: Repository<User> = getManager().getRepository(User);
         // will always return the currently authenticated user
         const authUser: User = await userRepository.findOne({ where: {id: (ctx.state.user.id)}, relations: ['licks', 'licks.sharedWith']});
@@ -121,7 +122,7 @@ export class UserController {
             ctx.status = 500; // SERVER ERROR
             ctx.body = { errors: {error: "We could not get your licks right now"}}
         }
-        
+
     }
 
     /**
@@ -134,7 +135,7 @@ export class UserController {
         const userRepository: Repository<User> = getManager().getRepository(User);
         // will always return the currently authenticated user
         const authUser: User= await userRepository.findOne({ where: {id: (ctx.state.user.id)}, relations: ['sharedWithMe', 'sharedWithMe.owner']});
-        
+
         if (authUser) {
             ctx.status = 200; // OK
             ctx.body = authUser.sharedWithMe;
@@ -143,11 +144,11 @@ export class UserController {
             ctx.body = { errors: {error: "We could not get the licks shared with you right now"}}
         }
     }
-  
+
     // Save this as template for later
     /**
      * PUT /users/{id}
-     * 
+     *
      * Update a user.
      */
     public static async updateUser(ctx: Context): Promise<void> {
@@ -189,7 +190,7 @@ export class UserController {
 
     /**
      * DELETE /user
-     * 
+     *
      * Delete the currently authenticated user.
      */
     public static async deleteAuthUser(ctx: Context): Promise<void> {

@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { Button, Col, Form } from "react-bootstrap";
-import { useHistory } from "react-router";
 import { LickInterface } from "../../common/lick/interface/LickInterface";
-import { Lick } from "../../../../../server/src/entity/lick";
+import { throwFormattedError } from "../../common/utils/utils";
 
 export default function DetailsForm(props: any) {
 
@@ -19,7 +18,7 @@ export default function DetailsForm(props: any) {
       if (response.status === 200) {
         return response.json();
       }
-      throw new Error('Details could not be saved: ' + response.status + ' (' + response.statusText + ')');
+      throwFormattedError('Details could not be saved', response.status, response.statusText);
     })
     .then((responseJson: LickInterface) => {
       props.setAlert({msg: 'Details saved!', variant: 'success'})

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button, Col, Row } from "react-bootstrap";
 import DownloadTabsButton from "./DownloadTabsButton";
 import { LickInterface } from "../../common/lick/interface/LickInterface";
+import { throwFormattedError } from "../../common/utils/utils";
 
 export default function TabForm(props: any) {
 
@@ -17,7 +18,7 @@ export default function TabForm(props: any) {
       if (response.status === 200) {
         return response.json();
       }
-      throw new Error('Tab could not be updated: ' + response.status + ' (' + response.statusText + ')');
+      throwFormattedError('Tab could not be updated', response.status, response.statusText);
     })
     .then((responseJson: LickInterface) => {
       props.setAlert({msg: 'Tab updated!', variant: 'success'})

@@ -3,6 +3,7 @@ import { Button, Col, Form } from "react-bootstrap";
 import { formatCapo } from "../../library/component/FormattingHelpers";
 import { useHistory } from "react-router";
 import ReTabLickModal from "./ReTabLickModal";
+import { throwFormattedError } from "../../common/utils/utils";
 
 export default function ReTabForm(props: any) {
   const history = useHistory();
@@ -28,12 +29,12 @@ export default function ReTabForm(props: any) {
       if (response.status === 200) {
         return response.json();
       }
-      throw new Error('Lick could not be re-tabbed: ' + response.status + ' (' + response.statusText + ')');
+      throwFormattedError('Lick could not be re-tabbed', response.status, response.statusText);
     })
     .then((responseJson) => {
       history.push({
         pathname: '/edit/' + responseJson.id,
-        state: {from: '404'}
+        state: {from: '404', lickName: props.lickName}
       });
     })
     .catch((err: Error) => {

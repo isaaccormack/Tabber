@@ -2,16 +2,14 @@ import React from "react";
 import { Button, Col, Form, FormControl, InputGroup, Row } from "react-bootstrap";
 import LinkIcon from "../icons/link.svg";
 import { LickInterface } from "../../common/lick/interface/LickInterface";
-
+import { throwFormattedError } from "../../common/utils/utils";
 
 // TODO: actually check if lick is made public and private s.t. user which is not owner cant see
 export default function VisibilityForm(props: any) {
 
   const lickURL = window.location.host + "/view/" + props.lickId;
 
-  // probably want to rename this updateVisibility()
-
-  const submitMakeLickPublic = (makePublic: boolean) => {
+  const updateVisibility = (makePublic: boolean) => {
     fetch("/api/lick/" + props.lickId, {
       method: "PUT",
       headers: { 'Content-Type': 'application/json' },
@@ -21,7 +19,7 @@ export default function VisibilityForm(props: any) {
       if (response.status === 200) {
         return response.json();
       }
-      throw new Error('Lick visibility could not be updated: ' + response.status + ' (' + response.statusText + ')');
+      throwFormattedError('Lick visibility could not be updated', response.status, response.statusText);
     })
     .then((responseJson: LickInterface) => {
       props.setLick(responseJson);
@@ -37,11 +35,11 @@ export default function VisibilityForm(props: any) {
         <Form.Group as={Col} controlId="formGridState" xs={3}>
           <Form.Label><h3>Visibility</h3></Form.Label>
           {props.isLickPublic ?
-            <Button variant="danger" type="submit" onClick={() => submitMakeLickPublic(false)}>
+            <Button variant="danger" type="submit" onClick={() => updateVisibility(false)}>
               Make Private
             </Button>
             :
-            <Button variant="success" type="submit" onClick={() => submitMakeLickPublic(true)}>
+            <Button variant="success" type="submit" onClick={() => updateVisibility(true)}>
               Make Public
             </Button>
           }

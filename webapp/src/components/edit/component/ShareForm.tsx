@@ -1,17 +1,15 @@
 import React, { useState } from "react";
-import { Alert, Button, Col, Container, Form, FormControl, InputGroup, Row, Table } from "react-bootstrap";
+import { Button, Container, Form, FormControl, InputGroup, Row } from "react-bootstrap";
 import RemoveIcon from "../icons/remove.svg";
 import { UserInterface } from "../../common/user/interface/UserInterface";
 import { LickInterface } from "../../common/lick/interface/LickInterface";
+import { throwFormattedError } from "../../common/utils/utils";
 
-
-// TODO: make share and unshare one function in front and back end and use email everwhere -> this will be a pain since
-//  will need to update tests on backend
 export default function ShareForm(props: any) {
 
   const [shareWithEmail, setShareWithEmail] = useState("");
 
-  const handleUpdateLickSharedWith = (userEmail: string, share: boolean) => {
+  const updateLickSharedWith = (userEmail: string, share: boolean) => {
     if (share && !userEmail) return;
 
     fetch("/api/lick/update-shared-with/" + props.lickId, {
@@ -27,7 +25,7 @@ export default function ShareForm(props: any) {
       } else if (response.status === 418) {
         throw new Error('Cannot share lick with yourself')
       }
-      throw new Error('Cannot (un)share this lick: ' + response.status + ' (' + response.statusText + ')');
+      throwFormattedError('Cannot (un)share this lick', response.status, response.statusText);
     })
     .then((responseJson: LickInterface) => {
       if (share) {
@@ -58,7 +56,7 @@ export default function ShareForm(props: any) {
               src={RemoveIcon}
               height={25}
               alt="unshare button"
-              onClick={() => handleUpdateLickSharedWith(user.email || "", false)}/>
+              onClick={() => updateLickSharedWith(user.email || "", false)}/>
           </Row>
         );
       })
@@ -67,7 +65,7 @@ export default function ShareForm(props: any) {
 
   return (
     <>
-      <Form onSubmit={(e: any) => {e.preventDefault(); handleUpdateLickSharedWith(shareWithEmail, true)}}>
+      <Form onSubmit={(e: any) => {e.preventDefault(); updateLickSharedWith(shareWithEmail, true)}}>
         <Form.Group>
           <Form.Label><h3>Share</h3></Form.Label>
           <InputGroup className="mb-3">
@@ -79,8 +77,7 @@ export default function ShareForm(props: any) {
               onChange={(event => setShareWithEmail(event.target.value))}
             />
             <InputGroup.Append>
-              {/* change to !sharedWithEmail*/}
-              <Button type="submit" variant={"success"} disabled={shareWithEmail === ""}> Share</Button>
+              <Button type="submit" variant={"success"} disabled={!shareWithEmail}> Share</Button>
             </InputGroup.Append>
           </InputGroup>
         </Form.Group>

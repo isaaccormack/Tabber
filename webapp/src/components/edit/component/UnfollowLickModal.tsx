@@ -5,6 +5,7 @@ import { useHistory } from "react-router";
 import { Row } from "react-bootstrap";
 import RemoveIcon from "../icons/remove.svg";
 import { LickInterface } from "../../common/lick/interface/LickInterface";
+import { throwFormattedError } from "../../common/utils/utils";
 
 export default function UnfollowLickModal(props: any) {
   const history = useHistory();
@@ -20,7 +21,7 @@ export default function UnfollowLickModal(props: any) {
       if (response.status === 200) {
         return response.json();
       }
-      throw new Error('Lick could not be unfollowed: ' + response.status + ' (' + response.statusText + ')');
+      throwFormattedError('Lick could not be unfollowed', response.status, response.statusText);
     })
     .then((responseJson: LickInterface) => {
       history.push({
