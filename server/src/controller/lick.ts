@@ -190,7 +190,7 @@ export class LickController {
         lickToUnfollow.sharedWith =
             lickToUnfollow.sharedWith.filter((user) => user.id !== authUserId);
 
-        await LickController.trySaveLickAndSetEmptyResponse(ctx, lickToUnfollow)
+        await LickController.trySaveLickAndSetResponse(ctx, lickToUnfollow)
     }
 
     /**
@@ -363,18 +363,6 @@ export class LickController {
 
         ctx.status = StatusCodes.OK;
         ctx.body = removedLick;
-    }
-
-    public static async trySaveLickAndSetEmptyResponse(ctx: Context, lick: Lick) {
-        const updatedLick: Lick | undefined = await LickController.saveLickToDb(lick);
-
-        if (!updatedLick) {
-            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
-            ctx.body = { errors: {error: "Error: Could not update lick in db"}}
-            return;
-        }
-
-        ctx.status = StatusCodes.NO_CONTENT;
     }
 
     /**

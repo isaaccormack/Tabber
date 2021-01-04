@@ -1,18 +1,41 @@
 import React, { useEffect, useState } from "react";
 import { LickInterface } from "../../common/lick/interface/LickInterface";
-import { formatCapo, formatDate, formatLickLength } from "./FormattingHelpers";
+import { formatCapo, formatLickLength } from "./FormattingHelpers";
 import Container from "react-bootstrap/Container";
 import IconTitleBlock from "./IconTitleBlock";
 import DanceIcon from "../icons/dance.svg";
 import LibraryTable from "./LibraryTable";
 import { useHistory } from "react-router";
+import { Alert } from "react-bootstrap";
 
-export default function SharedPage() {
+// TODO: consolidate this somewhere
+interface AlertInterface {
+  msg: string,
+  variant: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "dark" | "light" | undefined;
+}
+
+// TODO: just move all alert stuff into /common/alerts
+export default function SharedPage(props: any) {
   const history = useHistory();
 
   const [licks, setLicks] = useState<LickInterface[]>([])
+  const [alert, setAlert] = useState<AlertInterface>();
+  const [alertTimeout, setAlertTimeout] = useState();
 
-  // TODO: edit backend so that there is a date shared field on the many-to-many relationship
+  useEffect(() => {
+    if (props.location.state && props.location.state.from === "unfollow") {
+      setAlert({msg: props.location.state.lickName + " was unfollowed!", variant: "success"})
+      history.push({ state: { from: '' } });
+    }
+  }, [])
+
+  useEffect(() => {
+    if (alert) {
+      clearTimeout(alertTimeout);
+      setAlertTimeout(setTimeout(() => { setAlert(undefined) }, 5000));
+    }
+  }, [alert])
+
   function getSharedLicks() {
     fetch("/api/user/licks-shared-with-me", {
       method: "GET"
@@ -68,6 +91,16 @@ export default function SharedPage() {
   //   same time as fixing table relation for date shared
   return (
     <Container>
+      {alert &&
+        <Alert
+          style={{marginTop: '5px'}}
+          dismissible
+          variant={alert.variant}
+          onClose={() => setAlert(undefined)}
+        >
+          {alert.msg}
+        </Alert>
+      }
       <IconTitleBlock icon={DanceIcon} title="Shared With You" lickLengthArr={licks.map((lick) => lick.audioLength)}/>
       <LibraryTable headerCols={headerCols} setLicks={setLicks} defaultSortColumn={"name"} renderTableBody={renderTableBody}/>
     </Container>

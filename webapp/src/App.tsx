@@ -17,7 +17,7 @@ import LibraryPage from "./components/library/component/LibraryPage";
 import SharedPage from "./components/library/component/SharedPage";
 import CreateDescriptionPage from "./components/create/component/CreateDescriptionPage";
 import EditPage from "./components/edit/component/EditPage";
-import ViewPage from "./components/view/component/ViewPage";
+import ViewPage from "./components/edit/component/ViewPage";
 import RecordPage from './components/create/component/RecordPage';
 import LandingPage from "./components/landing/component/LandingPage";
 import Footer from "./components/common/footer/component/Footer";

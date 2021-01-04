@@ -1,18 +1,19 @@
 import { Col, Row } from "react-bootstrap";
 import PencilIcon from "../icons/pencil.svg";
 import TrashIcon from "../icons/trash.svg";
+import RemoveIcon from "../icons/remove.svg";
 import { formatCapo } from "../../library/component/FormattingHelpers";
 import React, { useState } from "react";
 import DownloadTabsButton from "./DownloadTabsButton";
 import DeleteLickModal from "./DeleteLickModal";
-import { useHistory } from "react-router";
-import { LickInterface } from "../../common/lick/interface/LickInterface";
+import UnfollowLickModal from "./UnfollowLickModal";
 
 export default function ViewLickBlock(props: any) {
 
   const lick = props.lick;
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
+  const [showUnfollowModal, setShowUnfollowModal] = useState<boolean>(false);
 
   return (
     <>
@@ -21,6 +22,12 @@ export default function ViewLickBlock(props: any) {
         setAlert={props.setAlert}
         showModal={showDeleteModal}
         handleCloseModal={() => setShowDeleteModal(false)}
+      />
+      <UnfollowLickModal
+        lickId={lick.id}
+        setAlert={props.setAlert}
+        showModal={showUnfollowModal}
+        handleCloseModal={() => setShowUnfollowModal(false)}
       />
 
       <Row style={{marginTop: '15px', paddingLeft: "20px"}}>
@@ -31,28 +38,44 @@ export default function ViewLickBlock(props: any) {
             </Row>
           }
         </Col>
-        <Col xs={3}>
-          <Row style={{paddingRight: '30px'}} className="justify-content-md-end">
-            <span id="edit-lick-span" onClick={() => props.setShowEditForm((showEditForm: boolean) => !showEditForm)}>
-              <h4 style={{display: "inline", color: '#ffc107'}}>Edit</h4>
-              <img
-                style={{marginLeft: '5px', marginRight: '20px'}}
-                src={PencilIcon}
-                height={25}
-                alt="edit lick"
-              />
-            </span>
-            <span id="delete-lick-span" onClick={() => setShowDeleteModal(true)}>
-              <h4 style={{display: "inline", color: '#dc3545'}}>Delete</h4>
-              <img
-                style={{marginLeft: '5px'}}
-                src={TrashIcon}
-                height={25}
-                alt="delete lick"
-              />
-            </span>
-          </Row>
-        </Col>
+        {props.isEditPage ?
+          <Col xs={3}>
+            <Row style={{paddingRight: '30px'}} className="justify-content-md-end">
+              <span id="edit-lick-span" onClick={() => props.setShowEditForm((showEditForm: boolean) => !showEditForm)}>
+                <h4 style={{display: "inline", color: '#ffc107'}}>Edit</h4>
+                <img
+                  style={{marginLeft: '5px', marginRight: '20px'}}
+                  src={PencilIcon}
+                  height={25}
+                  alt="edit lick"
+                />
+              </span>
+              <span id="delete-lick-span" onClick={() => setShowDeleteModal(true)}>
+                <h4 style={{display: "inline", color: '#dc3545'}}>Delete</h4>
+                <img
+                  style={{marginLeft: '5px'}}
+                  src={TrashIcon}
+                  height={25}
+                  alt="delete lick"
+                />
+              </span>
+            </Row>
+          </Col>
+          :
+          <Col xs={3}>
+            <Row style={{paddingRight: '30px'}} className="justify-content-md-end">
+              <span id="delete-lick-span" onClick={() => setShowUnfollowModal(true)}>
+                <h4 style={{display: "inline", color: '#dc3545'}}>Unfollow</h4>
+                <img
+                  style={{marginLeft: '5px'}}
+                  src={RemoveIcon}
+                  height={25}
+                  alt="delete lick"
+                />
+              </span>
+            </Row>
+          </Col>
+        }
       </Row>
       {!props.showEditForm &&
         <Row style={{marginTop: '10px', paddingLeft: "20px"}}>

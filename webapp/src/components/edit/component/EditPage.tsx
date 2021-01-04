@@ -90,12 +90,14 @@ export default function EditPage(props: any) {
           isLickPublic={lick.isPublic}
           dateLickUploaded={lick.dateUploaded}
           lickAudioURL={lickAudioURL}
+          isEditPage={true}
         />
         <ViewLickBlock
           lick={lick}
           showEditForm={showEditForm}
           setAlert={setAlert}
           setShowEditForm={setShowEditForm}
+          isEditPage={true}
         />
         {showEditForm &&
           <EditForm

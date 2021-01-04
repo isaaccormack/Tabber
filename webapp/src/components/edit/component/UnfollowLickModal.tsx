@@ -3,29 +3,29 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import { useHistory } from "react-router";
 import { Row } from "react-bootstrap";
-import TrashIcon from "../icons/trash.svg";
+import RemoveIcon from "../icons/remove.svg";
 import { LickInterface } from "../../common/lick/interface/LickInterface";
 
-export default function DeleteLickModal(props: any) {
+export default function UnfollowLickModal(props: any) {
   const history = useHistory();
 
   const showModal = props.showModal;
   const handleCloseModal = props.handleCloseModal;
 
-  const deleteLick = () => {
-    fetch("/api/lick/" + props.lickId, {
-      method: "DELETE"
+  const unfollowLick = () => {
+    fetch("/api/lick/unfollow/" + props.lickId, {
+      method: "PUT"
     })
     .then((response) => {
       if (response.status === 200) {
         return response.json();
       }
-      throw new Error('Lick could not be deleted: ' + response.status + ' (' + response.statusText + ')');
+      throw new Error('Lick could not be unfollowed: ' + response.status + ' (' + response.statusText + ')');
     })
     .then((responseJson: LickInterface) => {
       history.push({
-        pathname: '/library',
-        state: { from: 'delete', lickName: responseJson.name }
+        pathname: '/shared',
+        state: { from: 'unfollow', lickName: responseJson.name }
       });
     })
     .catch((err: Error) => {
@@ -41,23 +41,23 @@ export default function DeleteLickModal(props: any) {
       <Modal.Body>
       <Row className="justify-content-md-center" style={{marginBottom: '20px'}}>
         <img
-          src={TrashIcon}
+          src={RemoveIcon}
           height={120}
-          alt="trash can icon"
+          alt="unfollow lick icon"
         />
       </Row>
         <Row className="justify-content-md-center">
           <h5>Are you sure?</h5>
         </Row>
         <Row className="justify-content-md-center">
-          This lick will be permanently deleted
+          You will no longer have access to this lick
         </Row>
         <Row className="justify-content-md-center" style={{marginTop: '20px'}}>
           <Button variant="outline-secondary" onClick={handleCloseModal} style={{marginRight: '50px'}}>
             Cancel
           </Button>
-          <Button variant="danger" onClick={() => deleteLick()}>
-            Delete
+          <Button variant="danger" onClick={() => unfollowLick()}>
+            Unfollow
           </Button>
         </Row>
       </Modal.Body>

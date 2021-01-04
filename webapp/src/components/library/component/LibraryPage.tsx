@@ -9,6 +9,7 @@ import LibraryTable from "./LibraryTable";
 import { useHistory } from "react-router";
 import { Alert } from "react-bootstrap";
 
+// TODO: consolidate this somewhere
 interface AlertInterface {
   msg: string,
   variant: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "dark" | "light" | undefined;
@@ -22,9 +23,10 @@ export default function LibraryPage(props: any) {
   const [alert, setAlert] = useState<AlertInterface>();
   const [alertTimeout, setAlertTimeout] = useState();
 
+  // TODO: refactor these into useCheckRedirect() and useClearAlert() after clean up some pages
   useEffect(() => {
     if (props.location.state && props.location.state.from === "delete") {
-      setAlert({msg: "Lick " + props.location.state.lickName + " was deleted!", variant: "success"})
+      setAlert({msg: props.location.state.lickName + " was deleted!", variant: "success"})
       history.push({ state: { from: '' } });
     }
   }, [])
@@ -90,14 +92,14 @@ export default function LibraryPage(props: any) {
   return (
     <Container>
       {alert &&
-      <Alert
-        style={{marginTop: '5px'}}
-        dismissible
-        variant={alert.variant}
-        onClose={() => setAlert(undefined)}
-      >
-        {alert.msg}
-      </Alert>
+        <Alert
+          style={{marginTop: '5px'}}
+          dismissible
+          variant={alert.variant}
+          onClose={() => setAlert(undefined)}
+        >
+          {alert.msg}
+        </Alert>
       }
       <IconTitleBlock icon={TurntableIcon} title="Library" lickLengthArr={licks.map((lick) => lick.audioLength)}/>
       <LibraryTable headerCols={headerCols} setLicks={setLicks} defaultSortColumn={"dateUploaded"} renderTableBody={renderTableBody}/>

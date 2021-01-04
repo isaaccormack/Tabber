@@ -41,6 +41,11 @@ export default function TitleBlock(props: any) {
           <Row>
             <h1 style={{color: '#404040'}}>{props.lickName}</h1>
           </Row>
+          {/*{props.isEditPage ?*/}
+          {/*  <EditSubtitle />*/}
+          {/*  :*/}
+          {/*  <ViewSubtitle />*/}
+          {/*}*/}
           <Row>
             {props.isLickPublic ?
               <Button disabled variant="success" style={{opacity: 1}}>Public</Button>
