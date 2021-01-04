@@ -303,19 +303,18 @@ export class LickController {
             return;
         }
 
-        // TODO: need to actually delete lick from database...
-
-        const err: NodeJS.ErrnoException = await LickController.unlinkAsync(lickToRemove.audioFileLocation);
-        if (err) {
+        try {
+            await LickController.unlinkAsync(lickToRemove.audioFileLocation);
+        } catch (err) {
             // ENOENT == file doesn't exist, let that case fail silently
-            if (err.code != 'ENOENT') {
+            if (err.code !== 'ENOENT') {
                 ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
                 ctx.body = { errors: {error: "Error: Cant unlink lick from file system."}}
                 return
             }
         }
 
-        await LickController.trySaveLickAndSetEmptyResponse(ctx, lickToRemove);
+        await LickController.tryRemoveLickAndSetResponse(ctx, lickToRemove);
     }
 
     /**
@@ -333,6 +332,12 @@ export class LickController {
         return await lickRepository.save(lick);
     }
 
+    // TODO: this should really go in DAO layer, not here
+    public static async deleteLickFromDb(lick: Lick): Promise<Lick | undefined> {
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        return await lickRepository.remove(lick);
+    }
+
     public static async trySaveLickAndSetResponse(ctx: Context, lick: Lick): Promise<boolean> {
         const updatedLick: Lick | undefined = await LickController.saveLickToDb(lick);
 
@@ -347,6 +352,18 @@ export class LickController {
         return true;
     }
 
+    public static async tryRemoveLickAndSetResponse(ctx: Context, lick: Lick) {
+        const removedLick: Lick | undefined = await LickController.deleteLickFromDb(lick);
+        if (!removedLick) {
+            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
+            ctx.body = { errors: {error: "Error: Cant remove lick from database."}}
+            return;
+        }
+
+        ctx.status = StatusCodes.OK;
+        ctx.body = removedLick;
+    }
+
     public static async trySaveLickAndSetEmptyResponse(ctx: Context, lick: Lick) {
         const updatedLick: Lick | undefined = await LickController.saveLickToDb(lick);
 
@@ -358,7 +375,6 @@ export class LickController {
 
         ctx.status = StatusCodes.NO_CONTENT;
     }
-
 
     /**
      * UTILS

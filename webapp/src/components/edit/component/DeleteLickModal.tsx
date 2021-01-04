@@ -4,6 +4,7 @@ import Modal from 'react-bootstrap/Modal';
 import { useHistory } from "react-router";
 import { Row } from "react-bootstrap";
 import TrashIcon from "../icons/trash.svg";
+import { LickInterface } from "../../common/lick/interface/LickInterface";
 
 export default function DeleteLickModal(props: any) {
   const history = useHistory();
@@ -15,19 +16,22 @@ export default function DeleteLickModal(props: any) {
     fetch("/api/lick/" + props.lickId, {
       method: "DELETE"
     })
-      .then((response) => {
-        if (response.status === 204) {
-          history.push({
-            pathname: '/library',
-            state: { from: 'delete' }
-          });
-        }
-        throw new Error('Lick could not be deleted: ' + response.status + ' (' + response.statusText + ')');
-      })
-      .catch((err: Error) => {
-        handleCloseModal();
-        props.setAlert({msg: err.message, variant: 'danger'})
-      })
+    .then((response) => {
+      if (response.status === 200) {
+        return response.json();
+      }
+      throw new Error('Lick could not be deleted: ' + response.status + ' (' + response.statusText + ')');
+    })
+    .then((responseJson: LickInterface) => {
+      history.push({
+        pathname: '/library',
+        state: { from: 'delete', lickName: responseJson.name }
+      });
+    })
+    .catch((err: Error) => {
+      handleCloseModal();
+      props.setAlert({msg: err.message, variant: 'danger'})
+    })
   }
 
   return (

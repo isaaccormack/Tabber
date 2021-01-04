@@ -24,7 +24,7 @@ export default function LibraryPage(props: any) {
 
   useEffect(() => {
     if (props.location.state && props.location.state.from === "delete") {
-      setAlert({msg: "Lick deleted!", variant: "success"})
+      setAlert({msg: "Lick " + props.location.state.lickName + " was deleted!", variant: "success"})
       history.push({ state: { from: '' } });
     }
   }, [])
