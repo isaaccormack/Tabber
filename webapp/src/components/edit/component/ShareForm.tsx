@@ -9,41 +9,8 @@ import { LickInterface } from "../../common/lick/interface/LickInterface";
 //  will need to update tests on backend
 export default function ShareForm(props: any) {
 
-  // TODO, use this somewhere
-  const [userDoesntExistErr, setUserDoesntExistErr] = useState(false);
   const [shareWithEmail, setShareWithEmail] = useState("");
 
-  // // TODO: consolidate error handling
-  // const handleShare = () => {
-  //   if (!shareWithEmail) return;
-  //
-  //   fetch("/api/lick/share/" + props.lickId, {
-  //     method: "PUT",
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //     },
-  //     body: JSON.stringify({userEmail: shareWithEmail})
-  //   })
-  //     // should be a handle success response and handle fail
-  //     .then((response) => {
-  //       if (response.status !== 200) {
-  //         setUserDoesntExistErr(true);
-  //         throw Error('uh oh')
-  //       }
-  //       return response.json();
-  //     })
-  //     .then((responseJson) => {
-  //       props.setAlert({msg: 'Lick shared with ' + shareWithEmail + '!', variant: 'success'})
-  //       props.setLick(responseJson);
-  //     })
-  //     .catch((error) => {
-  //       props.setAlert({msg: 'Lick could not be shared with ' + shareWithEmail, variant: 'danger'})
-  //       console.log(error)
-  //     })
-  //     .finally(() => setShareWithEmail(""))
-  // }
-
-  // TODO: endpoint should accept user email not id
   const handleUpdateLickSharedWith = (userEmail: string, share: boolean) => {
     if (share && !userEmail) return;
 
@@ -68,6 +35,7 @@ export default function ShareForm(props: any) {
       } else {
         props.setAlert({msg: 'Lick has been unshared with ' + userEmail, variant: 'warning'})
       }
+      setShareWithEmail("");
       props.setLick(responseJson);
     })
     .catch((err: Error) => {

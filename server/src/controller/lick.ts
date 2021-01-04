@@ -162,6 +162,7 @@ export class LickController {
         const body = ctx.request.body;
 
         if (body.share === true) {
+            // TODO: could send back error response if below condition is true, meaning lick has already been shared with user
             if (!lickToUpdate.sharedWith.some(user => user.id === userToUpdate.id)) {
                 lickToUpdate.sharedWith.push(userToUpdate)
             }

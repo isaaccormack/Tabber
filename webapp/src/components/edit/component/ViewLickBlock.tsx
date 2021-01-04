@@ -59,7 +59,7 @@ export default function ViewLickBlock(props: any) {
           <Col>
             <Row>
               <h4 style={{color: 'grey'}}>
-                {lick.uning + ' Tuning | ' + formatCapo(lick.capo)}
+                {lick.tuning + ' Tuning | ' + formatCapo(lick.capo)}
               </h4>
             </Row>
           </Col>
