@@ -37,7 +37,7 @@ export default function SharedPage() {
 
     useEffect(() => {
         if (selected) {
-            getAudioFile(selected).then((file: Blob) => {
+            getAudioFile(selected.id).then((file: Blob) => {
                 setSelectedFile(file);
             })
         }

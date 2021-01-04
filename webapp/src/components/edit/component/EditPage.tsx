@@ -1,6 +1,6 @@
 import { Container, Alert } from "react-bootstrap";
 import React, { useEffect, useState } from "react";
-import { match, useHistory } from "react-router";
+import { useHistory } from "react-router";
 import { getAudioFile } from "../../common/musicplayer/component/MusicHelper";
 
 import "./EditPage.css";
@@ -11,18 +11,11 @@ import ViewLickBlock from "./ViewLickBlock";
 import TabForm from "./TabForm";
 import EditForm from "./EditForm";
 
-
-interface EditFormProps {
-  id: string
-  location: any
-}
-
 interface AlertInterface {
   msg: string,
   variant: "primary" | "secondary" | "success" | "danger" | "warning" | "info" | "dark" | "light" | undefined;
 }
 
-// TODO: fix alert messages... really
 export default function EditPage(props: any) {
 
   const history = useHistory();
@@ -30,70 +23,61 @@ export default function EditPage(props: any) {
   const [lick, setLick] = useState<LickInterface>();
   const [lickAudioURL, setLickAudioURL] = useState<string>();
   const [alert, setAlert] = useState<AlertInterface>();
-  const [alertTimeout, setAlertTimeout] = useState(); // dont know what to type this...
+  const [alertTimeout, setAlertTimeout] = useState();
   const [showEditForm, setShowEditForm] = useState<boolean>(false);
 
   useEffect(() => {
     if (props.location.state && props.location.state.from === "404") {
-      setAlert({msg: "Lick tabbed successfully!", variant: "success"})
+      setAlert({msg: "Lick re-tabbed!", variant: "success"})
       history.push({ state: { from: '' } });
     }
   }, [])
 
-
-  // TODO: complete refactor of fetching from URL
   useEffect(() => {
-    // @ts-ignore //For some reason my IDE says that match doesn't exist but it does
-    fetch("/api/licks/" + props.match.params.id, {method: "GET"})
-      .then((response) => {
-        if (response.status !== 200) {
-          setLick(undefined);
-          return;
-        }
+    const lickId = props.match.params.id;
+
+    fetch("/api/licks/" + lickId, {
+      method: "GET"
+    })
+    .then((response) => {
+      if (response.status === 200) {
         return response.json();
-      })
-      .then((responseJson) => {
-        setLick(responseJson);
-      });
-    // @ts-ignore //again, typescript says match doesn't exist
+      }
+      throw new Error('Lick could not be retrieved: ' + response.status + ' (' + response.statusText + ')');
+    })
+    .then((responseJson: LickInterface) => {
+      setLick(responseJson);
+      return getAudioFile(responseJson.id)
+    })
+    .then((file: Blob) => {
+      setLickAudioURL(URL.createObjectURL(file));
+    })
+    .catch((err: Error) => {
+      // TODO: redirect to error page eventually -- probably want to send err.message via history.state too
+      history.push('/');
+    })
   }, [props.match.params.id])
-
-  // TODO: this should just chained onto first use effect
-  // I think this came from a misunderstanding that the audio could be changed for a lick
-  useEffect(() => {
-    if (lick) {
-      getAudioFile(lick).then((file: Blob) => {
-        setLickAudioURL(URL.createObjectURL(file));
-      })
-    }
-  }, [lick])
 
   useEffect(() => {
     if (alert) {
-      clearTimeout(alertTimeout); // will this break when param is null?
-
-      const timeout = setTimeout(() => {
-        setAlert(undefined);
-      }, 5000);
-
-      setAlertTimeout(timeout);
+      clearTimeout(alertTimeout);
+      setAlertTimeout(setTimeout(() => { setAlert(undefined) }, 5000));
     }
   }, [alert])
-
-  // theres a bug here when state changes while alert is still present it wont keep alert up for longer
-  const renderAlert = () => {
-
-    return (
-      <Alert variant={alert!.variant} style={{marginTop: '5px'}} dismissible onClose={() => setAlert(undefined)}>
-        {alert && alert.msg}
-      </Alert>
-    );
-  }
 
   if (lick) {
     return (
       <Container>
-        {alert && renderAlert()}
+        {alert &&
+          <Alert
+            style={{marginTop: '5px'}}
+            dismissible
+            variant={alert.variant}
+            onClose={() => setAlert(undefined)}
+          >
+            {alert.msg}
+          </Alert>
+        }
         <TitleBlock
           lickName={lick.name}
           isLickPublic={lick.isPublic}
@@ -128,5 +112,5 @@ export default function EditPage(props: any) {
     );
   } else {
     return <></>
-  };
+  }
 }

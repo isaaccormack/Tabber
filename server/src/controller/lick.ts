@@ -209,7 +209,7 @@ export class LickController {
     }
 
     /**
-     * PUT /api/licks/{id}
+     * PUT /api/lick/{id}
      *
      * Update a lick by id.
      */
@@ -227,17 +227,11 @@ export class LickController {
             lickToUpdate.isPublic = body.makePublic;
         }
         // assert the name isnt empty
-        if (body.newName) {
-            lickToUpdate.name = body.newName;
+        if (body.name) {
+            lickToUpdate.name = body.name;
         }
-        if (body.newDescription !== undefined) {
-            lickToUpdate.description = body.newDescription;
-        }
-        if (body.newTuning) {
-            lickToUpdate.tuning = body.newTuning;
-        }
-        if (body.newCapo) {
-            lickToUpdate.capo = parseInt(body.newCapo);
+        if (body.desc !== undefined) {
+            lickToUpdate.description = body.desc;
         }
 
         if (!await assertLickValid(ctx, lickToUpdate)) {
@@ -261,8 +255,8 @@ export class LickController {
         }
 
         const body = ctx.request.body;
-        if (body.newTab !== undefined) {
-            lickToUpdate.tab = body.newTab;
+        if (body.tab !== undefined) {
+            lickToUpdate.tab = body.tab;
         }
 
         await LickController.trySaveLickAndSetResponse(ctx, lickToUpdate);
@@ -281,28 +275,28 @@ export class LickController {
         }
 
         const body = ctx.request.body;
-        if (!body.newTuning || body.newCapo === undefined) {
+        if (!body.tuning || body.capo === undefined) {
             ctx.status = StatusCodes.BAD_REQUEST;
             ctx.body = { errors: {error: "Error: No tuning or capo position provided"}}
             return;
         }
 
-        if (lickToUpdate.tuning === body.newTuning && lickToUpdate.capo === body.newCapo) {
+        if (lickToUpdate.tuning === body.tuning && lickToUpdate.capo === body.capo) {
             // no work to do
             ctx.status = StatusCodes.OK;
             ctx.body = lickToUpdate;
             return;
         }
 
-        lickToUpdate.tuning = body.newTuning;
-        lickToUpdate.capo = body.newCapo;
+        lickToUpdate.tuning = body.tuning;
+        lickToUpdate.capo = body.capo;
 
         if (!await assertLickValid(ctx, lickToUpdate)) {
             return;
         }
 
         try {
-            lickToUpdate.tab = await TabModule.tabLick(lickToUpdate.audioFileLocation, body.newTuning, body.newCapo);
+            lickToUpdate.tab = await TabModule.tabLick(lickToUpdate.audioFileLocation, body.tuning, body.capo);
         } catch (err) {
             ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
             ctx.body = { errors: {error: "Error: Failed to tab audio file."}};

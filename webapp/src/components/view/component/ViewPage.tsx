@@ -58,7 +58,7 @@ export default function ViewPage(props: match<ViewPageProps>) {
 
     useEffect(() => {
         if (lick) {
-            getAudioFile(lick).then((file: Blob) => {
+            getAudioFile(lick.id).then((file: Blob) => {
                 setLickAudio(file);
             })
         }

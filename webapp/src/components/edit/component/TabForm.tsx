@@ -1,60 +1,56 @@
 import React, { useState } from "react";
 import { Button, Col, Row } from "react-bootstrap";
 import DownloadTabsButton from "./DownloadTabsButton";
+import { LickInterface } from "../../common/lick/interface/LickInterface";
 
 export default function TabForm(props: any) {
 
   const [tab, setTab] = useState<string>(props.lickTab);
 
-  // TODO: move this into component which is only rendered when lick exists so dont need lick!.id
   const updateTab = () => {
     fetch("/api/lick/update-tab/" + props.lickId, {
       method: "PUT",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        newTab: tab
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tab })
     })
-      // TODO: set alert that says cant update lick for some reason, ie. bad req, server error (maybe?)
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          throw new Error('Couldn\'t update lick');
-        }
-      })
-      .then((responseJson) => {
-        setTab(responseJson.tab);
-        props.setAlert({msg: 'Tab saved!', variant: 'success'})
-        props.setLick(responseJson);
-      })
+    .then((response) => {
+      if (response.status === 200) {
+        return response.json();
+      }
+      throw new Error('Tab could not be updated: ' + response.status + ' (' + response.statusText + ')');
+    })
+    .then((responseJson: LickInterface) => {
+      props.setAlert({msg: 'Tab updated!', variant: 'success'})
+      props.setLick(responseJson);
+    })
+    .catch((err: Error) => {
+      props.setAlert({msg: err.message, variant: 'danger'})
+    })
   }
 
   return (
     <>
       {props.showEditForm &&
-        <Row>
-          <Col>
-            <DownloadTabsButton lickName={props.lickName} lickTab={props.lickTab}/>
-          </Col>
-          <Col>
-            <Row className="justify-content-md-end" style={{marginRight: '0px', marginBottom: '5px'}}>
-              <Button
-                style={{marginRight: '10px'}}
-                variant={"danger"}
-                disabled={tab === props.lickTab}
-                onClick={() => setTab(props.lickTab)}
-              >
-                Reset
-              </Button>
-              <Button variant={"success"} disabled={tab === props.lickTab} onClick={updateTab}>
-                Save Tab
-              </Button>
-            </Row>
-          </Col>
-        </Row>
+      <Row>
+        <Col>
+          <DownloadTabsButton lickName={props.lickName} lickTab={props.lickTab}/>
+        </Col>
+        <Col>
+          <Row className="justify-content-md-end" style={{marginRight: '0px', marginBottom: '5px'}}>
+            <Button
+              style={{marginRight: '10px'}}
+              variant={"danger"}
+              disabled={tab === props.lickTab}
+              onClick={() => setTab(props.lickTab)}
+            >
+              Reset
+            </Button>
+            <Button variant={"success"} disabled={tab === props.lickTab} onClick={updateTab}>
+              Save Tab
+            </Button>
+          </Row>
+        </Col>
+      </Row>
       }
       <Row>
         <textarea

@@ -3,6 +3,9 @@ import { Alert, Button, Col, Container, Form, FormControl, InputGroup, Row, Tabl
 import RemoveIcon from "../icons/remove.svg";
 import { UserInterface } from "../../common/user/interface/UserInterface";
 
+
+// TODO: make share and unshare one function in front and back end and use email everwhere -> this will be a pain since
+//  will need to update tests on backend
 export default function ShareForm(props: any) {
 
   // TODO, use this somewhere

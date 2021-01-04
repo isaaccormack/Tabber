@@ -2,38 +2,36 @@ import React, { useState } from "react";
 import { Button, Col, Form } from "react-bootstrap";
 import { useHistory } from "react-router";
 import { LickInterface } from "../../common/lick/interface/LickInterface";
+import { Lick } from "../../../../../server/src/entity/lick";
 
 export default function DetailsForm(props: any) {
-  const [title, setTitle] = useState<string>(props.lickName);
+
+  const [name, setName] = useState<string>(props.lickName);
   const [desc, setDesc] = useState<string>(props.lickDesc);
 
-  const updateDetails = (newLickName: string, newLickDesc: string) => {
+  const updateDetails = () => {
     fetch("/api/lick/" + props.lickId, {
       method: "PUT",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        newName: newLickName,
-        newDescription: newLickDesc
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, desc })
     })
-    // TODO: set alert that says cant update lick for some reason, ie. bad req, server error (maybe?)
     .then((response) => {
       if (response.status === 200) {
         return response.json();
-      } else {
-        throw new Error('Couldnt update lick');
       }
+      throw new Error('Details could not be saved: ' + response.status + ' (' + response.statusText + ')');
     })
-    .then((responseJson) => {
+    .then((responseJson: LickInterface) => {
       props.setAlert({msg: 'Details saved!', variant: 'success'})
       props.setLick(responseJson);
+    })
+    .catch((err: Error) => {
+      props.setAlert({msg: err.message, variant: 'danger'})
     })
   }
 
   const renderSaveDetailsButton = () => {
-    const detailsUpdated = !((title === props.lickName) && (desc === props.lickDesc) || (title === ""));
+    const detailsUpdated = !((name === props.lickName) && (desc === props.lickDesc) || (name === ""));
 
     return (
       <Button type="submit" variant={"success"} disabled={!detailsUpdated}>
@@ -43,7 +41,7 @@ export default function DetailsForm(props: any) {
   }
 
   return (
-    <Form onSubmit={(e: any) => {e.preventDefault(); updateDetails(title, desc)}}>
+    <Form onSubmit={(e: any) => {e.preventDefault(); updateDetails()}}>
       <Form.Row style={{marginBottom: '0px'}}>
         <Col xs={8}>
           <Form.Group>
@@ -53,9 +51,9 @@ export default function DetailsForm(props: any) {
             <Form.Control
               type="text"
               maxLength={100}
-              value={title}
+              value={name}
               placeholder="Title"
-              onChange={(event => setTitle(event.target.value))}
+              onChange={(event => setName(event.target.value))}
             />
           </Form.Group>
         </Col>

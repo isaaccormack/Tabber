@@ -12,36 +12,38 @@ export default function ViewLickBlock(props: any) {
 
   return (
     <>
-      <DeleteLickModal lickName={props.lickName}
-                       showModal={showDeleteModal}
+      <DeleteLickModal showModal={showDeleteModal}
                        handleCloseModal={() => setShowDeleteModal(false)}
       />
 
       <Row style={{marginTop: '15px', paddingLeft: "20px"}}>
-        <Col xs={10}>
+        <Col xs={9}>
           {!props.showEditForm &&
             <Row>
               <h5 style={{color: 'lightgrey'}}>{props.lickDesc}</h5>
             </Row>
           }
         </Col>
-        <Col xs={2}>
+        <Col xs={3}>
           <Row style={{paddingRight: '30px'}} className="justify-content-md-end">
+            <h4 style={{display: "inline", color: '#ffc107'}}>Edit</h4>
             <img
-              style={{marginLeft: '20px'}}
+              style={{marginLeft: '5px', marginRight: '20px'}}
               id="pencil-icon"
               src={PencilIcon}
               height={25}
               alt="edit lick"
               onClick={() => props.setShowEditForm((showEditForm: boolean) => !showEditForm)}
             />
+            <h4 style={{display: "inline", color: '#dc3545'}}>Delete</h4>
             <img
-              style={{marginLeft: '10px'}}
-              id="trash-icon"
-              src={TrashIcon}
-              height={25}
-              alt="delete lick"
-              onClick={() => setShowDeleteModal(true)}/>
+            style={{marginLeft: '5px'}}
+            id="trash-icon"
+            src={TrashIcon}
+            height={25}
+            alt="delete lick"
+            onClick={() => setShowDeleteModal(true)}
+          />
           </Row>
         </Col>
       </Row>

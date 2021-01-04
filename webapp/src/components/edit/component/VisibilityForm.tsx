@@ -1,27 +1,34 @@
 import React from "react";
-import { Button, Col, Container, Form, FormControl, InputGroup, Row } from "react-bootstrap";
+import { Button, Col, Form, FormControl, InputGroup, Row } from "react-bootstrap";
 import LinkIcon from "../icons/link.svg";
-import DetailsForm from "./DetailsForm";
+import { LickInterface } from "../../common/lick/interface/LickInterface";
 
 
 // TODO: actually check if lick is made public and private s.t. user which is not owner cant see
 export default function VisibilityForm(props: any) {
+
   const lickURL = window.location.host + "/view/" + props.lickId;
+
+  // probably want to rename this updateVisibility()
 
   const submitMakeLickPublic = (makePublic: boolean) => {
     fetch("/api/lick/" + props.lickId, {
       method: "PUT",
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({makePublic})
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ makePublic })
     })
-      .then((response) => {
+    .then((response) => {
+      if (response.status === 200) {
         return response.json();
-      })
-      .then((responseJson) => {
-        props.setLick(responseJson);
-      })
+      }
+      throw new Error('Lick visibility could not be updated: ' + response.status + ' (' + response.statusText + ')');
+    })
+    .then((responseJson: LickInterface) => {
+      props.setLick(responseJson);
+    })
+    .catch((err: Error) => {
+      props.setAlert({msg: err.message, variant: 'danger'})
+    })
   }
 
   return (
@@ -42,7 +49,8 @@ export default function VisibilityForm(props: any) {
 
         <Form.Group id="lick-url-display" as={Col} controlId="formGridState" className="align-self-end" xs={9}>
           <InputGroup className="mb-3">
-            <InputGroup.Prepend onClick={() => {
+            <InputGroup.Prepend
+              onClick={() => {
               navigator.clipboard.writeText(lickURL);
               props.setAlert({msg: 'Lick URL copied to clipboard!', variant: 'success'});
             }}>
