@@ -16,12 +16,31 @@ import { NavDropdown } from "react-bootstrap";
 
 export default function Header() {
 
+  const recordPath = "/create/record";
+  const uploadPath = "/create/upload";
+  const libraryPath = "/library";
+  const sharedPath = "/shared";
+
   const history = useHistory();
   const dispatch = useDispatch();
 
   const user: UserInterface | undefined = useSelector((state: RootState) => state.userState.user);
   const [loginUrl, setLoginURL] = useState("");
   const [activeKey, setActiveKey] = useState(() => { return window.location.pathname });
+
+  useEffect(() => {
+    const path = window.location.pathname;
+
+    if (path.includes('record')) {
+      setActiveKey(recordPath);
+    } else if (path.includes('upload')) {
+      setActiveKey(uploadPath);
+    } else if (path.includes('library') || path.includes('edit')) {
+      setActiveKey(libraryPath);
+    }  else if (path.includes('shared') || path.includes('view')) {
+      setActiveKey(sharedPath);
+    }
+  }, [window.location.pathname])
 
   useEffect(() => {
     fetch("/api/loginUrl")
@@ -69,34 +88,23 @@ export default function Header() {
 
   // Note: href will re-render the entire app forcing all components to remount which resets state here
   const loggedInNavBar = () => {
-    const recordPath = "/create/record";
-    const uploadPath = "/create/upload";
-    const libraryPath = "/library";
-    const sharedPath = "/shared";
-
-    const handleSelect = (setActiveKey: Function, path: string) => {
-      setActiveKey(path)
-      history.push(path)
-    }
 
     return (
       <div style={{backgroundColor: '#75a9f9', color: 'white'}}>
         <Container>
           <Navbar variant="dark">
             {tabberBrand()}
-            {/* TODO: figure out how to display which page is selected */}
-            {/*  see for how to do: https://stackoverflow.com/questions/36342220/tabs-in-react-bootstrap-navbar */}
             <Nav variant="pills" className="ml-auto" activeKey={activeKey}>
-              <Nav.Link eventKey={recordPath} style={{color: 'white'}} onSelect={() => {handleSelect(setActiveKey, recordPath)}}>
+              <Nav.Link eventKey={recordPath} style={{color: 'white'}} onSelect={() => history.push(recordPath)}>
                 Record
               </Nav.Link>
-              <Nav.Link eventKey={uploadPath} style={{color: 'white'}} onSelect={() => {handleSelect(setActiveKey, uploadPath)}}>
+              <Nav.Link eventKey={uploadPath} style={{color: 'white'}} onSelect={() => history.push(uploadPath)}>
                 Upload
               </Nav.Link>
-              <Nav.Link eventKey={libraryPath} style={{color: 'white'}} onSelect={() => {handleSelect(setActiveKey, libraryPath)}}>
+              <Nav.Link eventKey={libraryPath} style={{color: 'white'}} onSelect={() => history.push(libraryPath)}>
                 Library
               </Nav.Link>
-              <Nav.Link eventKey={sharedPath} style={{color: 'white'}} onSelect={() => {handleSelect(setActiveKey, sharedPath)}}>
+              <Nav.Link eventKey={sharedPath} style={{color: 'white'}} onSelect={() => history.push(sharedPath)}>
                 Shared
               </Nav.Link>
               <NavDropdown title={user && user.name} id="basic-nav-dropdown" style={{marginLeft: '10px'}}>

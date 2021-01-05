@@ -13,6 +13,7 @@
 
 #basic-nav-dropdown {
     color: white;
+    background: rgb(117, 169, 249);
 }
 
 .sign-out {
@@ -22,8 +23,6 @@
 }
 
 a.nav-link.active {
-    outline: 3px solid white;
-    outline-offset: -4px;
-    /* must be !important to override bootstrap defaults */
-    background-color: transparent !important;
+    background-color: white !important;
+    color: rgb(117, 169, 249) !important;
 }
