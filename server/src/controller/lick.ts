@@ -400,6 +400,8 @@ export class LickController {
     }
 
     public static canUserAccess(user: User, lick: Lick): boolean {
+        console.log(user)
+
         // The owner and sharedWith relations MUST exist be loaded on the lick passed in
         if (!lick.owner || !lick.sharedWith) {
             throw new Error('The owner and sharedWith relations MUST be loaded on lick parameter')

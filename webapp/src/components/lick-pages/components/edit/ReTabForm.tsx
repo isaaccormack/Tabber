@@ -17,7 +17,7 @@ export default function ReTabForm(props: any) {
   const capoPositions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => formatCapo(num));
 
   const reTabLick = () => {
-    history.push('/404'); // redirect to upload page instead
+    history.push('/404'); // TODO: redirect to upload page instead
 
     fetch("/api/lick/re-tab/" + props.lickId, {
       method: "PUT",
@@ -30,15 +30,14 @@ export default function ReTabForm(props: any) {
       }
       throwFormattedError('Lick could not be re-tabbed', response.status, response.statusText);
     })
-    .then((responseJson) => {
+    .then(() => {
       history.push({
-        pathname: '/edit/' + responseJson.id,
-        state: {from: '404', lickName: props.lickName}
+        pathname: '/edit/' + props.lickId,
+        state: {from: '404', lickName: props.lickName} // TODO: fix this when changing page redirecting to
       });
     })
     .catch((err: Error) => {
       // TODO: redirect to error page eventually -- probably want to send err.message via history.state too
-      history.push('/');
     })
   }
 

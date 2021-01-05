@@ -1,5 +1,4 @@
 import React from "react";
-import MusicPlayer from "../../common/musicplayer/component/MusicPlayer";
 import {useDispatch} from "react-redux";
 import {UpdateMetaData} from "../actions/FileActions";
 import {useHistory} from "react-router";
@@ -28,7 +27,7 @@ export default function CreateDescriptionPage() {
             <img src={TryAgain} className='tryAgainButton' alt='try again button' onClick={() => {history.goBack()}}/>
             {/*<EditFormOLD onSubmit={submitForm} formTitle="Tell us about your lick!" uploading={true}/>*/}
             <br />
-            <MusicPlayer/>
+            {/*<MusicPlayer/>*/}
         </div>
     )
 }

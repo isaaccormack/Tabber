@@ -7,7 +7,7 @@ import TitleBlock from "../common/TitleBlock";
 import ViewLickBlock from "../common/ViewLickBlock";
 import TabForm from "./TabForm";
 import EditForm from "./EditForm";
-import { useGetLick } from "../../utils/useGetLick";
+import { useGetLick, useGetLickAudio } from "../../utils/useGetLick";
 import { AlertInterface, useAlertTimeouts } from "../../../common/utils/useAlertTimeouts";
 import { useRedirectAlerts } from "../../../common/utils/useRedirectAlerts";
 import renderAlert from "../../../common/utils/renderAlert";
@@ -20,7 +20,8 @@ export default function EditPage(props: any) {
   const [alertTimeout, setAlertTimeout] = useState();
   const [showEditForm, setShowEditForm] = useState<boolean>(false);
 
-  useGetLick(props.match.params.id, setLick, setLickAudioURL, setAlert);
+  useGetLick(props.match.params.id, setLick);
+  useGetLickAudio(props.match.params.id, lick, setLickAudioURL, setAlert)
   useAlertTimeouts(alert, setAlert, alertTimeout, setAlertTimeout);
   useRedirectAlerts(setAlert, "404", " was re-tabbed!");
 

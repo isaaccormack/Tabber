@@ -51,6 +51,7 @@ export default function Header() {
   const logout = useCallback(() => {
     dispatch(DeleteUser());
     history.push("/");
+    // this is not removing token from client...
     localStorage.clear();
   }, [dispatch, history])
 

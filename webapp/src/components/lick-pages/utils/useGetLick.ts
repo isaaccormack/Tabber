@@ -1,10 +1,12 @@
 import { LickInterface } from "../../common/lick/interface/LickInterface";
-import { getAudioFile } from "../../common/musicplayer/component/MusicHelper";
 import { useEffect } from "react";
 import { throwFormattedError } from "../../common/utils/formattingHelpers";
+import { useHistory } from "react-router";
 
 // Attempt to fetch lick, then lick audio using lick id
-export const useGetLick = (lickId: number, setLick: Function, setLickAudioURL: Function, setAlert: Function) => {
+export const useGetLick = (lickId: number, setLick: Function) => {
+  const history = useHistory();
+
   useEffect(() => {
     fetch("/api/licks/" + lickId, {
       method: "GET"
@@ -20,18 +22,36 @@ export const useGetLick = (lickId: number, setLick: Function, setLickAudioURL: F
       return responseJson.id;
     })
     .catch((err: Error) => {
-      // TODO: redirect to error page eventually -- probably want to send err.message via history.state too
-      // TODO: will need to return something that indicates an error of this nature here
-      // history.push('/');
-    })
-    .then((lickId: number | void) => {
-      return getAudioFile(lickId || -1)
-    })
-    .then((file: Blob) => {
-      setLickAudioURL(URL.createObjectURL(file));
-    })
-    .catch((err: Error) => {
-      setAlert({msg: err.message, variant: 'danger'})
+      let redirectRoute = '/500';
+      if (err.message.includes('403')) {
+        redirectRoute = '/403';
+      } else if (err.message.includes('400')) {
+        redirectRoute = '/400';
+      }
+      history.push({ pathname: redirectRoute,  state: { from: 'get-lick' , lickName: ''} });
     })
   }, [lickId]);
+}
+// Probably dont end up using this
+// Only attempt to fetch lick audio after lick is retrieved
+export const useGetLickAudio = (lickId: number, lick: LickInterface | undefined, setLickAudioURL: Function, setAlert: Function) => {
+  useEffect(() => {
+    if (lick) {
+      fetch("/api/licks/audio/" + lickId, {
+        method: "GET"
+      })
+      .then((response) => {
+        if (response.status === 200) {
+          return response.blob();
+        }
+        throwFormattedError('Lick audio could not be retrieved', response.status, response.statusText);
+      })
+      .then((file: Blob | undefined) => {
+        setLickAudioURL(URL.createObjectURL(file));
+      })
+      .catch((err: Error) => {
+        setAlert({msg: err.message, variant: 'danger'})
+      })
+    }
+  }, [lickId])
 }
