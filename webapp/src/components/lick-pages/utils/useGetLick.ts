@@ -53,5 +53,5 @@ export const useGetLickAudio = (lickId: number, lick: LickInterface | undefined,
         setAlert({msg: err.message, variant: 'danger'})
       })
     }
-  }, [lickId])
+  }, [lick])
 }
