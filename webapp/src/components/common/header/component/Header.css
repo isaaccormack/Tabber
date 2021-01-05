@@ -27,7 +27,3 @@ a.nav-link.active {
     /* must be !important to override bootstrap defaults */
     background-color: transparent !important;
 }
-
-a.nav-link {
-    color: white !important;
-}

@@ -87,16 +87,16 @@ export default function Header() {
             {/* TODO: figure out how to display which page is selected */}
             {/*  see for how to do: https://stackoverflow.com/questions/36342220/tabs-in-react-bootstrap-navbar */}
             <Nav variant="pills" className="ml-auto" activeKey={activeKey}>
-              <Nav.Link eventKey={recordPath} onSelect={() => {handleSelect(setActiveKey, recordPath)}}>
+              <Nav.Link eventKey={recordPath} style={{color: 'white'}} onSelect={() => {handleSelect(setActiveKey, recordPath)}}>
                 Record
               </Nav.Link>
-              <Nav.Link eventKey={uploadPath} onSelect={() => {handleSelect(setActiveKey, uploadPath)}}>
+              <Nav.Link eventKey={uploadPath} style={{color: 'white'}} onSelect={() => {handleSelect(setActiveKey, uploadPath)}}>
                 Upload
               </Nav.Link>
-              <Nav.Link eventKey={libraryPath} onSelect={() => {handleSelect(setActiveKey, libraryPath)}}>
+              <Nav.Link eventKey={libraryPath} style={{color: 'white'}} onSelect={() => {handleSelect(setActiveKey, libraryPath)}}>
                 Library
               </Nav.Link>
-              <Nav.Link eventKey={sharedPath} onSelect={() => {handleSelect(setActiveKey, sharedPath)}}>
+              <Nav.Link eventKey={sharedPath} style={{color: 'white'}} onSelect={() => {handleSelect(setActiveKey, sharedPath)}}>
                 Shared
               </Nav.Link>
               <NavDropdown title={user && user.name} id="basic-nav-dropdown" style={{marginLeft: '10px'}}>
