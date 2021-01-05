@@ -39,6 +39,8 @@ export default function Header() {
       setActiveKey(libraryPath);
     }  else if (path.includes('shared') || path.includes('view')) {
       setActiveKey(sharedPath);
+    } else {
+      setActiveKey('');
     }
   }, [window.location.pathname])
 
