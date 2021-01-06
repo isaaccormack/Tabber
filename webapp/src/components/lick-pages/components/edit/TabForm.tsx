@@ -56,7 +56,7 @@ export default function TabForm(props: any) {
       <Row>
         <textarea
           className="lick-tab-field"
-          value={tab ? tab : "No tab available"}
+          value={tab}
           onChange={(event) => setTab(event.target.value)}>
         </textarea>
       </Row>

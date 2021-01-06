@@ -19,7 +19,7 @@ export default function CreateDescriptionPage() {
 
     const submitForm = (data: LickFormInterface) => {
         dispatch(UpdateMetaData(data));
-        history.push("/create/upload");
+        history.push("/upload");
     }
 
    return(

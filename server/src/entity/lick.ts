@@ -26,7 +26,7 @@ export class Lick {
     @Column()
     audioLength: number; // seconds
 
-    @Column({type: "text"})
+    @Column({type: "text", nullable: true})
     tab: string;
 
     @Column()
@@ -39,7 +39,7 @@ export class Lick {
     @Max(24)
     capo: number;
 
-    @Column()
+    @Column({default: false})
     isPublic: boolean;
 
     @ManyToOne(type => User, user => user.licks)

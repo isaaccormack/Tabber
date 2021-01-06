@@ -29,7 +29,7 @@ export default function UserHomePage(props: any) {
             button={<NavigationButton
               variant={"primary"}
               desc={"Get Uploading"}
-              onClick={() => history.push("/create/upload")}
+              onClick={() => history.push("/upload")}
             />}
           />
         </Col>
@@ -42,7 +42,7 @@ export default function UserHomePage(props: any) {
             button={<NavigationButton
               variant={"warning"}
               desc={"Start Recording"}
-              onClick={() => history.push("/create/record")}
+              onClick={() => history.push("/record")}
             />}
           />
         </Col>

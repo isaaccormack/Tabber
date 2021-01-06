@@ -41,17 +41,12 @@ export class LickController {
 
         const body = ctx.request.body;
 
-        // add user specified attributes to lick to be validated
         const lick: Lick = new Lick();
         lick.name = ctx.request.body.name;
-        lick.description = body.description ? body.description : "";
         lick.dateUploaded = new Date();
-        lick.tab = ""; // initally empty, tab not generated yet
         lick.tuning = body.tuning;
         lick.capo = parseInt(body.capo);
-        lick.isPublic = body.isPublic == "true" ? true : false;
         lick.owner = ctx.state.user;
-        lick.sharedWith = []; // TODO - list of shared with users will be sent from client upon lick creation
 
         const errors: ValidationError[] = await validate(lick);
 
@@ -78,14 +73,14 @@ export class LickController {
             return
         }
 
-        if (lick.audioLength > 60) { // lick is too long
+        const maxLickLength = 30;
+        if (lick.audioLength > maxLickLength) { // lick is too long
             await LickController.attemptToDeleteFile(lick.audioFileLocation);
             ctx.status = StatusCodes.BAD_REQUEST;
-            ctx.body = { errors: {error: "Error: Audio file is longer than 60 seconds."}}
+            ctx.body = { errors: {error: "Error: Audio file is longer than " + maxLickLength + " seconds."}}
             return
         }
 
-        lick.tab = "";
         // TODO: this conditional clause is for dev, probably can remove
         if (!body.skipTabbing) {
             try {
@@ -400,7 +395,6 @@ export class LickController {
     }
 
     public static canUserAccess(user: User, lick: Lick): boolean {
-        console.log(user)
 
         // The owner and sharedWith relations MUST exist be loaded on the lick passed in
         if (!lick.owner || !lick.sharedWith) {

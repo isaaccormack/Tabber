@@ -8,7 +8,7 @@ import { AlertInterface, useAlertTimeouts } from "../../../common/utils/useAlert
 import renderAlert from "../../../common/utils/renderAlert";
 import "../common/LickPage.css";
 
-export default function EditPage(props: any) {
+export default function ViewPage(props: any) {
 
   const [lick, setLick] = useState<LickInterface>();
   const [lickAudioURL, setLickAudioURL] = useState<string>();
@@ -18,23 +18,6 @@ export default function EditPage(props: any) {
   useGetLick(props.match.params.id, setLick);
   useGetLickAudio(props.match.params.id, lick, setLickAudioURL, setAlert)
   useAlertTimeouts(alert, setAlert, alertTimeout, setAlertTimeout);
-
-  // get lick as non auth user
-  // if lick is public, return it, otherwise forbidden
-
-  // get lick as auth user
-  // on server
-  // try to get lick,
-  // server checks if 1. you are the owner, 2. the lick is public, or 3. your user id exists in the list of users this lick is shared with
-  // if none of these 3, send back forbidden
-
-  // useEffect(() => {
-  //   if (lick) {
-  //     if (user.id !== lick.owner.id) {
-  //
-  //     }
-  //   }
-  // }, [lick])
 
   if (lick) {
     return (

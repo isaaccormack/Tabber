@@ -17,7 +17,7 @@ export default function CreatePage() {
     const onRecordClick = () => {
         navigator.mediaDevices.getUserMedia( {audio: true })
         .then(() => { // user allows microphone
-            history.push("/create/record");
+            history.push("/record");
         }).catch(() => {
             setPermissionErr(true);
         });
@@ -26,20 +26,21 @@ export default function CreatePage() {
 
     return(
         <Container className="createPageBody centered">
-            <Row className="button">
-                <img src={Record} className='recordButton' alt='record button' onClick={() => onRecordClick()}/>
-            </Row>
-            {permissionErr && <Row>
-                Please allow microphone to record a lick
-            </Row>}
-            <br />
-            <Row>
-                <img src={OrIcon} className='OrIcon' alt='OR icon' />
-            </Row>
-            <br />
-            <Row className="button">
-               <UploadButton />
-            </Row>
+          <h1>upload</h1>
+            {/*<Row className="button">*/}
+            {/*    <img src={Record} className='recordButton' alt='record button' onClick={() => onRecordClick()}/>*/}
+            {/*</Row>*/}
+            {/*{permissionErr && <Row>*/}
+            {/*    Please allow microphone to record a lick*/}
+            {/*</Row>}*/}
+            {/*<br />*/}
+            {/*<Row>*/}
+            {/*    <img src={OrIcon} className='OrIcon' alt='OR icon' />*/}
+            {/*</Row>*/}
+            {/*<br />*/}
+            {/*<Row className="button">*/}
+            {/*   <UploadButton />*/}
+            {/*</Row>*/}
         </Container>
     );
 }

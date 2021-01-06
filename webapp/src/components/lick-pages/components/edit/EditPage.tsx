@@ -23,7 +23,7 @@ export default function EditPage(props: any) {
   useGetLick(props.match.params.id, setLick);
   useGetLickAudio(props.match.params.id, lick, setLickAudioURL, setAlert)
   useAlertTimeouts(alert, setAlert, alertTimeout, setAlertTimeout);
-  useRedirectAlerts(setAlert, "404", " was re-tabbed!");
+  useRedirectAlerts(setAlert, "404", " was re-tabbed!", "success");
 
   if (lick) {
     return (
@@ -53,7 +53,7 @@ export default function EditPage(props: any) {
         <TabForm
           lickId={lick.id}
           lickName={lick.name}
-          lickTab={lick.tab}
+          lickTab={lick.tab ? lick.tab : "No tab available"}
           setLick={setLick}
           setAlert={setAlert}
           showEditForm={showEditForm}

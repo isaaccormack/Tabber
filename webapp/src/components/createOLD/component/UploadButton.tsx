@@ -15,7 +15,7 @@ export default function UploadButton() {
         if (fileList) {
             const file: File = fileList[0];
             dispatch(UpdateFile(file));
-            history.push("/create/description");
+            history.push("/description");
         }
     }
 

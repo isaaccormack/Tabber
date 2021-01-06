@@ -8,7 +8,7 @@ export default function ServerErrorPage() {
 
   const [alert, setAlert] = useState<AlertInterface>();
 
-  useRedirectAlerts(setAlert, "get-lick", "Lick could not be retrieved");
+  useRedirectAlerts(setAlert, "get-lick", "Lick could not be retrieved", "danger");
 
   return (
     <Container>

@@ -16,8 +16,8 @@ import { NavDropdown } from "react-bootstrap";
 
 export default function Header() {
 
-  const recordPath = "/create/record";
-  const uploadPath = "/create/upload";
+  const recordPath = "/record";
+  const uploadPath = "/upload";
   const libraryPath = "/library";
   const sharedPath = "/shared";
 

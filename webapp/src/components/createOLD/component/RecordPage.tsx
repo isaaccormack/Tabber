@@ -8,7 +8,7 @@ import { ReactMic } from 'react-mic';
 import {UpdateFile} from "../actions/FileActions";
 import {useDispatch} from "react-redux";
 
-const descPage = "/create/description";
+const descPage = "/description";
 
 
 export default function RecordPage() {

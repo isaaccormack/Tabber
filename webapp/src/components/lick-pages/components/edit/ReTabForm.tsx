@@ -3,6 +3,8 @@ import { Button, Col, Form } from "react-bootstrap";
 import { formatCapo, throwFormattedError } from "../../../common/utils/formattingHelpers";
 import { useHistory } from "react-router";
 import ReTabLickModal from "./ReTabLickModal";
+import CapoFormControl from "./CapoFormControl";
+import TuningFormControl from "./TuningFormControl";
 
 export default function ReTabForm(props: any) {
   const history = useHistory();
@@ -10,11 +12,6 @@ export default function ReTabForm(props: any) {
   const [tuning, setTuning] = useState<string>(props.lickTuning);
   const [capo, setCapo] = useState<number>(props.lickCapo);
   const [showReTabModal, setShowReTabModal] = useState<boolean>(false);
-
-  // TODO: clean this up between front and back end for less bugs..
-  const tunings = ['Standard', 'Drop D', 'Open G'];
-  // TODO: create capo positions from calling formatCapo() on 0 to 9 int array
-  const capoPositions = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => formatCapo(num));
 
   const reTabLick = () => {
     history.push('/404'); // TODO: redirect to upload page instead
@@ -54,38 +51,14 @@ export default function ReTabForm(props: any) {
             <Form.Label>
               <h3>Tuning</h3>
             </Form.Label>
-
-            <Form.Control as="select" onChange={event => setTuning(event.target.value)}>
-              {tunings.map((dispTuning: string) => {
-                return (
-                  <option
-                    key={dispTuning}
-                    selected={tuning === dispTuning}
-                    value={dispTuning}
-                  >
-                    {dispTuning}
-                  </option>
-                );
-              })}
-            </Form.Control>
+            <TuningFormControl tuning={tuning} setTuning={setTuning} />
           </Form.Group>
 
           <Form.Group as={Col} className="align-self-end" xs={4}>
-            <Form.Label><h3>Capo</h3></Form.Label>
-
-            <Form.Control as="select" onChange={event => setCapo(parseInt(event.target.value))}>
-              {capoPositions.map((capoPosition: string, index) => {
-                return (
-                  <option
-                    key={index}
-                    selected={formatCapo(capo) === capoPosition}
-                    value={index.toString()}
-                  >
-                    {capoPosition}
-                  </option>
-                );
-              })}
-            </Form.Control>
+            <Form.Label>
+              <h3>Capo</h3>
+            </Form.Label>
+            <CapoFormControl capo={capo} setCapo={setCapo} />
           </Form.Group>
 
           <Form.Group as={Col} className="align-self-end" xs={3}>

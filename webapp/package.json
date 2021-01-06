@@ -28,6 +28,7 @@
     "react": "^16.13.1",
     "react-bootstrap": "^1.0.1",
     "react-dom": "^16.13.1",
+    "react-dropzone": "^11.2.4",
     "react-hook-form": "^5.7.2",
     "react-mic": "^12.4.6",
     "react-player": "^2.3.1",
@@ -36,6 +37,7 @@
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.1",
+    "react-spinners": "^0.10.4",
     "redux": "^4.0.5",
     "sass": "^1.26.5",
     "typescript": "^3.7.5"

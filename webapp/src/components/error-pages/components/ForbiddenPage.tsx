@@ -8,7 +8,7 @@ export default function ForbiddenPage() {
   const [alert, setAlert] = useState<AlertInterface>();
 
   // TODO: change err message
-  useRedirectAlerts(setAlert, "get-lick", "You are not authorized to view this lick");
+  useRedirectAlerts(setAlert, "get-lick", "You are not authorized to view this lick", "danger");
 
   return (
     <Container>

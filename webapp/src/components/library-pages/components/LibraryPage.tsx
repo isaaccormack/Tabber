@@ -21,7 +21,7 @@ export default function LibraryPage() {
 
   useGetLibrary("/api/user/licks", setLicks, setAlert);
   useAlertTimeouts(alert, setAlert, alertTimeout, setAlertTimeout);
-  useRedirectAlerts(setAlert, "delete", " was deleted!");
+  useRedirectAlerts(setAlert, "delete", " was deleted", "success");
 
   const headerCols: {key: string, value: string}[] = [
     {key: 'Title', value: 'name'},

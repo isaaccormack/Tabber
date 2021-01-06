@@ -20,7 +20,7 @@ export default function SharedPage() {
 
   useGetLibrary("/api/user/licks-shared-with-me", setLicks, setAlert);
   useAlertTimeouts(alert, setAlert, alertTimeout, setAlertTimeout);
-  useRedirectAlerts(setAlert, "unfollow", " was unfollowed!");
+  useRedirectAlerts(setAlert, "unfollow", " was unfollowed", "success");
 
   const headerCols: {key: string, value: string}[] = [
     {key: 'Title', value: 'name'},

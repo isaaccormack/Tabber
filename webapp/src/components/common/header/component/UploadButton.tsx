@@ -2,7 +2,7 @@ import React from "react";
 import Upload from '../icons/upload.svg';
 // import "./CreatePage.css";
 // change this later
-import {UpdateFile} from "../../../create/actions/FileActions";
+import {UpdateFile} from "../../../createOLD/actions/FileActions";
 import {useDispatch} from "react-redux";
 import {useHistory} from "react-router";
 
@@ -16,7 +16,7 @@ export default function UploadButton() {
         if (fileList) {
             const file: File = fileList[0];
             dispatch(UpdateFile(file));
-            history.push("/create/description");
+            history.push("/description");
         }
     }
 
