@@ -1,6 +1,4 @@
-import { validate, ValidationError } from "class-validator";
 const fs = require('fs');
-import * as audioDuration from 'get-audio-duration';
 import { Context } from "koa";
 import { v4 as uuidv4 } from "uuid";
 import * as util from 'util';
@@ -8,7 +6,6 @@ const ffmpeg = require('fluent-ffmpeg');
 
 import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
-const TabModule = require('../tabbing/tabLick');
 
 import { StatusCodes } from "http-status-codes";
 import {
@@ -80,9 +77,7 @@ export class LickController {
 
         const lick: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lick) || !assertRequesterCanAccessLick(ctx, lick)) {
-            return;
-        }
+        if (!assertLickExists(ctx, lick) || !assertRequesterCanAccessLick(ctx, lick)) { return; }
 
         // TODO: maybe hide attributes of lick.owner here, like email, not sure what so save for later
         ctx.status = StatusCodes.OK;
@@ -98,9 +93,7 @@ export class LickController {
 
         const lick: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lick) || !assertRequesterCanAccessLick(ctx, lick)) {
-            return;
-        }
+        if (!assertLickExists(ctx, lick) || !assertRequesterCanAccessLick(ctx, lick)) { return; }
 
         ctx.status = StatusCodes.OK;
         const readFile = util.promisify(fs.readFile);
@@ -166,12 +159,11 @@ export class LickController {
 
         const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lickToUpdate) || !assertRequesterIsLickOwner(ctx, lickToUpdate)) {
-            return;
-        }
+        if (!assertLickExists(ctx, lickToUpdate) || !assertRequesterIsLickOwner(ctx, lickToUpdate)) { return; }
 
         const body = ctx.request.body;
 
+        // do manual checks here to allow same endpoint to update lick visibility and details
         if (body.makePublic !== undefined) {
             lickToUpdate.isPublic = body.makePublic;
         }
@@ -183,9 +175,7 @@ export class LickController {
             lickToUpdate.description = body.desc;
         }
 
-        if (!await assertLickValid(ctx, lickToUpdate)) {
-            return;
-        }
+        if (!await assertLickValid(ctx, lickToUpdate)) { return; }
 
         await LickController.trySaveLickAndSetResponse(ctx, lickToUpdate);
     }
@@ -199,9 +189,7 @@ export class LickController {
 
         const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lickToUpdate) ||  !assertRequesterIsLickOwner(ctx, lickToUpdate)) {
-            return;
-        }
+        if (!assertLickExists(ctx, lickToUpdate) ||  !assertRequesterIsLickOwner(ctx, lickToUpdate)) { return; }
 
         const body = ctx.request.body;
         if (body.tab !== undefined) {
@@ -219,17 +207,9 @@ export class LickController {
     public static async reTabLick(ctx: Context): Promise<void> {
         const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lickToUpdate) ||  !assertRequesterIsLickOwner(ctx, lickToUpdate)) {
-            return;
-        }
+        if (!assertLickExists(ctx, lickToUpdate) ||  !assertRequesterIsLickOwner(ctx, lickToUpdate)) { return; }
 
         const body = ctx.request.body;
-        if (!body.tuning || body.capo === undefined) {
-            ctx.status = StatusCodes.BAD_REQUEST;
-            ctx.body = { errors: {error: "Error: No tuning or capo position provided"}}
-            return;
-        }
-
         if (lickToUpdate.tuning === body.tuning && lickToUpdate.capo === body.capo) {
             // no work to do
             ctx.status = StatusCodes.OK;
@@ -240,17 +220,8 @@ export class LickController {
         lickToUpdate.tuning = body.tuning;
         lickToUpdate.capo = body.capo;
 
-        if (!await assertLickValid(ctx, lickToUpdate)) {
-            return;
-        }
-
-        try {
-            lickToUpdate.tab = await TabModule.tabLick(lickToUpdate.audioFileLocation, body.tuning, body.capo);
-        } catch (err) {
-            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
-            ctx.body = { errors: {error: "Error: Failed to tab audio file."}};
-            return;
-        }
+        if (!await assertLickValid(ctx, lickToUpdate)) { return; }
+        if (!await assertLickTabbed(ctx, lickToUpdate, false)) { return; }
 
         await LickController.trySaveLickAndSetResponse(ctx, lickToUpdate);
     }
@@ -264,9 +235,7 @@ export class LickController {
 
         const lickToRemove: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        if (!assertLickExists(ctx, lickToRemove) ||  !assertRequesterIsLickOwner(ctx, lickToRemove)) {
-            return;
-        }
+        if (!assertLickExists(ctx, lickToRemove) ||  !assertRequesterIsLickOwner(ctx, lickToRemove)) { return; }
 
         try {
             await LickController.unlinkAsync(lickToRemove.audioFileLocation);
