@@ -6,26 +6,40 @@ import React, { useState } from "react";
 import { throwFormattedError } from "../../common/utils/formattingHelpers";
 import { LickInterface } from "../../common/lick/interface/LickInterface";
 import { useHistory } from "react-router";
+import { UserInterface } from "../../common/user/interface/UserInterface";
+import { useSelector } from "react-redux";
+import RootState from "../../../store/root-state";
 
 
 export default function TuningCapoForm(props: any) {
+
   const history = useHistory();
+
+  const user: UserInterface | undefined = useSelector((state: RootState) => state.userState.user);
 
   const [tuning, setTuning] = useState<string>("Standard");
   const [capo, setCapo] = useState<number>(0);
 
-  const tabLick = () => {
+  const handleTabLick = () => {
     if (!props.file) return;
-
     history.push('/uploading')
 
+    // pass route in here etc.
+    if (user) {
+      tabLick();
+    } else {
+      tabLick();
+    }
+  }
+
+  const tabLick = () => {
     // must use FormData to send file
     const form = new FormData();
     form.append("file", props.file);
-    form.append("name", props.file.name);
     form.append("tuning", tuning);
     form.append("capo", capo.toString());
-    fetch("/api/licks",{
+    form.append("name", props.file.name);
+    fetch("/api/lick",{
       method: "POST",
       body: form
     }).then((response) => {
@@ -34,7 +48,7 @@ export default function TuningCapoForm(props: any) {
       }
       throwFormattedError('Lick could not be tabbed', response.status, response.statusText);
     }).then((responseJson: LickInterface) => {
-      history.push("/edit/" + responseJson.id);
+        history.push("/edit/" + responseJson.id);
     }).catch((error) => {
       history.push({ pathname: "/upload",  state: { from: 'uploading' , lickName: props.file.name, msg: error.message } });
     })
@@ -59,7 +73,7 @@ export default function TuningCapoForm(props: any) {
           </Form.Group>
         </Form.Row>
         <Form.Row style={{marginTop: '80px'}} className="justify-content-md-center">
-          <NavigationButton variant="success" desc="Get Tabs" onClick={tabLick}/>
+          <NavigationButton variant="success" desc="Get Tabs" onClick={handleTabLick}/>
         </Form.Row>
       </Form>
     </Row>

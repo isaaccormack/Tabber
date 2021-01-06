@@ -5,6 +5,81 @@ import { User } from "../entity/user";
 import { UserController } from "./user";
 import { validate, ValidationError } from "class-validator";
 import { LickController } from "./lick";
+import * as audioDuration from "get-audio-duration";
+const TabModule = require('../tabbing/tabLick');
+
+export const assertAudioFileValid = (ctx: Context, audioFile: any): boolean  => {
+    const err: Error = LickController.validateAudioFile(audioFile);
+    if (err) {
+        ctx.status = StatusCodes.BAD_REQUEST;
+        ctx.body = { errors: {error: err.message}}
+        return false
+    }
+
+    return true;
+}
+
+export const assertLickMetadataValid = async (ctx: Context, lick: Lick): Promise<boolean> => {
+    const errors: ValidationError[] = await validate(lick);
+
+    if (errors.length > 0) {
+        ctx.status = StatusCodes.BAD_REQUEST;
+        ctx.body = { errors };
+        return false;
+    }
+
+    return true;
+}
+
+export const assertLickAudioSaved =  async(ctx: Context, lick: Lick, audioFile: any): Promise<boolean> => {
+    try {
+        lick.audioFileLocation = await LickController.saveAudioFile(audioFile);
+    } catch (err) {
+        ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
+        ctx.body = { errors: {error: err.message}}
+        return false
+    }
+
+    return true;
+}
+
+export const assertLickAudioLengthValid = async(ctx: Context, lick: Lick): Promise<boolean> => {
+    try {
+        lick.audioLength = await audioDuration.getAudioDurationInSeconds(lick.audioFileLocation)
+    } catch (err) {
+        await LickController.attemptToDeleteFile(lick.audioFileLocation);
+        ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
+        ctx.body = { errors: {error: "Error: Cant get length of audio file."}}
+        return false;
+    }
+
+    const maxLickLength = 30;
+    if (lick.audioLength > maxLickLength) { // lick is too long
+        await LickController.attemptToDeleteFile(lick.audioFileLocation);
+        ctx.status = StatusCodes.BAD_REQUEST;
+        ctx.body = { errors: {error: "Error: Audio file is longer than " + maxLickLength + " seconds."}}
+    return false;
+    }
+
+    return true;
+}
+
+export const assertLickTabbed = async(ctx: Context, lick: Lick, skipTabbing: boolean | undefined): Promise<boolean> => {
+    // TODO: this conditional clause is for dev, probably can remove
+    if (!skipTabbing) {
+        try {
+            // Generate tab for lick after other data is handled
+            lick.tab = await TabModule.tabLick(lick.audioFileLocation, lick.tuning, lick.capo);
+        } catch (err) {
+            await LickController.attemptToDeleteFile(lick.audioFileLocation);
+            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
+            ctx.body = { errors: {error: "Error: Failed to tab audio file."}};
+            return;
+        }
+    }
+
+    return true;
+}
 
 export const assertLickExists = (ctx: Context, lick: Lick | undefined): boolean => {
   if (lick) { return true; }

@@ -295,7 +295,7 @@ describe('Unit test: User shared licks endpoint', () => {
         ctx.state.user = userUnfollowingLick;
         await LickController.unfollowLick(ctx)
 
-        expect(ctx.status).toBe(204)
+        expect(ctx.status).toBe(200)
         // cant check that user entity was updated since only lick is returned
         // this is checked in integration tests
     })

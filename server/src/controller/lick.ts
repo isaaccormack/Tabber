@@ -12,6 +12,11 @@ const TabModule = require('../tabbing/tabLick');
 
 import { StatusCodes } from "http-status-codes";
 import {
+    assertAudioFileValid,
+    assertLickMetadataValid,
+    assertLickAudioSaved,
+    assertLickAudioLengthValid,
+    assertLickTabbed,
     assertLickExists,
     assertRequesterCanAccessLick,
     assertRequesterIsLickOwner,
@@ -24,7 +29,17 @@ import { getManager, Repository } from "typeorm";
 export class LickController {
 
     /**
-     * POST /api/licks
+     * POST /api/tab-lick
+     *
+     * Tab a lick for a user with no account
+     */
+    public static async tabLick(ctx: any): Promise<void> {
+        const audioFile = ctx.request.files.file;
+
+    }
+
+    /**
+     * POST /api/lick
      *
      * Upload new lick to be processed and have a tab generated.
      */
@@ -32,12 +47,7 @@ export class LickController {
 
         const audioFile = ctx.request.files.file;
 
-        const err: Error = LickController.validateAudioFile(audioFile);
-        if (err) {
-            ctx.status = StatusCodes.BAD_REQUEST;
-            ctx.body = { errors: {error: err.message}}
-            return
-        }
+        if (!assertAudioFileValid(ctx, audioFile)) { return; }
 
         const body = ctx.request.body;
 
@@ -48,51 +58,10 @@ export class LickController {
         lick.capo = parseInt(body.capo);
         lick.owner = ctx.state.user;
 
-        const errors: ValidationError[] = await validate(lick);
-
-        if (errors.length > 0) {
-            ctx.status = StatusCodes.BAD_REQUEST;
-            ctx.body = { errors };
-            return
-        }
-
-        try {
-            lick.audioFileLocation = await LickController.saveAudioFile(audioFile);
-        } catch (err) {
-            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
-            ctx.body = { errors: {error: err.message}}
-            return
-        }
-
-        try {
-            lick.audioLength = await audioDuration.getAudioDurationInSeconds(lick.audioFileLocation)
-        } catch (err) {
-            await LickController.attemptToDeleteFile(lick.audioFileLocation);
-            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
-            ctx.body = { errors: {error: "Error: Cant get length of audio file."}}
-            return
-        }
-
-        const maxLickLength = 30;
-        if (lick.audioLength > maxLickLength) { // lick is too long
-            await LickController.attemptToDeleteFile(lick.audioFileLocation);
-            ctx.status = StatusCodes.BAD_REQUEST;
-            ctx.body = { errors: {error: "Error: Audio file is longer than " + maxLickLength + " seconds."}}
-            return
-        }
-
-        // TODO: this conditional clause is for dev, probably can remove
-        if (!body.skipTabbing) {
-            try {
-                // Generate tab for lick after other data is handled
-                lick.tab = await TabModule.tabLick(lick.audioFileLocation, lick.tuning, lick.capo);
-            } catch (err) {
-                await LickController.attemptToDeleteFile(lick.audioFileLocation);
-                ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
-                ctx.body = { errors: {error: "Error: Failed to tab audio file."}};
-                return;
-            }
-        }
+        if (!await assertLickMetadataValid(ctx, lick)) { return; }
+        if (!await assertLickAudioSaved(ctx, lick, audioFile)) { return; }
+        if (!await assertLickAudioLengthValid(ctx, lick)) { return; }
+        if (!await assertLickTabbed(ctx, lick, body.skipTabbing)) { return; }
 
         if (!await LickController.trySaveLickAndSetResponse(ctx, lick)) {
             await LickController.attemptToDeleteFile(lick.audioFileLocation);
@@ -363,7 +332,8 @@ export class LickController {
     /**
      * UTILS
      */
-    private static validateAudioFile(audioFile: any): Error | null {
+    // TODO: make all these methods protected and add lick assertions to same package
+    public static validateAudioFile(audioFile: any): Error | null {
 
         if (!audioFile) return new Error("Error: No file sent.")
         if (!audioFile.size) return new Error("Error: File is empty.")
@@ -375,7 +345,7 @@ export class LickController {
         return null;
     }
 
-    private static async saveAudioFile(audioFile: any): Promise<string> {
+    public static async saveAudioFile(audioFile: any): Promise<string> {
 
         // save the audio to a file with a randomly generated uuid
         const audioFileLocation: string = "uploads/" + uuidv4();
@@ -405,7 +375,7 @@ export class LickController {
                 (lick.sharedWith.some(user => user.id === user.id));
     }
 
-    private static async attemptToDeleteFile(filePath: string): Promise<void> {
+    public static async attemptToDeleteFile(filePath: string): Promise<void> {
         const deleteFile = util.promisify(fs.unlink);
         try {
             await deleteFile(filePath);
