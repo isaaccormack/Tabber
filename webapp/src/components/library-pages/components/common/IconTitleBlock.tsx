@@ -12,7 +12,7 @@ export default function IconTitleBlock(props: any) {
   }
 
   return (
-    <Row style={{marginTop: '40px'}}>
+    <Row style={{marginTop: '20px'}}>
       <Col className="align-self-center">
         <Row className="justify-content-md-end">
           <img src={props.icon} height={120} alt="" style={{marginRight: '20px'}}/>

@@ -47,7 +47,7 @@ export default function UserHomePage(props: any) {
           />
         </Col>
       </Row>
-      <Row style={{marginTop: '50px'}}>
+      <Row style={{marginTop: '50px', marginBottom: '50px'}}>
         <Col xs={6}>
           <NavigationCard
             icon={VinylsIcon}

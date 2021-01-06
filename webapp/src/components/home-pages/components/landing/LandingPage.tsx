@@ -151,7 +151,7 @@ export default function LandingPage() {
             </Row>
           </Col>
         </Row>
-        <Row style={{marginTop: '100px', marginBottom: '30px'}}>
+        <Row style={{marginTop: '100px', marginBottom: '50px'}}>
           <Col xs={3}>
             <Row>
               <img src={ClockIcon} height={120} alt="clock icon"/>

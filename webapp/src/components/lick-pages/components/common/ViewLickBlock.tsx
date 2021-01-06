@@ -40,7 +40,7 @@ export default function ViewLickBlock(props: any) {
         </Col>
         {props.isEditPage ?
           <Col xs={3}>
-            <Row style={{paddingRight: '30px'}} className="justify-content-md-end">
+            <Row style={{paddingRight: '40px'}} className="justify-content-md-end">
               <span className="modify-lick-span" onClick={() => props.setShowEditForm((showEditForm: boolean) => !showEditForm)}>
                 <h4 style={{display: "inline", color: '#ffc107'}}>Edit</h4>
                 <img
