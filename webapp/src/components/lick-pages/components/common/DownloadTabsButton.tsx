@@ -1,16 +1,12 @@
 import React, { useEffect, useState } from "react";
 import DownloadIcon from "../../icons/download.svg"
+import { useDownloadTabs } from "./useDownloadTabs";
 
 export default function DownloadTabsButton(props: any) {
 
   const [lickDownloadURL, setLickDownloadURL] = useState<string>();
 
-  useEffect(() => {
-    // save lick as downloadable txt file and set URL to download
-    const myURL = window.URL || window.webkitURL // window.webkitURL for Chrome, window.URL for Firefox
-    const blob = new Blob([props.lickTab], { type: 'text/csv' });
-    setLickDownloadURL(myURL.createObjectURL(blob));
-  }, [])
+  useDownloadTabs(props.lickTab, setLickDownloadURL);
 
   return (
     <>

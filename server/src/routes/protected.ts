@@ -16,9 +16,7 @@ protectedRouter.delete("/user", UserController.deleteAuthUser);
 protectedRouter.get("/users", UserController.getUsers);
 protectedRouter.get("/users/:id", UserController.getUser);
 protectedRouter.put("/users/:id", UserController.updateUser);
-// TODO: change /licks to /lick for post requests
-// TODO: /licks should not be protected, instead there should just be logic to see whether user is logged in, if so persist, else, dont
-protectedRouter.post("/lick", LickController.createLick);
+
 protectedRouter.put("/lick/update-shared-with/:id", LickController.updateLickSharedWith);
 protectedRouter.put("/lick/unfollow/:id", LickController.unfollowLick);
 protectedRouter.put("/lick/:id", LickController.updateLick);

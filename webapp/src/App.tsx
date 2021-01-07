@@ -23,6 +23,7 @@ import ForbiddenPage from "./components/error-pages/components/ForbiddenPage";
 import ServerErrorPage from "./components/error-pages/components/ServerErrorPage";
 import BadRequestPage from "./components/error-pages/components/BadRequestPage";
 import UploadingPage from "./components/create/components/UploadingPage";
+import NoUserViewPage from "./components/lick-pages/components/view/NoUserViewPage";
 
 function App() {
     return (
@@ -36,6 +37,7 @@ function App() {
                         <Route exact path="/uploading" component={UploadingPage} />
                         <Route exact path="/description" component={CreateDescriptionPage} />
                         <Route exact path="/record" component={RecordPage} />
+                        <Route exact path="/view" component={NoUserViewPage} />
                         <Route exact path="/create" component={CreatePage} />
                         <PrivateRoute exact path="/library" component={LibraryPage} />
                         <PrivateRoute exact path="/edit/:id" component={EditPage} />

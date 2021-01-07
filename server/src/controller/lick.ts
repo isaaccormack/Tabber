@@ -26,16 +26,6 @@ import { getManager, Repository } from "typeorm";
 export class LickController {
 
     /**
-     * POST /api/tab-lick
-     *
-     * Tab a lick for a user with no account
-     */
-    public static async tabLick(ctx: any): Promise<void> {
-        const audioFile = ctx.request.files.file;
-
-    }
-
-    /**
      * POST /api/lick
      *
      * Upload new lick to be processed and have a tab generated.
@@ -47,25 +37,31 @@ export class LickController {
         if (!assertAudioFileValid(ctx, audioFile)) { return; }
 
         const body = ctx.request.body;
+        const user = ctx.state.user;
 
         const lick: Lick = new Lick();
-        lick.name = ctx.request.body.name;
+        lick.name = body.name;
         lick.dateUploaded = new Date();
         lick.tuning = body.tuning;
         lick.capo = parseInt(body.capo);
-        lick.owner = ctx.state.user;
+        lick.owner = user ? user : new User();
 
         if (!await assertLickMetadataValid(ctx, lick)) { return; }
         if (!await assertLickAudioSaved(ctx, lick, audioFile)) { return; }
         if (!await assertLickAudioLengthValid(ctx, lick)) { return; }
         if (!await assertLickTabbed(ctx, lick, body.skipTabbing)) { return; }
 
-        if (!await LickController.trySaveLickAndSetResponse(ctx, lick)) {
+        if (user) {
+            if (!await LickController.trySaveLickAndSetResponse(ctx, lick)) {
+                await LickController.attemptToDeleteFile(lick.audioFileLocation);
+            }
+            // Override default OK status
+            ctx.status = StatusCodes.CREATED;
+        } else {
             await LickController.attemptToDeleteFile(lick.audioFileLocation);
+            ctx.status = StatusCodes.CREATED;
+            ctx.body = lick;
         }
-
-        // Override default OK status
-        ctx.status = StatusCodes.CREATED;
     }
 
     /**
@@ -277,7 +273,7 @@ export class LickController {
 
         if (!updatedLick) {
             ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
-            ctx.body = { errors: {error: "Error: Could not update lick in db"}}
+            ctx.body = { errors: {error: "Error: Could not update lick in db"}} // should change this to could not save
             return false;
         }
 

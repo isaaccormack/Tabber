@@ -13,6 +13,7 @@ import CircleIcon from "../icons/circle.svg";
 import UserIcon from "../icons/user.svg";
 import { UserInterface } from "../../user/interface/UserInterface";
 import { NavDropdown } from "react-bootstrap";
+import { useLoginURL } from "./useLoginURL";
 
 export default function Header() {
 
@@ -25,8 +26,10 @@ export default function Header() {
   const dispatch = useDispatch();
 
   const user: UserInterface | undefined = useSelector((state: RootState) => state.userState.user);
-  const [loginUrl, setLoginURL] = useState("");
+  const [loginURL, setLoginURL] = useState("");
   const [activeKey, setActiveKey] = useState(() => { return window.location.pathname });
+
+  useLoginURL(setLoginURL);
 
   useEffect(() => {
     const path = window.location.pathname;
@@ -43,12 +46,6 @@ export default function Header() {
       setActiveKey('');
     }
   }, [window.location.pathname])
-
-  useEffect(() => {
-    fetch("/api/loginUrl")
-      .then(response => response.text())
-      .then(data => setLoginURL(data));
-  }, [loginUrl])
 
   const logout = useCallback(() => {
     dispatch(DeleteUser());
@@ -128,7 +125,7 @@ export default function Header() {
         <Navbar variant="light">
           {tabberBrand()}
           <Nav className="ml-auto">
-            <Nav.Link href={loginUrl} style={{marginLeft: '20px'}}>
+            <Nav.Link href={loginURL} style={{marginLeft: '20px'}}>
               Sign In
               <img src={UserIcon} height={22} alt="user icon" style={{marginLeft: '8px', opacity: 0.6}}/>
             </Nav.Link>

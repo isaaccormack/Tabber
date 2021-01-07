@@ -16,7 +16,6 @@ export class Lick {
     @Column({ nullable: true })
     description: string;
 
-    // one to one relation with audio file containing
     @Column()
     dateUploaded: Date;
 

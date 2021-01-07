@@ -8,7 +8,7 @@ export const useGetLick = (lickId: number, setLick: Function) => {
   const history = useHistory();
 
   useEffect(() => {
-    fetch("/api/licks/" + lickId, {
+    fetch("/api/lick/" + lickId, {
       method: "GET"
     })
     .then((response) => {
@@ -37,7 +37,7 @@ export const useGetLick = (lickId: number, setLick: Function) => {
 export const useGetLickAudio = (lickId: number, lick: LickInterface | undefined, setLickAudioURL: Function, setAlert: Function) => {
   useEffect(() => {
     if (lick) {
-      fetch("/api/licks/audio/" + lickId, {
+      fetch("/api/lick/audio/" + lickId, {
         method: "GET"
       })
       .then((response) => {

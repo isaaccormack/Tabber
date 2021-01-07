@@ -20,25 +20,17 @@ export default function TuningCapoForm(props: any) {
   const [tuning, setTuning] = useState<string>("Standard");
   const [capo, setCapo] = useState<number>(0);
 
-  const handleTabLick = () => {
+  const tabLick = () => {
     if (!props.file) return;
     history.push('/uploading')
 
-    // pass route in here etc.
-    if (user) {
-      tabLick();
-    } else {
-      tabLick();
-    }
-  }
-
-  const tabLick = () => {
     // must use FormData to send file
     const form = new FormData();
     form.append("file", props.file);
     form.append("tuning", tuning);
     form.append("capo", capo.toString());
     form.append("name", props.file.name);
+    // form.append("skipTabbing", "true")
     fetch("/api/lick",{
       method: "POST",
       body: form
@@ -48,8 +40,13 @@ export default function TuningCapoForm(props: any) {
       }
       throwFormattedError('Lick could not be tabbed', response.status, response.statusText);
     }).then((responseJson: LickInterface) => {
+      if (user) {
         history.push("/edit/" + responseJson.id);
+      } else {
+        history.push({ pathname: "/view",  state: { from: 'uploading' , lick: responseJson } });
+      }
     }).catch((error) => {
+      // TODO: need to figure out how to tell if user is coming from record or upload se we know where to redirect back to if upload fails
       history.push({ pathname: "/upload",  state: { from: 'uploading' , lickName: props.file.name, msg: error.message } });
     })
   }
@@ -73,7 +70,7 @@ export default function TuningCapoForm(props: any) {
           </Form.Group>
         </Form.Row>
         <Form.Row style={{marginTop: '80px'}} className="justify-content-md-center">
-          <NavigationButton variant="success" desc="Get Tabs" onClick={handleTabLick}/>
+          <NavigationButton variant="success" desc="Get Tabs" onClick={tabLick}/>
         </Form.Row>
       </Form>
     </Row>
