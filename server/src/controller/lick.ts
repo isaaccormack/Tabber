@@ -65,7 +65,7 @@ export class LickController {
     }
 
     /**
-     * GET /api/licks/{id}
+     * GET /api/lick/{id}
      *
      * Get a lick by id.
      */
@@ -95,6 +95,31 @@ export class LickController {
         const readFile = util.promisify(fs.readFile);
         ctx.body = await readFile(lick.audioFileLocation);
     }
+
+    /**
+     * GET /api/lick-count
+     *
+     * Get the total number of licks in the db.
+     */
+    public static async getLickCount(ctx: Context): Promise<void> {
+
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+
+        try {
+            const { count } = await lickRepository
+                .createQueryBuilder("lick")
+                .select("COUNT(lick.id)", "count")
+                .getRawOne();
+
+            ctx.status = StatusCodes.OK;
+            ctx.body = { count };
+        } catch (error) {
+            console.error(error)
+            ctx.status = StatusCodes.BAD_REQUEST;
+            ctx.body = { errors: {error: "Error: Could not count number of licks in db."}}
+        }
+    }
+
 
     /**
      * PUT /api/lick/update-shared-with/{id}
