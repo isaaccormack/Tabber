@@ -14,7 +14,7 @@ export default function ReTabForm(props: any) {
   const [showReTabModal, setShowReTabModal] = useState<boolean>(false);
 
   const reTabLick = () => {
-    history.push('/404'); // TODO: redirect to upload page instead
+    history.push('/uploading');
 
     fetch("/api/lick/re-tab/" + props.lickId, {
       method: "PUT",
@@ -30,11 +30,14 @@ export default function ReTabForm(props: any) {
     .then(() => {
       history.push({
         pathname: '/edit/' + props.lickId,
-        state: {from: '404', lickName: props.lickName} // TODO: fix this when changing page redirecting to
+        state: {from: 'uploading', lickName: props.lickName}
       });
     })
-    .catch((err: Error) => {
-      // TODO: redirect to error page eventually -- probably want to send err.message via history.state too
+    .catch(() => {
+      history.push({
+        pathname: '/edit/' + props.lickId,
+        state: {from: 'error-re-tab', msg: 'Could not re-tab lick'}
+      });
     })
   }
 

@@ -95,11 +95,11 @@ export default function Header() {
           <Navbar variant="dark">
             {tabberBrand()}
             <Nav variant="pills" className="ml-auto" activeKey={activeKey}>
-              <Nav.Link eventKey={recordPath} style={{color: 'white'}} onSelect={() => history.push(recordPath)}>
-                Record
-              </Nav.Link>
               <Nav.Link eventKey={uploadPath} style={{color: 'white'}} onSelect={() => history.push(uploadPath)}>
                 Upload
+              </Nav.Link>
+              <Nav.Link eventKey={recordPath} style={{color: 'white'}} onSelect={() => history.push(recordPath)}>
+                Record
               </Nav.Link>
               <Nav.Link eventKey={libraryPath} style={{color: 'white'}} onSelect={() => history.push(libraryPath)}>
                 Library
@@ -125,6 +125,12 @@ export default function Header() {
         <Navbar variant="light">
           {tabberBrand()}
           <Nav className="ml-auto">
+            <Nav.Link eventKey={uploadPath} onSelect={() => history.push(uploadPath)}>
+              Upload
+            </Nav.Link>
+            <Nav.Link eventKey={recordPath} onSelect={() => history.push(recordPath)}>
+              Record
+            </Nav.Link>
             <Nav.Link href={loginURL} style={{marginLeft: '20px'}}>
               Sign In
               <img src={UserIcon} height={22} alt="user icon" style={{marginLeft: '8px', opacity: 0.6}}/>

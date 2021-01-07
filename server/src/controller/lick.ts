@@ -201,6 +201,7 @@ export class LickController {
      * Re-Tab a lick given a new tuning and / or capo
      */
     public static async reTabLick(ctx: Context): Promise<void> {
+
         const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
         if (!assertLickExists(ctx, lickToUpdate) ||  !assertRequesterIsLickOwner(ctx, lickToUpdate)) { return; }

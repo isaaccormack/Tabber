@@ -23,7 +23,8 @@ export default function EditPage(props: any) {
   useGetLick(props.match.params.id, setLick);
   useGetLickAudio(props.match.params.id, lick, setLickAudioURL, setAlert)
   useAlertTimeouts(alert, setAlert, alertTimeout, setAlertTimeout);
-  useRedirectAlerts(setAlert, "404", " was re-tabbed!", "success");
+  useRedirectAlerts(setAlert, "uploading", " was re-tabbed!", "success");
+  useRedirectAlerts(setAlert, "error-re-tab", "", "danger");
 
   if (lick) {
     return (
