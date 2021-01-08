@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Row } from "react-bootstrap";
 
 export default function CountDown(props: any) {
 
@@ -17,6 +18,8 @@ export default function CountDown(props: any) {
   }, [countDownNumber]);
 
   return (
-    <h1>{countDownNumber}</h1>
+    <Row style={{marginTop: '250px'}} className="justify-content-md-center">
+      <h1 id="countdown" style={{fontSize: '80px', color: '#444444', textAlign: 'center'}}>{countDownNumber}</h1>
+    </Row>
   );
 }

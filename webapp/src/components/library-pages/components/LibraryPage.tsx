@@ -1,5 +1,5 @@
 import React, {  useState } from "react";
-import { LickInterface } from "../../common/lick/interface/LickInterface";
+import { LickInterface } from "../../common/lick-interface/LickInterface";
 import Container from "react-bootstrap/Container";
 import { formatCapo, formatDate, formatLickLength } from "../../common/utils/formattingHelpers";
 import TurntableIcon from "../icons/turntable.svg"

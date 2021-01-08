@@ -4,7 +4,7 @@ import Modal from 'react-bootstrap/Modal';
 import { useHistory } from "react-router";
 import { Row } from "react-bootstrap";
 import TrashIcon from "../../icons/trash.svg";
-import { LickInterface } from "../../../common/lick/interface/LickInterface";
+import { LickInterface } from "../../../common/lick-interface/LickInterface";
 import { throwFormattedError } from "../../../common/utils/formattingHelpers";
 
 export default function DeleteLickModal(props: any) {

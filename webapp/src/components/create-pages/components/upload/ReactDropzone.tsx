@@ -6,7 +6,7 @@ import { useDropzone } from "react-dropzone";
 
 export default function ReactDropzone(props: any) {
 
-  const MAX_FILE_SIZE_MB = 5;
+  const MAX_FILE_SIZE_MB = 2;
   const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1000 * 1000;
 
   const [fileErrorMsg, setFileErrorMsg] = useState<string>();
@@ -40,7 +40,6 @@ export default function ReactDropzone(props: any) {
     multiple: false,
     accept: 'audio/*',
     maxSize: MAX_FILE_SIZE_BYTES,
-    // maxSize: 5 * 1000, // for testing
     onDropRejected,
     onDropAccepted
   });

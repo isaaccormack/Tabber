@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button, Col, Form } from "react-bootstrap";
-import { LickInterface } from "../../../common/lick/interface/LickInterface";
+import { LickInterface } from "../../../common/lick-interface/LickInterface";
 import { throwFormattedError } from "../../../common/utils/formattingHelpers";
 
 export default function DetailsForm(props: any) {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Table } from "react-bootstrap";
 import AscSortIcon from "../../icons/desc-sort.svg";
 import DescSortIcon from "../../icons/asc-sort.svg";
-import { LickInterface } from "../../../common/lick/interface/LickInterface";
+import { LickInterface } from "../../../common/lick-interface/LickInterface";
 import { useHistory } from "react-router";
 import "./LibraryTable.css";
 

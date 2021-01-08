@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { LickInterface } from "../../common/lick/interface/LickInterface";
+import { LickInterface } from "../../common/lick-interface/LickInterface";
 import { formatCapo, formatLickLength } from "../../common/utils/formattingHelpers";
 import Container from "react-bootstrap/Container";
 import IconTitleBlock from "./common/IconTitleBlock";

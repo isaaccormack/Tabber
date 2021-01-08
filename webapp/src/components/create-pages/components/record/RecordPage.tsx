@@ -1,25 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Button, Container, Form, Row } from "react-bootstrap";
+import React, { useState } from "react";
+import { Col, Container, Row } from "react-bootstrap";
 import TitleBlock from "./TitleBlock";
 import TuningCapoForm from "./TuningCapoForm";
 import { AlertInterface, useAlertTimeouts } from "../../../common/utils/useAlertTimeouts";
 import { useRedirectAlerts } from "../../../common/utils/useRedirectAlerts";
 import renderAlert from "../../../common/utils/renderAlert";
-import { ReactMic } from "react-mic";
-import { Prompt, useHistory } from "react-router";
-import { tabLick } from "../common/tabLick";
-import NavigationButton from "../../../home-pages/components/common/NavigationButton";
-import { UserInterface } from "../../../common/user/interface/UserInterface";
-import { useSelector } from "react-redux";
-import RootState from "../../../../store/root-state";
-import RecordingIcon from "../../icons/recording.svg"
 import Countdown from "./Countdown";
-import "./RecordPage.css"
 import RecordingPage from "./RecordingPage";
+import "./RecordPage.css"
 
-// Note, the abort logic is complicated because we are trying to save state of this component and essentially just rollback state
-// to the point where record just became true. Memory leak, saving state, and wrong api call -> take your pick, this is why logic
-// is so complicated, to save off any of these wrongfully happening
 export default function RecordPage() {
 
   const [tuning, setTuning] = useState<string>("Standard");
@@ -48,14 +37,15 @@ export default function RecordPage() {
           />
         </>
         :
-        <>
-          {!recording ?
-            <Countdown setRecording={setRecording}/>
-          :
-            // <h1>fdfasdfs</h1>
-            <RecordingPage recording={recording} setRecording={setRecording} capo={capo} tuning={tuning}/>
-          }
-        </>
+        <Row>
+          <Col>
+            {!recording ?
+              <Countdown setRecording={setRecording}/>
+            :
+              <RecordingPage recording={recording} setRecording={setRecording} capo={capo} tuning={tuning}/>
+            }
+          </Col>
+        </Row>
       }
     </Container>
   );

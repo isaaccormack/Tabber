@@ -1,5 +1,5 @@
 import { throwFormattedError } from "../../../common/utils/formattingHelpers";
-import { LickInterface } from "../../../common/lick/interface/LickInterface";
+import { LickInterface } from "../../../common/lick-interface/LickInterface";
 
 export const tabLick = (history: any,
                         file: File,

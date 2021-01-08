@@ -4,7 +4,7 @@ import CapoFormControl from "../../../lick-pages/components/edit/CapoFormControl
 import NavigationButton from "../../../home-pages/components/common/NavigationButton";
 import React, { useState } from "react";
 import { throwFormattedError } from "../../../common/utils/formattingHelpers";
-import { LickInterface } from "../../../common/lick/interface/LickInterface";
+import { LickInterface } from "../../../common/lick-interface/LickInterface";
 import { useHistory } from "react-router";
 import { UserInterface } from "../../../common/user/interface/UserInterface";
 import { useSelector } from "react-redux";

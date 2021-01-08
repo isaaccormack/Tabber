@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Container, Row } from "react-bootstrap";
 import TitleBlock from "../common/TitleBlock";
 import ViewLickBlock from "../common/ViewLickBlock";
-import { LickInterface } from "../../../common/lick/interface/LickInterface";
+import { LickInterface } from "../../../common/lick-interface/LickInterface";
 import { useGetLick, useGetLickAudio } from "../../utils/useGetLick";
 import { AlertInterface, useAlertTimeouts } from "../../../common/utils/useAlertTimeouts";
 import renderAlert from "../../../common/utils/renderAlert";

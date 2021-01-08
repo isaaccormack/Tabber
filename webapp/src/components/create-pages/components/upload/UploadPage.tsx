@@ -1,15 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { Button, Col, Container, Form, Row } from "react-bootstrap";
-import {useDropzone} from 'react-dropzone'
+import React, { useState } from "react";
+import { Container } from "react-bootstrap";
 import "./UploadPage.css"
-import UploadCloudIcon from "../../icons/upload-cloud.svg";
-import { formatCapo, throwFormattedError } from "../../../common/utils/formattingHelpers";
-import { ClimbingBoxLoader, ClipLoader } from "react-spinners";
-import Upload from "../../../createOLD/icons/Upload.svg";
-import WarningIcon from "../../icons/warning.svg"
-import { LickInterface } from "../../../common/lick/interface/LickInterface";
-import { ClearFileState } from "../../../createOLD/actions/FileActions";
-import { useHistory } from "react-router";
 import TitleBlock from "./TitleBlock";
 import ReactDropzone from "./ReactDropzone";
 import { AlertInterface, useAlertTimeouts } from "../../../common/utils/useAlertTimeouts";

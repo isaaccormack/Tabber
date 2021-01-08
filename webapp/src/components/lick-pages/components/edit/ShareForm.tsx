@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Container, Form, FormControl, InputGroup, Row } from "react-bootstrap";
 import RemoveIcon from "../../icons/remove.svg";
 import { UserInterface } from "../../../common/user/interface/UserInterface";
-import { LickInterface } from "../../../common/lick/interface/LickInterface";
+import { LickInterface } from "../../../common/lick-interface/LickInterface";
 import { throwFormattedError } from "../../../common/utils/formattingHelpers";
 
 export default function ShareForm(props: any) {

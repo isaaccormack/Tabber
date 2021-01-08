@@ -1,4 +1,4 @@
-import {UserInterface} from "../../user/interface/UserInterface";
+import {UserInterface} from "../user/interface/UserInterface";
 
 export interface LickInterface {
     id: number

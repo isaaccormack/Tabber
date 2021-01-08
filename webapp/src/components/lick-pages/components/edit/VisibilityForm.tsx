@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, Col, Form, FormControl, InputGroup, Row } from "react-bootstrap";
 import LinkIcon from "../../icons/link.svg";
-import { LickInterface } from "../../../common/lick/interface/LickInterface";
+import { LickInterface } from "../../../common/lick-interface/LickInterface";
 import { throwFormattedError } from "../../../common/utils/formattingHelpers";
 
 // TODO: actually check if lick is made public and private s.t. user which is not owner cant see

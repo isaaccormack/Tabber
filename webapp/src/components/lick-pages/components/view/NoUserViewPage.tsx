@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { useHistory } from "react-router";
-import { LickInterface } from "../../../common/lick/interface/LickInterface";
+import { LickInterface } from "../../../common/lick-interface/LickInterface";
 import ConfettiIcon from "../../icons/confetti.svg"
 import CelebrateIcon from "../../icons/celebrate.svg"
 import DownloadWhiteIcon from "../../icons/download-white.svg"
 import { useDownloadTabs } from "../common/useDownloadTabs";
-import { useLoginURL } from "../../../common/header/component/useLoginURL";
+import { useLoginURL } from "../../../common/header/components/useLoginURL";
 import { formatCapo } from "../../../common/utils/formattingHelpers";
 
 interface State {

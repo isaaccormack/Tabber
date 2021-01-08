@@ -1,7 +1,7 @@
 import { Container } from "react-bootstrap";
 import React, { useState } from "react";
 import "../common/LickPage.css";
-import { LickInterface } from "../../../common/lick/interface/LickInterface";
+import { LickInterface } from "../../../common/lick-interface/LickInterface";
 
 import TitleBlock from "../common/TitleBlock";
 import ViewLickBlock from "../common/ViewLickBlock";

@@ -1,4 +1,4 @@
-import { LickInterface } from "../../common/lick/interface/LickInterface";
+import { LickInterface } from "../../common/lick-interface/LickInterface";
 import { useEffect } from "react";
 import { throwFormattedError } from "../../common/utils/formattingHelpers";
 import { useHistory } from "react-router";

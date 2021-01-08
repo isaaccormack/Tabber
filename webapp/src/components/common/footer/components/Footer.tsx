@@ -7,7 +7,7 @@ import NoteIcon from '../icons/note.svg'
 import { Link } from "react-router-dom";
 import { useHistory } from "react-router";
 import { throwFormattedError } from "../../utils/formattingHelpers";
-import { LickInterface } from "../../lick/interface/LickInterface";
+import { LickInterface } from "../../lick-interface/LickInterface";
 
 export default function Footer() {
 
