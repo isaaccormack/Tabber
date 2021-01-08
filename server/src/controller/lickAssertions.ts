@@ -64,18 +64,16 @@ export const assertLickAudioLengthValid = async(ctx: Context, lick: Lick): Promi
     return true;
 }
 
-export const assertLickTabbed = async(ctx: Context, lick: Lick, skipTabbing: boolean | undefined): Promise<boolean> => {
-    // TODO: this conditional clause is for dev, probably can remove
-    if (!skipTabbing) {
-        try {
-            // Generate tab for lick after other data is handled
-            lick.tab = await TabModule.tabLick(lick.audioFileLocation, lick.tuning, lick.capo);
-        } catch (err) {
-            await LickController.attemptToDeleteFile(lick.audioFileLocation);
-            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
-            ctx.body = { errors: {error: "Error: Failed to tab audio file."}};
-            return;
-        }
+export const assertLickTabbed = async(ctx: Context, lick: Lick): Promise<boolean> => {
+    try {
+        // Generate tab for lick after other data is handled
+        lick.tab = await TabModule.tabLick(lick.audioFileLocation, lick.tuning, lick.capo);
+    } catch (err) {
+        console.error(err);
+        await LickController.attemptToDeleteFile(lick.audioFileLocation);
+        ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
+        ctx.body = { errors: {error: "Error: Failed to tab audio file."}};
+        return;
     }
 
     return true;

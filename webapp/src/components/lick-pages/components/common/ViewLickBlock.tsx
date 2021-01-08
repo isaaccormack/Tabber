@@ -7,10 +7,17 @@ import React, { useState } from "react";
 import DownloadTabsButton from "./DownloadTabsButton";
 import DeleteLickModal from "../edit/DeleteLickModal";
 import UnfollowLickModal from "../view/UnfollowLickModal";
+import { UserInterface } from "../../../common/user/interface/UserInterface";
+import { useSelector } from "react-redux";
+import RootState from "../../../../store/root-state";
 
 export default function ViewLickBlock(props: any) {
 
   const lick = props.lick;
+
+  const user: UserInterface | undefined = useSelector((state: RootState) => state.userState.user);
+  const userEmail = user ? user.email : "";
+  const sharedWithCurrUser = lick.sharedWith.filter((user: UserInterface) => user.email !== userEmail).length > 0;
 
   const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
   const [showUnfollowModal, setShowUnfollowModal] = useState<boolean>(false);
@@ -62,19 +69,23 @@ export default function ViewLickBlock(props: any) {
             </Row>
           </Col>
           :
-          <Col xs={3}>
-            <Row style={{paddingRight: '30px'}} className="justify-content-md-end">
-              <span className="modify-lick-span" onClick={() => setShowUnfollowModal(true)}>
-                <h4 style={{display: "inline", color: '#dc3545'}}>Unfollow</h4>
-                <img
-                  style={{marginLeft: '5px'}}
-                  src={RemoveIcon}
-                  height={25}
-                  alt="delete lick"
-                />
-              </span>
-            </Row>
-          </Col>
+          <>
+            {sharedWithCurrUser &&
+              <Col xs={3}>
+                <Row style={{paddingRight: '30px'}} className="justify-content-md-end">
+                  <span className="modify-lick-span" onClick={() => setShowUnfollowModal(true)}>
+                    <h4 style={{display: "inline", color: '#dc3545'}}>Unfollow</h4>
+                    <img
+                      style={{marginLeft: '5px'}}
+                      src={RemoveIcon}
+                      height={25}
+                      alt="delete lick"
+                    />
+                  </span>
+                </Row>
+              </Col>
+            }
+          </>
         }
       </Row>
       {!props.showEditForm &&

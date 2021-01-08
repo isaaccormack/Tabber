@@ -16,7 +16,6 @@ export const tabLick = (history: any,
   form.append("tuning", tuning);
   form.append("capo", capo.toString());
   form.append("name", file.name);
-  // form.append("skipTabbing", "true") // for dev
   fetch("/api/lick",{
     method: "POST",
     body: form

@@ -49,7 +49,7 @@ export class LickController {
         if (!await assertLickMetadataValid(ctx, lick)) { return; }
         if (!await assertLickAudioSaved(ctx, lick, audioFile)) { return; }
         if (!await assertLickAudioLengthValid(ctx, lick)) { return; }
-        if (!await assertLickTabbed(ctx, lick, body.skipTabbing)) { return; }
+        if (!await assertLickTabbed(ctx, lick)) { return; }
 
         if (user) {
             if (!await LickController.trySaveLickAndSetResponse(ctx, lick)) {
@@ -243,7 +243,7 @@ export class LickController {
         lickToUpdate.capo = body.capo;
 
         if (!await assertLickValid(ctx, lickToUpdate)) { return; }
-        if (!await assertLickTabbed(ctx, lickToUpdate, false)) { return; }
+        if (!await assertLickTabbed(ctx, lickToUpdate)) { return; }
 
         await LickController.trySaveLickAndSetResponse(ctx, lickToUpdate);
     }
