@@ -1,3 +1,5 @@
+# MUST run 'npm update-views' before building image to build most up-to-date react app
+
 FROM ubuntu:18.04
 
 RUN apt-get update && apt-get install -y python3  python3-dbg  python3-pip
@@ -25,9 +27,6 @@ WORKDIR /app
 COPY package*.json /app/
 RUN npm install
 COPY . /app/
-
-# save production build of react app in /dist
-RUN npm update-views
 
 EXPOSE 3000
 
