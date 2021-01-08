@@ -1,7 +1,12 @@
 version: '3'
 
 services:
-    tabber-app:
-        image: tabber:0.0.1
+    tabber:
+#        should tag this, ie. tabber:0.0.1
+        image: tabber
         ports:
             - "3000:3000"
+        volumes:
+            - type: bind
+              source: ./uploads
+              target: /app/uploads
