@@ -1,0 +1,27 @@
+FROM node:12
+
+RUN apt-get update || : && apt-get install python3 -y
+# RUN apt-get update || : && apt-get install curl -y
+RUN apt-get update || : && apt-get install python3-pip -y
+# RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+# RUN python get-pip.py
+RUN python3 -m pip install --upgrade tensorflow
+RUN python3 -m pip install crepe
+
+WORKDIR /app
+
+COPY package*.json /app/
+
+RUN npm install
+
+COPY . /app/
+
+RUN ls
+# change this to npm run start?
+CMD [ "node", "bin/www" ]
+
+# should this be before?
+EXPOSE 3000
+
+# user to run as?
+# who is the user?

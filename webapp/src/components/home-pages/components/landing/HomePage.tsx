@@ -26,7 +26,7 @@ export default function HomePage() {
           be tabbed
         </>}
       />
-      <Row style={{marginTop: '150px'}}>
+      <Row style={{marginTop: '80px', marginBottom: '30px'}}>
         <Col xs={6}>
           <NavigationCard
             icon={UploadIcon}
