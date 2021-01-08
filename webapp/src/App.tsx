@@ -18,8 +18,6 @@ import RecordPage from './components/create-pages/components/record/RecordPage';
 import LandingPage from "./components/home-pages/components/landing/LandingPage";
 import Footer from "./components/common/footer/components/Footer";
 import ForbiddenPage from "./components/error-pages/components/ForbiddenPage";
-import ServerErrorPage from "./components/error-pages/components/ServerErrorPage";
-import BadRequestPage from "./components/error-pages/components/BadRequestPage";
 import UploadingPage from "./components/create-pages/components/upload/UploadingPage";
 import NoUserViewPage from "./components/lick-pages/components/view/NoUserViewPage";
 
@@ -41,10 +39,8 @@ function App() {
                         <PrivateRoute exact path="/shared" component={SharedPage} />
                         <Route exact path="/oauth" component={OAuth2Page} />
                         <Route exact path="/" component={LandingPage} />
-                        <Route exact path="/400" component={BadRequestPage} />
                         <Route exact path="/403" component={ForbiddenPage} />
                         <Route exact path="/404" component={NotFoundPage} />
-                        <Route exact path="/500" component={ServerErrorPage} />
                         <Route path="*">
                             <Redirect to="/404" />
                         </Route>
