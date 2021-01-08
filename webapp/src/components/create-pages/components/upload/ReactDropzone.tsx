@@ -1,6 +1,6 @@
 import { Row } from "react-bootstrap";
-import UploadCloudIcon from "../icons/upload-cloud.svg";
-import WarningIcon from "../icons/warning.svg";
+import UploadCloudIcon from "../../icons/upload-cloud.svg";
+import WarningIcon from "../../icons/warning.svg";
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 

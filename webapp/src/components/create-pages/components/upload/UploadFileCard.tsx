@@ -1,6 +1,6 @@
 import { Col, Row } from "react-bootstrap";
-import FileIcon from "../icons/music-file.svg";
-import TrashIcon from "../../lick-pages/icons/trash.svg";
+import FileIcon from "../../icons/music-file.svg";
+import TrashIcon from "../../../lick-pages/icons/trash.svg";
 import React from "react";
 
 export default function UploadFileCard(props: any) {

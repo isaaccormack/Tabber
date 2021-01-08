@@ -9,20 +9,20 @@ import PrivateRoute from "./PrivateRoute";
 import Header from "./components/common/header/component/Header";
 import OAuth2Page from "./components/oauth/component/OAuth2Page";
 import CreatePage from "./components/createOLD/component/CreatePage";
-import UploadPage from "./components/create/components/UploadPage";
+import UploadPage from "./components/create-pages/components/upload/UploadPage";
 import NotFoundPage from "./components/error-pages/components/NotFoundPage";
 import LibraryPage from "./components/library-pages/components/LibraryPage";
 import SharedPage from "./components/library-pages/components/SharedPage";
 import CreateDescriptionPage from "./components/createOLD/component/CreateDescriptionPage";
 import EditPage from "./components/lick-pages/components/edit/EditPage";
 import ViewPage from "./components/lick-pages/components/view/ViewPage";
-import RecordPage from './components/createOLD/component/RecordPage';
+import RecordPage from './components/create-pages/components/record/RecordPage';
 import LandingPage from "./components/home-pages/components/landing/LandingPage";
 import Footer from "./components/common/footer/component/Footer";
 import ForbiddenPage from "./components/error-pages/components/ForbiddenPage";
 import ServerErrorPage from "./components/error-pages/components/ServerErrorPage";
 import BadRequestPage from "./components/error-pages/components/BadRequestPage";
-import UploadingPage from "./components/create/components/UploadingPage";
+import UploadingPage from "./components/create-pages/components/upload/UploadingPage";
 import NoUserViewPage from "./components/lick-pages/components/view/NoUserViewPage";
 
 function App() {

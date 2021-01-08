@@ -86,6 +86,16 @@ export default function Header() {
     );
   }
 
+  // TODO: maybe wont need this if i can get modal logic down to hard refresh page before navigating away
+  // used to still refresh the page even if currently on the given page
+  const historyPushWrapper = (destURL: string) => {
+    if (destURL === window.location.pathname) {
+      window.location.reload();
+    } else {
+      history.push(destURL)
+    }
+  }
+
   // Note: href will re-render the entire app forcing all components to remount which resets state here
   const loggedInNavBar = () => {
 
@@ -95,16 +105,16 @@ export default function Header() {
           <Navbar variant="dark">
             {tabberBrand()}
             <Nav variant="pills" className="ml-auto" activeKey={activeKey}>
-              <Nav.Link eventKey={uploadPath} style={{color: 'white'}} onSelect={() => history.push(uploadPath)}>
+              <Nav.Link eventKey={uploadPath} style={{color: 'white'}} onSelect={() => historyPushWrapper(uploadPath)}>
                 Upload
               </Nav.Link>
-              <Nav.Link eventKey={recordPath} style={{color: 'white'}} onSelect={() => history.push(recordPath)}>
+              <Nav.Link eventKey={recordPath} style={{color: 'white'}} onSelect={() => historyPushWrapper(recordPath)}>
                 Record
               </Nav.Link>
-              <Nav.Link eventKey={libraryPath} style={{color: 'white'}} onSelect={() => history.push(libraryPath)}>
+              <Nav.Link eventKey={libraryPath} style={{color: 'white'}} onSelect={() => historyPushWrapper(libraryPath)}>
                 Library
               </Nav.Link>
-              <Nav.Link eventKey={sharedPath} style={{color: 'white'}} onSelect={() => history.push(sharedPath)}>
+              <Nav.Link eventKey={sharedPath} style={{color: 'white'}} onSelect={() => historyPushWrapper(sharedPath)}>
                 Shared
               </Nav.Link>
               <NavDropdown title={user && user.name} id="basic-nav-dropdown" style={{marginLeft: '10px'}}>
@@ -124,11 +134,11 @@ export default function Header() {
       <Container>
         <Navbar variant="light">
           {tabberBrand()}
-          <Nav className="ml-auto">
-            <Nav.Link eventKey={uploadPath} onSelect={() => history.push(uploadPath)}>
+          <Nav className="ml-auto" activeKey={activeKey}>
+            <Nav.Link eventKey={uploadPath} onSelect={() => historyPushWrapper(uploadPath)}>
               Upload
             </Nav.Link>
-            <Nav.Link eventKey={recordPath} onSelect={() => history.push(recordPath)}>
+            <Nav.Link eventKey={recordPath} onSelect={() => historyPushWrapper(recordPath)}>
               Record
             </Nav.Link>
             <Nav.Link href={loginURL} style={{marginLeft: '20px'}}>

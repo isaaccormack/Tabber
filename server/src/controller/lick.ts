@@ -32,6 +32,8 @@ export class LickController {
      */
     public static async createLick(ctx: any): Promise<void> {
 
+        console.log('in here')
+
         const audioFile = ctx.request.files.file;
 
         if (!assertAudioFileValid(ctx, audioFile)) { return; }
@@ -51,6 +53,8 @@ export class LickController {
         if (!await assertLickAudioLengthValid(ctx, lick)) { return; }
         if (!await assertLickTabbed(ctx, lick, body.skipTabbing)) { return; }
 
+        console.log('in here later')
+
         if (user) {
             if (!await LickController.trySaveLickAndSetResponse(ctx, lick)) {
                 await LickController.attemptToDeleteFile(lick.audioFileLocation);
@@ -62,6 +66,7 @@ export class LickController {
             ctx.status = StatusCodes.CREATED;
             ctx.body = lick;
         }
+        console.log('returning')
     }
 
     /**

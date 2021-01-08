@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Container, Row } from "react-bootstrap";
-import UploadTitleBlock from "./UploadTitleBlock";
-import GearIcon from "../icons/gear.svg";
+import TitleBlock from "./TitleBlock";
+import GearIcon from "../../icons/gear.svg";
 import {
   BeatLoader,
   BounceLoader,
@@ -67,7 +67,7 @@ export default function UploadingPage() {
 
   return (
     <Container>
-      <UploadTitleBlock
+      <TitleBlock
         title="Uploading"
         marginRight="150px"
         desc="Please be patient, this may take a moment"

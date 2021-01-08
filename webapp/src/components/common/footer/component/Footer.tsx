@@ -41,7 +41,7 @@ export default function Footer() {
     return count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   }
 
-  // TODO: make this be at the bottom always
+  // TODO: make this be at the bottom always with same margin
     return (
       <Container>
         <Row style={{borderTop: 'solid', borderWidth: '1px', borderColor: 'lightgray', paddingTop: '15px', marginTop: '15px'}}>

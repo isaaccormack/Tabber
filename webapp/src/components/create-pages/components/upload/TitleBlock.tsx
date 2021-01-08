@@ -1,8 +1,7 @@
 import { Col, Row } from "react-bootstrap";
-import UploadFileIcon from "../icons/upload-file.svg";
 import React from "react";
 
-export default function UploadTitleBlock(props:any) {
+export default function TitleBlock(props:any) {
   return (
     <Row>
       <Col xs={8}>
