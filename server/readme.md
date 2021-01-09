@@ -13,7 +13,7 @@ To develop the app with hot-reloading:
 
 ## Testing
 Jest is used for testing.
-- Unit tests: `npm run unit-jest`
+- Unit tests: `npm test`
 - Integration tests: `npm run integration-jest`
 
 ## Updating React Views
