@@ -10,8 +10,9 @@ unprotectedRouter.prefix("/api")
 unprotectedRouter.get("/loginUrl", OAuth2Controller.loginUrl);
 unprotectedRouter.get("/token", OAuth2Controller.tokenExchange);
 
-unprotectedRouter.get("/licks/:id", LickController.getLick);
-unprotectedRouter.get("/licks/audio/:id", LickController.getLickAudio);
-
+unprotectedRouter.post("/lick", LickController.createLick);
+unprotectedRouter.get("/lick/:id", LickController.getLick);
+unprotectedRouter.get("/lick/audio/:id", LickController.getLickAudio);
+unprotectedRouter.get("/lick-count", LickController.getLickCount);
 
 export { unprotectedRouter };

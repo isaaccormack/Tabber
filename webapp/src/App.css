@@ -1,27 +1,14 @@
 @import "mainstyles.css";
-
-.sidenav {
-  height: 100%;
-  width: var(--sidebar-size);
-  position: fixed;
-  z-index: 1;
-  top: 0;
-  left: 0;
-  background-color: #111;
-  overflow-x: hidden;
-  padding-top: 20px;
-}
-
-.main {
-  margin-left: var(--sidebar-size);
-}
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
 
 .app {
-  background-color: var(--background-dark);
-  min-height: 100vh;
-  color: var(--font-color-light);
+  background-color: #ffffff;
   font-size: 16px;
-  font-family: var(--font-body);
+  font-family: 'Open Sans', sans-serif;
+  /* hacky workaround to get footer to stick to bottom */
+  min-height: calc(100vh - 195px);
 }
 
-
+h1, h2, h3, h4, h5, h6, p {
+  color: #000000;
+}

@@ -57,9 +57,7 @@ export default class TabGenerator {
             stringTabStrings[i] += "|";
         }
 
-        const capoString: string = capo.getCapo() === 0 ? "(No capo)\n" : "(Capo " + capo.getCapo().toFixed(0) + ")\n";
-
-        return capoString + stringTabStrings.join("\n");
+        return stringTabStrings.join("\n");
     }
 
     // Gets the note that each string is tuned to. Ensures string lengths are uniform.

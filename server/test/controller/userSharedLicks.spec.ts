@@ -35,22 +35,18 @@ describe('Unit test: User shared licks endpoint', () => {
         const lickToBeShared: Lick = new Lick()
         lickToBeShared.owner = lickOwner;
 
-        const body = {
-            userID: lickOwner.id
-        }
-
         sandbox.stub(UserController, "getUserByEmail").returns(lickOwner);
         stubGetLickRepository({
             findOne: function() { return lickToBeShared }
         });
 
         const ctx: any = createMockContext();
-        ctx.request.body = body;
+        ctx.request.body = { share: true };
         ctx.params = {};
         ctx.state.user = lickOwner;
-        await LickController.shareLick(ctx)
-                
-        expect(ctx.status).toBe(400)
+        await LickController.updateLickSharedWith(ctx)
+
+        expect(ctx.status).toBe(418)
         expect(ctx.body.errors.error).toContain("share a lick with yourself")
     })
     it('should SHARE lick with another user', async () => {
@@ -71,19 +67,19 @@ describe('Unit test: User shared licks endpoint', () => {
 
         stubGetLickRepository({
             findOne: function() { return lickToBeShared },
-            save: function(lick) { 
+            save: function(lick) {
                 return lick
-            },   
+            },
         });
 
         sandbox.stub(UserController, "getUserByEmail").returns(anotherUser);
- 
+
         const ctx: any = createMockContext();
-        ctx.request.body = {};
+        ctx.request.body = { share: true };
         ctx.params = {};
         ctx.state.user = lickOwner;
-        await LickController.shareLick(ctx)
-        
+        await LickController.updateLickSharedWith(ctx)
+
         expect(ctx.status).toBe(200)
         expect(ctx.body.name).toBe(lickToBeShared.name)
         expect(ctx.body.sharedWith.sort()).toEqual([userLickSharedWith, anotherUser].sort())
@@ -100,13 +96,13 @@ describe('Unit test: User shared licks endpoint', () => {
         });
 
         const ctx: any = createMockContext();
-        ctx.request.body = {};
+        ctx.request.body = { share: true };
         ctx.params = {};
         ctx.state.user = lickOwner;
-        await LickController.shareLick(ctx)
-                
+        await LickController.updateLickSharedWith(ctx)
+
         expect(ctx.status).toBe(400)
-        expect(ctx.body.errors.error).toContain("trying to share doesn't exist")
+        expect(ctx.body.errors.error).toContain("trying to retrieve doesn't exist")
     })
     it('should NOT SHARE lick if requester isnt owner', async () => {
         const lickOwner: User = new User()
@@ -114,7 +110,7 @@ describe('Unit test: User shared licks endpoint', () => {
 
         const lickSharer: User = new User()
         lickOwner.id = 2 // must set id
-        
+
         const lickToBeShared: Lick = new Lick()
         lickToBeShared.name = "cool lick";
         lickToBeShared.isPublic = false;
@@ -126,38 +122,40 @@ describe('Unit test: User shared licks endpoint', () => {
         });
 
         const ctx: any = createMockContext();
-        ctx.request.body = {};
+        ctx.request.body = { share: true };
         ctx.params = {};
         ctx.state.user = lickSharer;
-        await LickController.shareLick(ctx)
-                
+        await LickController.updateLickSharedWith(ctx)
+
         expect(ctx.status).toBe(403)
-        expect(ctx.body.errors.error).toContain("can only be shared by its owner")
+        expect(ctx.body.errors.error).toContain("do not have permission to edit this lick")
     })
     it('should NOT SHARE lick with user who doesnt exist', async () => {
         const lickOwner: User = new User()
         lickOwner.id = 1 // must set id
-        
+
         const lickToBeShared: Lick = new Lick()
         lickToBeShared.name = "cool lick";
         lickToBeShared.isPublic = false;
         lickToBeShared.owner = lickOwner;
         lickToBeShared.sharedWith = [];
-        
+
         stubGetLickRepository({
-            findOne: function() { return lickToBeShared }
+            findOne: function() { return lickToBeShared },
+            save: function() { return lickToBeShared }
         });
 
         sandbox.stub(UserController, "getUserByEmail").returns(null);
+        sandbox.stub(UserController, "getUserByID").returns(null);
 
         const ctx: any = createMockContext();
-        ctx.request.body = {};
+        ctx.request.body = { share: true };
         ctx.params = {};
         ctx.state.user = lickOwner;
-        await LickController.shareLick(ctx)
-                
-        expect(ctx.status).toBe(400)
-        expect(ctx.body.errors.error).toContain("trying to share with doesn't exist")
+        await LickController.updateLickSharedWith(ctx)
+
+        expect(ctx.status).toBe(412)
+        expect(ctx.body.errors.error).toContain("you are trying to (un)share with doesn't exist")
     })
     /**
      * Test unshareLick()
@@ -180,18 +178,16 @@ describe('Unit test: User shared licks endpoint', () => {
 
         stubGetLickRepository({
             findOne: function() { return lickToBeUnshared },
-            save: function(lick) { 
-                return lick
-            },   
+            save: function(lick) { return lick }
         });
 
-        sandbox.stub(UserController, "getUserByID").returns(anotherUser);
- 
+        sandbox.stub(UserController, "getUserByEmail").returns(anotherUser);
+
         const ctx: any = createMockContext();
-        ctx.request.body = {};
+        ctx.request.body = { share: false };
         ctx.params = {};
         ctx.state.user = lickOwner;
-        await LickController.unshareLick(ctx)
+        await LickController.updateLickSharedWith(ctx)
 
         expect(ctx.status).toBe(200)
         expect(ctx.body.name).toBe(lickToBeUnshared.name)
@@ -209,13 +205,13 @@ describe('Unit test: User shared licks endpoint', () => {
         });
 
         const ctx: any = createMockContext();
-        ctx.request.body = {};
+        ctx.request.body = { share: false };
         ctx.params = {};
         ctx.state.user = lickOwner;
-        await LickController.unshareLick(ctx)
-                
+        await LickController.updateLickSharedWith(ctx)
+
         expect(ctx.status).toBe(400)
-        expect(ctx.body.errors.error).toContain("trying to unshare doesn't exist")
+        expect(ctx.body.errors.error).toContain(" trying to retrieve doesn't exist")
     })
     it('should NOT UNSHARE lick if requester isnt owner', async () => {
         const lickOwner: User = new User()
@@ -223,7 +219,7 @@ describe('Unit test: User shared licks endpoint', () => {
 
         const lickSharer: User = new User()
         lickOwner.id = 2 // must set id
-        
+
         const lickToBeShared: Lick = new Lick()
         lickToBeShared.name = "cool lick";
         lickToBeShared.isPublic = false;
@@ -235,38 +231,40 @@ describe('Unit test: User shared licks endpoint', () => {
         });
 
         const ctx: any = createMockContext();
-        ctx.request.body = {};
+        ctx.request.body = { share: false };
         ctx.params = {};
         ctx.state.user = lickSharer;
-        await LickController.unshareLick(ctx)
-                
+        await LickController.updateLickSharedWith(ctx)
+
         expect(ctx.status).toBe(403)
-        expect(ctx.body.errors.error).toContain("can only be unshared by its owner")
+        expect(ctx.body.errors.error).toContain("do not have permission to edit this lick")
     })
     it('should NOT UNSHARE lick with user who doesnt exist', async () => {
         const lickOwner: User = new User()
         lickOwner.id = 1 // must set id
-        
+
         const lickToBeShared: Lick = new Lick()
         lickToBeShared.name = "cool lick";
         lickToBeShared.isPublic = false;
         lickToBeShared.owner = lickOwner;
         lickToBeShared.sharedWith = [];
-        
+
         stubGetLickRepository({
-            findOne: function() { return lickToBeShared }
+            findOne: function() { return lickToBeShared },
+            save: function() { return lickToBeShared }
         });
 
+        sandbox.stub(UserController, "getUserByEmail").returns(null);
         sandbox.stub(UserController, "getUserByID").returns(null);
 
         const ctx: any = createMockContext();
-        ctx.request.body = {};
+        ctx.request.body = { share: false };
         ctx.params = {};
         ctx.state.user = lickOwner;
-        await LickController.unshareLick(ctx)
-                
-        expect(ctx.status).toBe(400)
-        expect(ctx.body.errors.error).toContain("trying to unshare with doesn't exist")
+        await LickController.updateLickSharedWith(ctx)
+
+        expect(ctx.status).toBe(412)
+        expect(ctx.body.errors.error).toContain("trying to (un)share with doesn't exist")
     })
     /**
      * Test unfollowLick()
@@ -286,18 +284,18 @@ describe('Unit test: User shared licks endpoint', () => {
 
         stubGetLickRepository({
             findOne: function() { return lickToBeUnfollowed },
-            save: function(lick) { 
+            save: function(lick) {
                 return lick
-            },   
+            },
         });
- 
+
         const ctx: any = createMockContext();
-        ctx.request.body = {};
+        ctx.request.body = { share: false };
         ctx.params = {};
         ctx.state.user = userUnfollowingLick;
         await LickController.unfollowLick(ctx)
-        
-        expect(ctx.status).toBe(204)
+
+        expect(ctx.status).toBe(200)
         // cant check that user entity was updated since only lick is returned
         // this is checked in integration tests
     })
@@ -310,12 +308,12 @@ describe('Unit test: User shared licks endpoint', () => {
         });
 
         const ctx: any = createMockContext();
-        ctx.request.body = {};
+        ctx.request.body = { share: false };
         ctx.params = {};
         ctx.state.user = lickOwner;
         await LickController.unfollowLick(ctx)
-                
+
         expect(ctx.status).toBe(400)
-        expect(ctx.body.errors.error).toContain("trying to unfollow doesn't exist")
+        expect(ctx.body.errors.error).toContain("trying to retrieve doesn't exist")
     })
 })

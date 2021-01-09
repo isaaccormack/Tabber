@@ -17,11 +17,11 @@ protectedRouter.get("/users", UserController.getUsers);
 protectedRouter.get("/users/:id", UserController.getUser);
 protectedRouter.put("/users/:id", UserController.updateUser);
 
-protectedRouter.post("/licks", LickController.createLick);
-protectedRouter.put("/lick/share/:id", LickController.shareLick);
-protectedRouter.put("/lick/unshare/:id", LickController.unshareLick);
+protectedRouter.put("/lick/update-shared-with/:id", LickController.updateLickSharedWith);
 protectedRouter.put("/lick/unfollow/:id", LickController.unfollowLick);
 protectedRouter.put("/lick/:id", LickController.updateLick);
-protectedRouter.delete("/licks/:id", LickController.deleteLick);
+protectedRouter.put("/lick/re-tab/:id", LickController.reTabLick);
+protectedRouter.put("/lick/update-tab/:id", LickController.updateTab);
+protectedRouter.delete("/lick/:id", LickController.deleteLick);
 
 export { protectedRouter };

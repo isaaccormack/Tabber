@@ -29,6 +29,7 @@ export default class Tuning {
         } else if (cleanString === "open g") {
             return Tuning.OpenG;
         } else {
+            console.error("invalid tuning")
             throw new Error("Invalid tuning");
         }
     }
