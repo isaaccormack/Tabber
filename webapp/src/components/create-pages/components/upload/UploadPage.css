@@ -13,12 +13,8 @@
 #browse-files {
     cursor:pointer;
     color:#3d8af7;
-    /*text-decoration:underline;*/
-    font-weight: bold;
-}
-
-#browse-files:hover {
     text-decoration:underline;
+    font-weight: bold;
 }
 
 #trash-icon:hover {
