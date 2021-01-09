@@ -23,6 +23,8 @@ RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - &&  apt-get install 
 RUN addgroup -gid 10001 tabber && \
     adduser -uid 10000 --gid 10001 --home /home/tabber --disabled-password --gecos '' tabber
 
+ENV NODE_ENV=production
+
 WORKDIR /app
 COPY package*.json /app/
 RUN npm install
