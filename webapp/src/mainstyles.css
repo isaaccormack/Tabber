@@ -1,17 +1,27 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans&display=swap');
+
+/* fix the use of --font-header and --font-body later */
 :root {
     /* Global colours */
     --background-dark: #12142C;
-    --background-light: #B5BBFF;
+    --background-light: #fff;
     --pink: #EF3BFF;
     --blue: #5335E8;
     --purple: #5b5e80;
     --red: #CB0202;
 
     /* Global fonts */
-    --font-header:'Damion', cursive;
-    --font-body: 'Roboto', sans-serif;
-    --font-color-light: #FFFFFF;
-    --font-size-large: 48px;
-    --font-size-medium: 24px;
-    --font-size-small: 16px;
+    --font-header: 'Open Sans', sans-serif; /* TODO: Change these two later to something more suitable */
+    --font-body: 'Open Sans', sans-serif;
+    --font-color-light: #000;
+    --font-size-8: 48px;
+    --font-size-7: 40px;
+    --font-size-6: 36px;
+    --font-size-5: 30px;
+    --font-size-4: 24px;
+    --font-size-3: 20px;
+    --font-size-2: 16px;
+    --font-size-1: 12px;
+
+    --sidebar-size: 100px;
 }

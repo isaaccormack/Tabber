@@ -1,9 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable } from "typeorm";
-import { Length, IsOptional } from "class-validator";
+import { IsOptional, Length, IsIn, IsInt, Min, Max } from "class-validator";
 import { User } from "./user";
-
-// should Lick be plural so db table is licks not lick?
-// this should be weak entity which is defined by its name and user name such that each name is unique to user 
 
 @Entity()
 export class Lick {
@@ -11,42 +8,43 @@ export class Lick {
     id: number;
 
     @Length(1, 100)
-    @Column({ length: 100 })
+    @Column()
     name: string;
-    
+
+    @IsOptional()
     @Length(0, 500)
-    @Column({ length: 500 })
+    @Column({ nullable: true })
     description: string;
-    
+
     @Column()
     dateUploaded: Date;
-    
-    // dont need to validate since server
-    // @Length(1, 50)
-    @Column({ length: 50 })
+
+    @Column()
     audioFileLocation: string;
-    
-    // dont need to validate since server
-    // @IsPositive()
-    // @Max(60)	
+
     @Column()
     audioLength: number; // seconds
-    
-    // put constraints on here later
-    @Column({ length: 100 }) // unsure of what length should be, maybe this should even be saved as file since
-    tab: string; // TODO: make tab data structure
 
-    @Length(1, 20)
-    @Column({ length: 20 })
-    tuning: string; // TODO: make tuning data structure/data type
+    @Column({type: "text", nullable: true})
+    tab: string;
 
     @Column()
+    @IsIn(["Standard", "Open G", "Drop D"])
+    tuning: string; // converts to tuning array with Tuning.fromString()
+
+    @Column()
+    @IsInt()
+    @Min(0)
+    @Max(24)
+    capo: number;
+
+    @Column({default: false})
     isPublic: boolean;
 
-    @ManyToOne(type => User, owner => owner.licks)
+    @ManyToOne(type => User, user => user.licks)
     owner: User;
 
-    @ManyToMany(type => User, user => user.sharedWithMe)
+    @ManyToMany(type => User, user => user.sharedWithMe, { cascade: ["update"] })
     @JoinTable()
     sharedWith: User[];
 }

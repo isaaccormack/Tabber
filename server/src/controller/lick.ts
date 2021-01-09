@@ -1,69 +1,83 @@
-import { validate, ValidationError } from "class-validator";
-import { getManager, Repository, Not, Equal, Like } from "typeorm";
+const fs = require('fs');
+import { Context } from "koa";
 import { v4 as uuidv4 } from "uuid";
-import { Context, Request } from "koa";
+import * as util from 'util';
+const ffmpeg = require('fluent-ffmpeg');
+
 import { Lick } from "../entity/lick";
 import { User } from "../entity/user";
-import { Files } from "koa2-formidable";
-const fs = require('fs');
-import * as util from 'util';
-import * as audioDuration from 'get-audio-duration';
 
-
-const lickAudioDirectory: string = "uploads";
-
-// Get a new unique location for an audio file
-function getNewAudioFileUri(): string {
-    return lickAudioDirectory + "/" + uuidv4();
-    // return uuidv4();
-}
-
-// files must be added to Request interface
-interface FileRequest extends Request {
-    files?: Files;
-}
-
-interface FileContext extends Context {
-    request: FileRequest;
-}
-
+import { StatusCodes } from "http-status-codes";
+import {
+    assertAudioFileValid,
+    assertLickMetadataValid,
+    assertLickAudioSaved,
+    assertLickAudioLengthValid,
+    assertLickTabbed,
+    assertLickExists,
+    assertRequesterCanAccessLick,
+    assertRequesterIsLickOwner,
+    getUserByEmailOrErrorResponse,
+    assertUserIsNotRequester,
+    assertLickValid
+} from "./lickAssertions";
+import { getManager, Repository } from "typeorm";
 
 export class LickController {
 
     /**
-     * GET /api/licks/{id}
+     * POST /api/lick
+     *
+     * Upload new lick to be processed and have a tab generated.
+     */
+    public static async createLick(ctx: any): Promise<void> {
+
+        const audioFile = ctx.request.files.file;
+
+        if (!assertAudioFileValid(ctx, audioFile)) { return; }
+
+        const body = ctx.request.body;
+        const user = ctx.state.user;
+
+        const lick: Lick = new Lick();
+        lick.name = body.name;
+        lick.dateUploaded = new Date();
+        lick.tuning = body.tuning;
+        lick.capo = parseInt(body.capo);
+        lick.owner = user ? user : new User();
+
+        if (!await assertLickMetadataValid(ctx, lick)) { return; }
+        if (!await assertLickAudioSaved(ctx, lick, audioFile)) { return; }
+        if (!await assertLickAudioLengthValid(ctx, lick)) { return; }
+        if (!await assertLickTabbed(ctx, lick)) { return; }
+
+        if (user) {
+            if (!await LickController.trySaveLickAndSetResponse(ctx, lick)) {
+                await LickController.attemptToDeleteFile(lick.audioFileLocation);
+            }
+            // Override default OK status
+            ctx.status = StatusCodes.CREATED;
+        } else {
+            await LickController.attemptToDeleteFile(lick.audioFileLocation);
+            ctx.status = StatusCodes.CREATED;
+            ctx.body = lick;
+        }
+    }
+
+    /**
+     * GET /api/lick/{id}
      *
      * Get a lick by id.
      */
     public static async getLick(ctx: Context): Promise<void> {
 
-        // check if lick is public, else check if user authenticated before going further
-        
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        const lick: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        // attempt to find the lick by id and load its user
-        const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner']});
+        if (!assertLickExists(ctx, lick) || !assertRequesterCanAccessLick(ctx, lick)) { return; }
 
-        if (lick) {
-            // verify user has permissions
-            const isPermitted = LickController.canUserAccess(ctx.state.user, lick);
-            if (isPermitted) {
-                // return OK status code and loaded lick object
-                ctx.status = 200;
-
-                // could do some manipulation to lick.owner here so not everyone can see all attributes of owner
-                // abide by front end requirements and implement later
-                ctx.body = lick;
-            } else {
-                // return FORBIDDEN status code
-                ctx.status = 403;
-                ctx.body = { errors: {error: "Error: You do not have permission to access this lick."}}
-            }
-        } else {
-            // return a BAD REQUEST status code and error message
-            ctx.status = 400;
-            ctx.body = { errors: {error: "Error: The lick you are trying to retrieve doesn't exist."}}
-        }
+        // TODO: maybe hide attributes of lick.owner here, like email, not sure what so save for later
+        ctx.status = StatusCodes.OK;
+        ctx.body = lick;
     }
 
     /**
@@ -73,108 +87,286 @@ export class LickController {
      */
     public static async getLickAudio(ctx: Context): Promise<void> {
 
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        const lick: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
 
-        // attempt to find the lick by id and load its user
-        const lick: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner']});
+        if (!assertLickExists(ctx, lick) || !assertRequesterCanAccessLick(ctx, lick)) { return; }
 
-        if (lick) {
-            // verify user has permissions
-            const isPermitted = LickController.canUserAccess(ctx.state.user, lick);
-            if (isPermitted) {
-                // return OK status code and loaded audio file
-                ctx.status = 200;
-                const readFile = util.promisify(fs.readFile);
-                ctx.body = await readFile(lick.audioFileLocation);
-            } else {
-                // return FORBIDDEN status code
-                ctx.status = 403;
-                ctx.body = { errors: {error: "Error: You do not have permission to access the audio for this lick."}}
-            }
-        } else {
-            // return a BAD REQUEST status code and error message
-            ctx.status = 400;
-            ctx.body = { errors: {error: "Error: The audio for the lick you are trying to retrieve doesn't exist."}}
-        }
+        ctx.status = StatusCodes.OK;
+        const readFile = util.promisify(fs.readFile);
+        ctx.body = await readFile(lick.audioFileLocation);
     }
 
     /**
-     * POST /api/licks
+     * GET /api/lick-count
      *
-     * Upload new lick to be processed and have a tab generated.
+     * Get the total number of licks in the db.
      */
-    public static async createLick(ctx: any): Promise<void> {
+    public static async getLickCount(ctx: Context): Promise<void> {
 
-        // can't use 'this' for some reason in this context, work around by using 'LickController' instead
-
-        const audioFile = ctx.request.files.file;
-        
-        const err: Error = LickController.validateAudioFile(audioFile); 
-        if (err) {
-            ctx.status = 400;
-            ctx.body = { errors: {error: err.message}}
-            return
-        }
-
-        const body = ctx.request.body;
-
-        // add user specified attributes to lick to be validated
-        const lickToBeSaved: Lick = new Lick();
-        lickToBeSaved.name = ctx.request.body.name;
-        lickToBeSaved.description = body.description ? body.description : "";
-        lickToBeSaved.dateUploaded = new Date();
-        lickToBeSaved.tab = ""; // initally empty, tab not generated yet
-        lickToBeSaved.tuning = body.tuning;
-        lickToBeSaved.isPublic = body.isPublic == "true" ? true : false;
-        lickToBeSaved.owner = ctx.state.user;
-        lickToBeSaved.sharedWith = []; // TODO - list of shared with users will be sent from client upon lick creation
-        
-        const errors: ValidationError[] = await validate(lickToBeSaved);
-        
-        if (errors.length > 0) {
-            ctx.status = 400;
-            ctx.body = { errors };
-            return
-        } 
-        
-        try {
-            lickToBeSaved.audioFileLocation = await LickController.saveAudioFile(audioFile);
-        } catch (err) {
-            ctx.status = 500;
-            ctx.body = { errors: {error: err.message}}
-            return
-        }
-        
-        try {
-            lickToBeSaved.audioLength = await audioDuration.getAudioDurationInSeconds(lickToBeSaved.audioFileLocation)
-        } catch (err) {
-            await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
-            ctx.status = 500;
-            ctx.body = { errors: {error: "Error: Cant get length of audio file."}}
-            return
-        }
-
-        if (lickToBeSaved.audioLength > 60) { // lick is too long
-            await LickController.attemptToDeleteFile(lickToBeSaved.audioFileLocation);
-            ctx.status = 400;
-            ctx.body = { errors: {error: "Error: Audio file is longer than 60 seconds."}}
-            return
-        }
-
-        // finally, save the lick to the database
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-        const lick: Lick | undefined = await lickRepository.save(lickToBeSaved);
 
-        if (!lick) {
-            ctx.status = 500;
-            ctx.body = { errors: {error: "Error: Cant save lick to database."}}
-        } else {
-            ctx.status = 201;
-            ctx.body = lick;
+        try {
+            const { count } = await lickRepository
+                .createQueryBuilder("lick")
+                .select("COUNT(lick.id)", "count")
+                .getRawOne();
+
+            ctx.status = StatusCodes.OK;
+            ctx.body = { count };
+        } catch (error) {
+            console.error(error)
+            ctx.status = StatusCodes.BAD_REQUEST;
+            ctx.body = { errors: {error: "Error: Could not count number of licks in db."}}
         }
     }
 
-    private static async attemptToDeleteFile(filePath: string): Promise<void> {
+
+    /**
+     * PUT /api/lick/update-shared-with/{id}
+     *
+     * Share or unshare a lick with another user by their email.
+     */
+    public static async updateLickSharedWith(ctx: Context): Promise<void> {
+
+        const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+
+        if (!assertLickExists(ctx, lickToUpdate) || !assertRequesterIsLickOwner(ctx, lickToUpdate)) {
+            return;
+        }
+
+        const userToUpdate: User | undefined  = await getUserByEmailOrErrorResponse(ctx);
+        if (userToUpdate === undefined || !await assertUserIsNotRequester(ctx, userToUpdate)) { return; }
+
+        const body = ctx.request.body;
+
+        if (body.share === true) {
+            // TODO: could send back error response if below condition is true, meaning lick has already been shared with user
+            if (!lickToUpdate.sharedWith.some(user => user.id === userToUpdate.id)) {
+                lickToUpdate.sharedWith.push(userToUpdate)
+            }
+        } else if (body.share === false) {
+            lickToUpdate.sharedWith =
+                lickToUpdate.sharedWith.filter((user) => user.id !== userToUpdate.id);
+        }
+
+        await LickController.trySaveLickAndSetResponse(ctx, lickToUpdate)
+    }
+
+    /**
+     * PUT /api/lick/unfollow/{id}
+     *
+     * Removes the authenticated user from the list of users the lick is shared with
+     */
+    public static async unfollowLick(ctx: Context): Promise<void> {
+
+        const lickToUnfollow: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+
+        if (!assertLickExists(ctx, lickToUnfollow)) { return; }
+
+        // works if lick was never shared with auth user in the first place
+        const authUserId = ctx.state.user.id;
+        lickToUnfollow.sharedWith =
+            lickToUnfollow.sharedWith.filter((user) => user.id !== authUserId);
+
+        await LickController.trySaveLickAndSetResponse(ctx, lickToUnfollow)
+    }
+
+    /**
+     * PUT /api/lick/{id}
+     *
+     * Update a lick by id.
+     */
+    public static async updateLick(ctx: Context): Promise<void> {
+
+        const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+
+        if (!assertLickExists(ctx, lickToUpdate) || !assertRequesterIsLickOwner(ctx, lickToUpdate)) { return; }
+
+        const body = ctx.request.body;
+
+        // do manual checks here to allow same endpoint to update lick visibility and details
+        if (body.makePublic !== undefined) {
+            lickToUpdate.isPublic = body.makePublic;
+        }
+        // assert the name isnt empty
+        if (body.name) {
+            lickToUpdate.name = body.name;
+        }
+        if (body.desc !== undefined) {
+            lickToUpdate.description = body.desc;
+        }
+
+        if (!await assertLickValid(ctx, lickToUpdate)) { return; }
+
+        await LickController.trySaveLickAndSetResponse(ctx, lickToUpdate);
+    }
+
+    /**
+     * PUT /api/lick/update-tab/{id}
+     *
+     * Update a licks tab after a user has manually edited it.
+     */
+    public static async updateTab(ctx: Context): Promise<void> {
+
+        const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+
+        if (!assertLickExists(ctx, lickToUpdate) ||  !assertRequesterIsLickOwner(ctx, lickToUpdate)) { return; }
+
+        const body = ctx.request.body;
+        if (body.tab !== undefined) {
+            lickToUpdate.tab = body.tab;
+        }
+
+        await LickController.trySaveLickAndSetResponse(ctx, lickToUpdate);
+    }
+
+    /**
+     * PUT /api/licks/re-tab/{id}
+     *
+     * Re-Tab a lick given a new tuning and / or capo
+     */
+    public static async reTabLick(ctx: Context): Promise<void> {
+
+        const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+
+        if (!assertLickExists(ctx, lickToUpdate) ||  !assertRequesterIsLickOwner(ctx, lickToUpdate)) { return; }
+
+        const body = ctx.request.body;
+        if (lickToUpdate.tuning === body.tuning && lickToUpdate.capo === body.capo) {
+            // no work to do
+            ctx.status = StatusCodes.OK;
+            ctx.body = lickToUpdate;
+            return;
+        }
+
+        lickToUpdate.tuning = body.tuning;
+        lickToUpdate.capo = body.capo;
+
+        if (!await assertLickValid(ctx, lickToUpdate)) { return; }
+        if (!await assertLickTabbed(ctx, lickToUpdate)) { return; }
+
+        await LickController.trySaveLickAndSetResponse(ctx, lickToUpdate);
+    }
+
+    /**
+     * DELETE /api/lick/{id}
+     *
+     * Delete a lick by id.
+     */
+    public static async deleteLick(ctx: Context): Promise<void> {
+
+        const lickToRemove: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+
+        if (!assertLickExists(ctx, lickToRemove) ||  !assertRequesterIsLickOwner(ctx, lickToRemove)) { return; }
+
+        try {
+            await LickController.unlinkAsync(lickToRemove.audioFileLocation);
+        } catch (err) {
+            // ENOENT == file doesn't exist, let that case fail silently
+            if (err.code !== 'ENOENT') {
+                ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
+                ctx.body = { errors: {error: "Error: Cant unlink lick from file system."}}
+                return
+            }
+        }
+
+        await LickController.tryRemoveLickAndSetResponse(ctx, lickToRemove);
+    }
+
+    /**
+     * HELPERS
+     */
+    // TODO: this should really go in DAO layer, not here
+    public static async getLickFromDbById(lickId: number): Promise<Lick | undefined> {
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        return await lickRepository.findOne({ where: {id: (lickId)}, relations: ['owner', 'sharedWith']});
+    }
+
+    // TODO: this should really go in DAO layer, not here
+    public static async saveLickToDb(lick: Lick): Promise<Lick | undefined> {
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        return await lickRepository.save(lick);
+    }
+
+    // TODO: this should really go in DAO layer, not here
+    public static async deleteLickFromDb(lick: Lick): Promise<Lick | undefined> {
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        return await lickRepository.remove(lick);
+    }
+
+    public static async trySaveLickAndSetResponse(ctx: Context, lick: Lick): Promise<boolean> {
+        const updatedLick: Lick | undefined = await LickController.saveLickToDb(lick);
+
+        if (!updatedLick) {
+            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
+            ctx.body = { errors: {error: "Error: Could not update lick in db"}} // should change this to could not save
+            return false;
+        }
+
+        ctx.status = StatusCodes.OK;
+        ctx.body = updatedLick;
+        return true;
+    }
+
+    public static async tryRemoveLickAndSetResponse(ctx: Context, lick: Lick) {
+        const removedLick: Lick | undefined = await LickController.deleteLickFromDb(lick);
+        if (!removedLick) {
+            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
+            ctx.body = { errors: {error: "Error: Cant remove lick from database."}}
+            return;
+        }
+
+        ctx.status = StatusCodes.OK;
+        ctx.body = removedLick;
+    }
+
+    /**
+     * UTILS
+     */
+    // TODO: make all these methods protected and add lick assertions to same package
+    public static validateAudioFile(audioFile: any): Error | null {
+
+        if (!audioFile) return new Error("Error: No file sent.")
+        if (!audioFile.size) return new Error("Error: File is empty.")
+        if (audioFile.size > 25000000) return new Error("Error: File must be less than 25MB.")
+
+        // ffmpeg can convert most types of audio files, let it fail if it can't convert the audio file
+        if (!audioFile.type.startsWith("audio/"))  return new Error("Error: Mimetype is not supported.");
+
+        return null;
+    }
+
+    public static async saveAudioFile(audioFile: any): Promise<string> {
+
+        // save the audio to a file with a randomly generated uuid
+        const audioFileLocation: string = "uploads/" + uuidv4();
+
+        // convert all file types to .wav before saving
+        return new Promise((res, rej) => {
+            ffmpeg(audioFile.path)
+            .toFormat('wav')
+            .on('error', (err) => {
+                rej(err);
+            })
+            .on('end', () => {
+                res(audioFileLocation);
+            })
+            .save(audioFileLocation);
+        })
+    }
+
+    public static canUserAccess(user: User, lick: Lick): boolean {
+
+        // The owner and sharedWith relations MUST exist be loaded on the lick passed in
+        if (!lick.owner || !lick.sharedWith) {
+            throw new Error('The owner and sharedWith relations MUST be loaded on lick parameter')
+        }
+        return lick.isPublic ||
+                (user && (user.id == lick.owner.id)) ||
+                (lick.sharedWith.some(user => user.id === user.id));
+    }
+
+    public static async attemptToDeleteFile(filePath: string): Promise<void> {
         const deleteFile = util.promisify(fs.unlink);
         try {
             await deleteFile(filePath);
@@ -183,121 +375,9 @@ export class LickController {
         }
     }
 
-
-    /**
-     * PUT /api/licks/{id}
-     *
-     * Update a lick by id.
-     */
-    public static async updateLick(ctx: Context): Promise<void> {
-        // TODO: implement this along with a frontend for it.
-        return;
-    }
-
-    /**
-     * DELETE /api/licks/{id}
-     *
-     * Delete a lick by id.
-     */
-    public static async deleteLick(ctx: Context): Promise<void> {
-
-        // this should actually delete the lick from the file system
-
-        // get a lick repository to perform operations with licks
-        const lickRepository = getManager().getRepository(Lick);
-
-        // attempt to find the lick by id and load its user
-        const lickToRemove: Lick | undefined = await lickRepository.findOne({ where: {id: (+ctx.params.id || 0)}, relations: ['owner']});
-
-        if (!lickToRemove) {
-            // return a BAD REQUEST status code and error message
-            ctx.status = 400;
-            ctx.body = { errors: {error: "Error: The lick you are trying to delete doesn't exist."}}
-        } else if (ctx.state.user.id !== lickToRemove.owner.id) {
-            // check user's token id and owner id are the same
-            // if not, return a FORBIDDEN status code and error message
-            ctx.status = 403;
-            ctx.body = { errors: {error: "Error: A lick can only be deleted by its owner."}}
-        } else {
-            // first try to delete the file
-            const deleteFile = util.promisify(fs.unlink);
-            try {
-                await deleteFile(lickToRemove.audioFileLocation);
-            } catch (err) {
-                // if err isnt that there is no file to be deleted, then a real error occurred
-                if (err.code != 'ENOENT') {
-                    ctx.status = 500;
-                    ctx.body = { errors: {error: "Error: Cant unlink lick from file system."}}
-                    return
-                }
-            }
-
-            // the lick is there so can be removed
-            const removedLick: Lick | undefined = await lickRepository.remove(lickToRemove);
-            if (!removedLick) {
-                ctx.status = 500;
-            } else {
-                // return a NO CONTENT status code
-                ctx.status = 204;
-                ctx.body = removedLick;
-            }
-        }
-    }
-
-    /**
-     * HELPERS
-     */
-    // audioFile should be of some file type or multipart/formdata type
-    // would be cleaner just to have an AudioFile entity which links to lick and validate it that way
-    private static validateAudioFile(audioFile: any): Error | null {
-    
-        if (!audioFile) return new Error("Error: No file sent.")
-        if (!audioFile.size) return new Error("Error: File is empty.")
-        if (audioFile.size > 25000000) return new Error("Error: File must be less than 25MB.")
-        
-        // decide on supported types later
-        const supportedTypes: string[] = ["audio/mpeg", "audio/wav", "audio/mp4"]
-        if (!supportedTypes.includes(audioFile.type)) return new Error("Error: Mimetype is not supported.")
-        
-        return null;
-    }
-
-    private static async saveAudioFile(audioFile: any): Promise<string> {
-
-        // save the audio to a file with a randomly generated uuid
-        const audioFileLocation: string = getNewAudioFileUri();
-        
-        // create read and write streams to save file
-        const readStream = fs.createReadStream(audioFile.path);
-        const writeStream = fs.createWriteStream(audioFileLocation);
-        
-        // asynchronously read from sent file and write to local file
-        for await (const chunk of readStream) {
-            const err: Error = await writeStream.write(chunk);
-            if (err) {
-                // try to delete file created, if any was
-                try {
-                    await fs.unlink(audioFileLocation);
-                } catch (e) {
-                    // let this fail silently, already in the midst of an exception
-                }
-                throw err;
-            }
-        }
-
-        return audioFileLocation;
-    }
-
-    // TODO: test whether these comparisons work correctly & are a reasonably efficient way to do things
-    private static canUserAccess(user: User, lick: Lick): boolean {
-        // TODO: fix the shared with validation when implementing that functionality
-        // note: will have to change query to get sharedWith attribute of lick
-        // doesn't handle shared with
-        return lick.isPublic || (user && (user.id == lick.owner.id));
-        // return lick.isPublic || lick.owner.id == user.id || lick.sharedWith.indexOf(user)? !== -1;
-    }
-
-    private static canUserModify(user: User, lick: Lick): boolean {
-        return lick.owner == user;
+    // Made this a private class function so it could be easily stubbed when testing
+    private static async unlinkAsync(filePath: string) : Promise<NodeJS.ErrnoException> {
+        const deleteFile = util.promisify(fs.unlink);
+        return await deleteFile(filePath);
     }
 }

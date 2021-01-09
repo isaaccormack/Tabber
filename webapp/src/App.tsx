@@ -1,31 +1,54 @@
 import React from 'react';
 import Container from "react-bootstrap/Container";
-import {Provider} from "react-redux";
-import {Route, Switch} from "react-router";
-
+import { Provider } from "react-redux";
+import {Redirect, Route, Switch} from "react-router";
 
 import './App.css';
 import rootStore from "./store";
-import Navigation from "./components/common/navigation/component/Navigation";
-import OAuth2Page from "./components/oauth/component/OAuth2Page";
-import CreatePage from "./components/create/component/CreatePage";
-import LoginPage from "./components/login/component/LoginPage";
-import UploadPage from "./components/create/component/UploadPage";
+import PrivateRoute from "./PrivateRoute";
+import Header from "./components/common/header/components/Header";
+import OAuth2Page from "./components/oauth/components/OAuth2Page";
+import UploadPage from "./components/create-pages/components/upload/UploadPage";
+import NotFoundPage from "./components/error-pages/components/NotFoundPage";
+import LibraryPage from "./components/library-pages/components/LibraryPage";
+import SharedPage from "./components/library-pages/components/SharedPage";
+import EditPage from "./components/lick-pages/components/edit/EditPage";
+import ViewPage from "./components/lick-pages/components/view/ViewPage";
+import RecordPage from './components/create-pages/components/record/RecordPage';
+import LandingPage from "./components/home-pages/components/landing/LandingPage";
+import Footer from "./components/common/footer/components/Footer";
+import ForbiddenPage from "./components/error-pages/components/ForbiddenPage";
+import UploadingPage from "./components/create-pages/components/upload/UploadingPage";
+import NoUserViewPage from "./components/lick-pages/components/view/NoUserViewPage";
 
 function App() {
-
     return (
       <Provider store={rootStore}>
-        <Container fluid className="app">
-          <Navigation />
-          <Switch>
-            <Route exact path="/" component={CreatePage} />
-            <Route exact path="/create/upload" component={UploadPage} />
-            <Route exact path="/create" component={CreatePage} />
-            <Route exact path="/oauth" component={OAuth2Page} />
-            <Route exact path="/login" component={LoginPage} />
-          </Switch>
-        </Container>
+        <div className="app-wrapper">
+            <Header />
+            <div className="main">
+                <Container fluid className="app">
+                    <Switch>
+                        <Route exact path="/upload" component={UploadPage} />
+                        <Route exact path="/uploading" component={UploadingPage} />
+                        <Route exact path="/record" component={RecordPage} />
+                        <Route exact path="/view" component={NoUserViewPage} />
+                        <PrivateRoute exact path="/library" component={LibraryPage} />
+                        <PrivateRoute exact path="/edit/:id" component={EditPage} />
+                        <Route exact path="/view/:id" component={ViewPage} />
+                        <PrivateRoute exact path="/shared" component={SharedPage} />
+                        <Route exact path="/oauth" component={OAuth2Page} />
+                        <Route exact path="/" component={LandingPage} />
+                        <Route exact path="/403" component={ForbiddenPage} />
+                        <Route exact path="/404" component={NotFoundPage} />
+                        <Route path="*">
+                            <Redirect to="/404" />
+                        </Route>
+                    </Switch>
+                </Container>
+            </div>
+            <Footer />
+        </div>
       </Provider>
     );
 }

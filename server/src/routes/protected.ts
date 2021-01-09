@@ -9,17 +9,19 @@ const protectedRouter: Router = new Router();
 protectedRouter.prefix("/api")
 protectedRouter.use(isAuthenticated);
 
-// User routes
+protectedRouter.get("/user", UserController.getAuthUser);
+protectedRouter.get("/user/licks", UserController.getAuthUserLicks);
+protectedRouter.get("/user/licks-shared-with-me", UserController.getLicksSharedWithAuthUser);
+protectedRouter.delete("/user", UserController.deleteAuthUser);
 protectedRouter.get("/users", UserController.getUsers);
 protectedRouter.get("/users/:id", UserController.getUser);
-protectedRouter.post("/users", UserController.createUser);
 protectedRouter.put("/users/:id", UserController.updateUser);
-protectedRouter.delete("/users/:id", UserController.deleteUser);
-protectedRouter.delete("/testusers/:id", UserController.deleteTestUser);
 
-// Lick routes
-protectedRouter.post("/licks", LickController.createLick);
-protectedRouter.put("/licks/:id", LickController.updateLick);
-protectedRouter.delete("/licks/:id", LickController.deleteLick);
+protectedRouter.put("/lick/update-shared-with/:id", LickController.updateLickSharedWith);
+protectedRouter.put("/lick/unfollow/:id", LickController.unfollowLick);
+protectedRouter.put("/lick/:id", LickController.updateLick);
+protectedRouter.put("/lick/re-tab/:id", LickController.reTabLick);
+protectedRouter.put("/lick/update-tab/:id", LickController.updateTab);
+protectedRouter.delete("/lick/:id", LickController.deleteLick);
 
 export { protectedRouter };

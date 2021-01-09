@@ -10,8 +10,6 @@ describe('Integration: Home page', () => {
     let db: Connection
 
     beforeAll((done) => {
-
-        // can wire in testdb if so inclined
         dbModule.initDb((err, conn) => {
             if (err) throw err
 
@@ -19,20 +17,12 @@ describe('Integration: Home page', () => {
             app = appModule.startApp()
             done()
         })
-
     });
 
     afterAll((done) => {
         db.close().then(done())
     });
     
-    it('should say "Hello World!"', async () => {
-        const response: request.Response = await request(app.callback()).get('/api/helloworld')
-
-        expect(response.status).toBe(200);
-        expect(response.text).toBe('Hello World!');
-    });
-
     it('should say render an html page"', async () => {
         const response: request.Response = await request(app.callback()).get('/')
 

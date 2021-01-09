@@ -1,0 +1,28 @@
+/* from: https://stackoverflow.com/a/23985078 */
+
+@keyframes blinkingAnimation {
+    0%   { opacity:1; }
+    50%  { opacity:0; }
+    100% { opacity:1; }
+}
+@-o-keyframes blinkingAnimation{
+    0%   { opacity:1; }
+    50%  { opacity:0; }
+    100% { opacity:1; }
+}
+@-moz-keyframes blinkingAnimation{
+    0%   { opacity:1; }
+    50%  { opacity:0; }
+    100% { opacity:1; }
+}
+@-webkit-keyframes blinkingAnimation{
+    0%   { opacity:1; }
+    50%  { opacity:0; }
+    100% { opacity:1; }
+}
+#recording-icon {
+    -webkit-animation: blinkingAnimation 2.5s infinite;
+    -moz-animation: blinkingAnimation 2.5s infinite;
+    -o-animation: blinkingAnimation 2.5s infinite;
+    animation: blinkingAnimation 2.5s infinite;
+}
