@@ -9,7 +9,7 @@ var jwtDecode = require('jwt-decode');
 
 var jwtDecode = require('jwt-decode');
 
-import * as keys from "../../keys/keys.json";
+import * as keys from "./oauth_tokens.json";
 const identityToken = keys.YOUR_TEST_IDENTITY_TOKEN;
 
 if (!identityToken) {
@@ -19,9 +19,9 @@ if (!identityToken) {
 
 /**
  * User tests.
- * 
+ *
  * Testing of basic functionality in the user endpoint.
- * 
+ *
  * LAST MODIFIED: June 21 2020
  */
 describe('Integration: Users endpoint', () => {
@@ -44,20 +44,20 @@ describe('Integration: Users endpoint', () => {
     afterAll((done) => {
         db.close().then(done())
     });
-    
+
     it('should GET currently authenticated user', async () => {
-        // since the user is initialzed with the data in the jwt, 
+        // since the user is initialzed with the data in the jwt,
         // the user returned is guaranteed to have at least as much
         // data as that in the jwt token
         const response: request.Response = await request(app.callback())
         .get('/api/user')
         .set("Cookie", "ti="+identityToken);
-        
+
         expect(response.status).toBe(200);
         expect(response.body.name).toEqual(token.name)
         expect(response.body.email).toEqual(token.email)
         expect(response.body.id).toBeGreaterThan(0)
-        
+
         id = response.body.id;
     });
     it('should GET all users', async () => {
@@ -73,7 +73,7 @@ describe('Integration: Users endpoint', () => {
         const response: request.Response = await request(app.callback())
             .get('/api/users/' + id)
             .set("Cookie", "ti="+identityToken);
-        
+
         expect(response.status).toBe(200);
         expect(response.body.name).toEqual(token.name)
         expect(response.body.email).toEqual(token.email)
@@ -83,14 +83,14 @@ describe('Integration: Users endpoint', () => {
         const response: request.Response = await request(app.callback())
             .delete('/api/user')
             .set("Cookie", "ti="+identityToken);
-        
+
         expect(response.status).toBe(204);
 
         // expect there to no longer exist a user with the deleted id
         const res: request.Response = await request(app.callback())
             .get('/api/users/' + id)
             .set("Cookie", "ti="+identityToken);
-        
+
         expect(res.status).toBe(400);
         expect(res.body.errors.error).toContain("doesn't exist in the db");
     });

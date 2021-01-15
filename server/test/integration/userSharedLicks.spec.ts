@@ -5,7 +5,7 @@ import Koa from 'koa'
 import * as appModule from "../../src/index";
 import * as dbModule from "../../src/database/dbclient";
 
-import * as keys from "../../keys/keys.json";
+import * as keys from "./oauth_tokens.json";
 const identityToken = keys.YOUR_TEST_IDENTITY_TOKEN;
 
 if (!identityToken) {
@@ -21,23 +21,23 @@ const testDataDir = __dirname + '/../../../test/data/';
 
 /**
  * Lick sharing tests.
- * 
+ *
  * These tests focus on only the lick sharing aspects of functionality implemented in the
  * user and lick controllers.
- * 
+ *
  * NOTES:
  * - These tests are directly dependent on each other. It is sometimes noted when the dependency
  *   is obscure, but mostly this is implied (ie. getting a shared lick must come after a lick was
  *   shared).
- * 
+ *
  * PRECONDITIONS:
  * - The user.spec.ts and lick.spec.ts integration tests must all pass.
  *   Specifically, the ability to create, get, and delete licks is needed in setup for these
  *   tests. These tests also test the sharing functionality of these endpoints.
- * 
- * - The database must not contain any records on any of the data used in this test before the 
+ *
+ * - The database must not contain any records on any of the data used in this test before the
  *   test is run. To make things easy, the database should be empty intially.
- * 
+ *
  * LAST MODIFIED: Aug 24 2020
  */
 describe('Integration: Users shared licks', () => {
@@ -118,7 +118,7 @@ describe('Integration: Users shared licks', () => {
             done()
         })
     });
-    
+
     /**
      * Test shareLick() and getLicksSharedWithAuthUser()
      */
@@ -138,7 +138,7 @@ describe('Integration: Users shared licks', () => {
         const userRes: request.Response = await request(app.callback())
         .get('/api/user/licks-shared-with-me')
         .set("Cookie", "ti="+testUserToken);
-    
+
         // expect the lick to be shared with the test user
         expect(userRes.status).toBe(200);
         expect(userRes.body.length).toBe(1);
@@ -166,7 +166,7 @@ describe('Integration: Users shared licks', () => {
         const userRes: request.Response = await request(app.callback())
         .get('/api/user/licks-shared-with-me')
         .set("Cookie", "ti="+testUserToken);
-    
+
         // expect the lick to be shared with the test user
         expect(userRes.status).toBe(200);
         expect(userRes.body.length).toBe(1);
@@ -250,7 +250,7 @@ describe('Integration: Users shared licks', () => {
         .get('/api/user/licks-shared-with-me')
         .set("Cookie", "ti="+testUserToken);
 
-        // expect the lick with lickIDs[0] to be unshared with user 
+        // expect the lick with lickIDs[0] to be unshared with user
         expect(userRes.status).toBe(200);
         expect(userRes.body.length).toBe(1);
         expect(userRes.body).toEqual(
@@ -284,7 +284,7 @@ describe('Integration: Users shared licks', () => {
             expect.objectContaining({name: licks[1].name})
             ])
         );
-    });   
+    });
     /**
     * Test getLick() -> From user lick is shared with
     */
@@ -292,7 +292,7 @@ describe('Integration: Users shared licks', () => {
        const response: request.Response = await request(app.callback())
        .get('/api/licks/' + lickIDs[0])
        .set("Cookie", "ti="+testUserToken);
-       
+
        expect(response.status).toBe(403);
        expect(response.body.errors.error).toContain("You do not have permission");
     });

@@ -2,14 +2,21 @@ import {Context} from "koa";
 import { LoginTicket } from "google-auth-library";
 import * as googleApis from "googleapis";
 
-import * as keys from "../../keys/keys.json";
 import {User} from "../entity/user";
 import { UserController } from "./user";
 
+const OAUTH_CLIENT_ID = process.env.OAUTH_CLIENT_ID;
+const OAUTH_CLIENT_SECRET = process.env.OAUTH_CLIENT_SECRET;
+const OAUTH_REDIRECT_URL = process.env.OAUTH_REDIRECT_URL;
+
+if (!OAUTH_CLIENT_ID) throw new Error('process.env.OAUTH_CLIENT_ID must be defined')
+if (!OAUTH_CLIENT_SECRET) throw new Error('process.env.OAUTH_CLIENT_SECRET must be defined')
+if (!OAUTH_REDIRECT_URL) throw new Error('process.env.OAUTH_REDIRECT_URL must be defined')
+
 const oauth2Client = new googleApis.google.auth.OAuth2(
-    keys.YOUR_CLIENT_ID,
-    keys.YOUR_CLIENT_SECRET,
-    keys.YOUR_REDIRECT_URL
+    OAUTH_CLIENT_ID,
+    OAUTH_CLIENT_SECRET,
+    OAUTH_REDIRECT_URL
 );
 
 const scopes = [
@@ -55,7 +62,7 @@ export default class OAuth2Controller {
         try {
             return await oauth2Client.verifyIdToken({
                 idToken: idToken,
-                audience: keys.YOUR_CLIENT_ID
+                audience: OAUTH_CLIENT_ID
             });
         } catch {
             return null;
