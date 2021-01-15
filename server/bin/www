@@ -21,10 +21,10 @@ dbModule.initDb(err => {
     console.log("Successfully connected to database. Starting app.");
 
     /* Create the Express server object. */
-    var app = appModule.startApp()
+    const app = appModule.startApp()
 
     /* Get port from environment and listen. */
-    var port = +(process.env.PORT || "3000");
+    const port = 3000;
     app.listen(port);
     console.log("Listening on port " + port);
 });
