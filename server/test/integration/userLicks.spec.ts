@@ -1,3 +1,5 @@
+require('dotenv').config({ path: './.env.test' });
+
 import request from 'supertest'
 import { Connection } from 'typeorm';
 import Koa from 'koa'
@@ -5,12 +7,8 @@ import Koa from 'koa'
 import * as appModule from "../../src/index";
 import * as dbModule from "../../src/database/dbclient";
 
-import * as keys from "./oauth_tokens.json";
-const identityToken = keys.YOUR_TEST_IDENTITY_TOKEN;
-
-if (!identityToken) {
-    console.log("MUST INSERT IDENTITY TOKEN FOR INTEGRATION TESTING");
-}
+const IDENTITY_TOKEN = process.env.YOUR_TEST_IDENTITY_TOKEN;
+if (!IDENTITY_TOKEN) throw new Error("MUST INSERT IDENTITY TOKEN FOR INTEGRATION TESTING");
 
 const testDataDir = __dirname + '/../../../test/data/';
 
@@ -55,14 +53,14 @@ describe('Integration: Users licks', () => {
             .field('skipTabbing', "true")
             .field('isPublic', lick.isPublic)
             .attach('file', lick.audioFilePath)
-            .set("Cookie", "ti="+identityToken)
+            .set("Cookie", "ti="+IDENTITY_TOKEN)
             lickIDs.push(response.body.id)
     }
 
     async function deleteLick(lickID): Promise<void> {
         await request(app.callback())
         .delete('/api/licks/' + lickID)
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
     }
 
     beforeAll((done) => {
@@ -94,7 +92,7 @@ describe('Integration: Users licks', () => {
     it('should GET auth users licks', async () => {
         const response: request.Response = await request(app.callback())
             .get('/api/user/licks')
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(response.status).toBe(200);
         expect(response.body.length).toBeGreaterThanOrEqual(2);

@@ -1,3 +1,5 @@
+require('dotenv').config({ path: './.env.test' });
+
 import request from 'supertest'
 import { Connection } from 'typeorm';
 import Koa from 'koa'
@@ -5,17 +7,11 @@ import Koa from 'koa'
 import * as appModule from "../../src/index";
 import * as dbModule from "../../src/database/dbclient";
 
-import * as keys from "./oauth_tokens.json";
-const identityToken = keys.YOUR_TEST_IDENTITY_TOKEN;
+const IDENTITY_TOKEN = process.env.YOUR_TEST_IDENTITY_TOKEN;
+const TEST_USER_TOKEN = process.env.TEST_USER_IDENTITY_TOKEN;
 
-if (!identityToken) {
-    console.log("MUST INSERT IDENTITY TOKEN FOR INTEGRATION TESTING");
-}
-
-const testUserToken = keys.TEST_USER_IDENTITY_TOKEN;
-if (!testUserToken) {
-    console.log("MUST INSERT TEST USER TOKEN FOR INTEGRATION TESTING");
-}
+if (!IDENTITY_TOKEN) throw new Error("MUST INSERT IDENTITY TOKEN FOR INTEGRATION TESTING");
+if (!TEST_USER_TOKEN) throw new Error("MUST INSERT TEST USER TOKEN FOR INTEGRATION TESTING");
 
 const testDataDir = __dirname + '/../../../test/data/';
 
@@ -74,20 +70,20 @@ describe('Integration: Users shared licks', () => {
             .field('skipTabbing', "true")
             .field('isPublic', lick.isPublic)
             .attach('file', lick.audioFilePath)
-            .set("Cookie", "ti="+identityToken)
+            .set("Cookie", "ti="+IDENTITY_TOKEN)
             lickIDs.push(response.body.id)
     }
 
     async function deleteLick(lickID): Promise<void> {
         await request(app.callback())
         .delete('/api/licks/' + lickID)
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
     }
 
     async function getTestUserID(): Promise<void> {
         const response: request.Response = await request(app.callback())
         .get('/api/user')
-        .set("Cookie", "ti="+testUserToken);
+        .set("Cookie", "ti="+TEST_USER_TOKEN);
         testUserID = response.body.id;
     }
 
@@ -127,7 +123,7 @@ describe('Integration: Users shared licks', () => {
             .put('/api/lick/share/' + lickIDs[0])
             .type('form')
             .field('userEmail', testUserEmail)
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         // expect the newly created lick to only be shared with test user
         expect(shareRes.status).toBe(200);
@@ -137,7 +133,7 @@ describe('Integration: Users shared licks', () => {
 
         const userRes: request.Response = await request(app.callback())
         .get('/api/user/licks-shared-with-me')
-        .set("Cookie", "ti="+testUserToken);
+        .set("Cookie", "ti="+TEST_USER_TOKEN);
 
         // expect the lick to be shared with the test user
         expect(userRes.status).toBe(200);
@@ -155,7 +151,7 @@ describe('Integration: Users shared licks', () => {
             .put('/api/lick/share/' + lickIDs[0])
             .type('form')
             .field('userEmail', testUserEmail)
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         // expect the shared with state of the lick to be the same as before
         expect(shareRes.status).toBe(200);
@@ -165,7 +161,7 @@ describe('Integration: Users shared licks', () => {
 
         const userRes: request.Response = await request(app.callback())
         .get('/api/user/licks-shared-with-me')
-        .set("Cookie", "ti="+testUserToken);
+        .set("Cookie", "ti="+TEST_USER_TOKEN);
 
         // expect the lick to be shared with the test user
         expect(userRes.status).toBe(200);
@@ -182,7 +178,7 @@ describe('Integration: Users shared licks', () => {
         .put('/api/lick/share/' + lickIDs[1])
         .type('form')
         .field('userEmail', testUserEmail)
-        .set("Cookie", "ti="+identityToken);
+        .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         // expect the newly created lick to only be shared with test user
         expect(shareRes.status).toBe(200);
@@ -192,7 +188,7 @@ describe('Integration: Users shared licks', () => {
 
         const userRes: request.Response = await request(app.callback())
         .get('/api/user/licks-shared-with-me')
-        .set("Cookie", "ti="+testUserToken);
+        .set("Cookie", "ti="+TEST_USER_TOKEN);
 
         // expect the lick to be shared with the test user
         expect(userRes.status).toBe(200);
@@ -212,7 +208,7 @@ describe('Integration: Users shared licks', () => {
     it('should be able to GET lick shared with user', async () => {
         const response: request.Response = await request(app.callback())
             .get('/api/licks/' + lickIDs[0])
-            .set("Cookie", "ti="+testUserToken);
+            .set("Cookie", "ti="+TEST_USER_TOKEN);
 
             expect(response.status).toBe(200);
             expect(response.body.id).toBe(lickIDs[0]);
@@ -224,7 +220,7 @@ describe('Integration: Users shared licks', () => {
     it('should be able to GET lick audio shared with user', async () => {
         const response: request.Response = await request(app.callback())
             .get('/api/licks/audio/' + lickIDs[0])
-            .set("Cookie", "ti="+testUserToken);
+            .set("Cookie", "ti="+TEST_USER_TOKEN);
 
             expect(response.status).toBe(200);
             // expect we get a file buffer back and its length is non zero
@@ -239,7 +235,7 @@ describe('Integration: Users shared licks', () => {
         .put('/api/lick/unshare/' + lickIDs[0])
         .type('form')
         .field('userID', testUserID)
-        .set("Cookie", "ti="+identityToken);
+        .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         // expect the lick to not be shared with anyone
         expect(shareRes.status).toBe(200);
@@ -248,7 +244,7 @@ describe('Integration: Users shared licks', () => {
 
         const userRes: request.Response = await request(app.callback())
         .get('/api/user/licks-shared-with-me')
-        .set("Cookie", "ti="+testUserToken);
+        .set("Cookie", "ti="+TEST_USER_TOKEN);
 
         // expect the lick with lickIDs[0] to be unshared with user
         expect(userRes.status).toBe(200);
@@ -265,7 +261,7 @@ describe('Integration: Users shared licks', () => {
         .put('/api/lick/unshare/' + lickIDs[0])
         .type('form')
         .field('userID', testUserID)
-        .set("Cookie", "ti="+identityToken);
+        .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         // expect the lick to still not be shared with anyone
         expect(shareRes.status).toBe(200);
@@ -273,7 +269,7 @@ describe('Integration: Users shared licks', () => {
 
         const userRes: request.Response = await request(app.callback())
         .get('/api/user/licks-shared-with-me')
-        .set("Cookie", "ti="+testUserToken);
+        .set("Cookie", "ti="+TEST_USER_TOKEN);
 
         // expect the licks shared with the test user to remain the same
         expect(userRes.status).toBe(200);
@@ -291,7 +287,7 @@ describe('Integration: Users shared licks', () => {
    it('should NOT be able to GET private lick NOTs shared with user', async () => {
        const response: request.Response = await request(app.callback())
        .get('/api/licks/' + lickIDs[0])
-       .set("Cookie", "ti="+testUserToken);
+       .set("Cookie", "ti="+TEST_USER_TOKEN);
 
        expect(response.status).toBe(403);
        expect(response.body.errors.error).toContain("You do not have permission");
@@ -302,7 +298,7 @@ describe('Integration: Users shared licks', () => {
     it('should NOT be able to GET private lick audio NOT shared with user', async () => {
     const response: request.Response = await request(app.callback())
         .get('/api/licks/audio/' + lickIDs[0])
-        .set("Cookie", "ti="+testUserToken);
+        .set("Cookie", "ti="+TEST_USER_TOKEN);
 
         expect(response.status).toBe(403);
         expect(response.body.errors.error).toContain("You do not have permission");
@@ -315,14 +311,14 @@ describe('Integration: Users shared licks', () => {
         .put('/api/lick/unfollow/' + lickIDs[1])
         .type('form')
         .field('userID', testUserID)
-        .set("Cookie", "ti="+testUserToken);
+        .set("Cookie", "ti="+TEST_USER_TOKEN);
 
         expect(shareRes.status).toBe(204);
 
         // GET lick to see that it has been unfollowed by test user
         const lickRes: request.Response = await request(app.callback())
         .get('/api/licks/' + lickIDs[1])
-        .set("Cookie", "ti="+identityToken);
+        .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(lickRes.status).toBe(200);
         expect(lickRes.body.name).toBe('lick2');
@@ -331,7 +327,7 @@ describe('Integration: Users shared licks', () => {
         // GET user to see they no longer have the lick shared with them
         const userRes: request.Response = await request(app.callback())
         .get('/api/user/licks-shared-with-me')
-        .set("Cookie", "ti="+testUserToken);
+        .set("Cookie", "ti="+TEST_USER_TOKEN);
 
         // expect the test user to have no licks shared with them
         expect(userRes.status).toBe(200);
@@ -345,14 +341,14 @@ describe('Integration: Users shared licks', () => {
         .put('/api/lick/unfollow/' + lickIDs[1])
         .type('form')
         .field('userID', testUserID)
-        .set("Cookie", "ti="+testUserToken);
+        .set("Cookie", "ti="+TEST_USER_TOKEN);
 
         expect(shareRes.status).toBe(204);
 
         // GET lick to see that it has been unfollowed by test user
         const lickRes: request.Response = await request(app.callback())
         .get('/api/licks/' + lickIDs[1])
-        .set("Cookie", "ti="+identityToken);
+        .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(lickRes.status).toBe(200);
         expect(lickRes.body.name).toBe('lick2');
@@ -361,7 +357,7 @@ describe('Integration: Users shared licks', () => {
         // GET user to see they no longer have the lick shared with them
         const userRes: request.Response = await request(app.callback())
         .get('/api/user/licks-shared-with-me')
-        .set("Cookie", "ti="+testUserToken);
+        .set("Cookie", "ti="+TEST_USER_TOKEN);
 
         // expect the test user to have no licks shared with them
         expect(userRes.status).toBe(200);

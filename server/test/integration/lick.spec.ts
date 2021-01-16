@@ -1,22 +1,19 @@
+require('dotenv').config({ path: './.env.test' });
+
 import jwtDecode from 'jwt-decode';
 import Koa from 'koa'
 import request from 'supertest'
 import { Connection } from 'typeorm';
 
-import * as keys from "./oauth_tokens.json";
 import * as appModule from "../../src/index";
 import * as dbModule from "../../src/database/dbclient";
 const fs = require('fs');
 
-const identityToken = keys.YOUR_TEST_IDENTITY_TOKEN;
-if (!identityToken) {
-    console.log("MUST INSERT IDENTITY TOKEN FOR INTEGRATION TESTING");
-}
+const IDENTITY_TOKEN = process.env.YOUR_TEST_IDENTITY_TOKEN;
+const TEST_USER_TOKEN = process.env.TEST_USER_IDENTITY_TOKEN;
 
-const testUserToken = keys.TEST_USER_IDENTITY_TOKEN;
-if (!testUserToken) {
-    console.log("MUST INSERT TEST USER TOKEN FOR INTEGRATION TESTING");
-}
+if (!IDENTITY_TOKEN) throw new Error("MUST INSERT IDENTITY TOKEN FOR INTEGRATION TESTING");
+if (!TEST_USER_TOKEN) throw new Error("MUST INSERT TEST USER TOKEN FOR INTEGRATION TESTING");
 
 const testDataDir = __dirname + '/../../../test/data/';
 
@@ -57,7 +54,7 @@ describe('Integration: Licks endpoint', () => {
      */
     it('should be able to POST new lick with valid data and mp3 file', async () => {
         const audioFilePath = testDataDir + '700KB_mp3_file_27s.mp3';
-        const tokenParams = jwtDecode(identityToken);
+        const tokenParams = jwtDecode(IDENTITY_TOKEN);
 
         const response: request.Response = await request(app.callback())
             .post('/api/licks')
@@ -68,7 +65,7 @@ describe('Integration: Licks endpoint', () => {
             .field('skipTabbing', "true")
             .field('isPublic', lickBody.isPublic)
             .attach('file', audioFilePath)
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
 
             expect(response.status).toBe(201);
             expect(response.body.id).toBeGreaterThan(0);
@@ -96,7 +93,7 @@ describe('Integration: Licks endpoint', () => {
             .field('capo', lickBody.capo)
             .field('skipTabbing', "true")
             .field('isPublic', lickBody.isPublic)
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(response.status).toBe(400);
         expect(response.body.errors.error).toContain("No file sent");
@@ -113,7 +110,7 @@ describe('Integration: Licks endpoint', () => {
             .field('skipTabbing', "true")
             .field('isPublic', lickBody.isPublic)
             .attach('file', longAudioFilePath)
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(response.status).toBe(400);
         expect(response.body.errors.error).toContain("Audio file is longer than 60 seconds");
@@ -130,7 +127,7 @@ describe('Integration: Licks endpoint', () => {
             .field('skipTabbing', "true")
             .field('isPublic', lickBody.isPublic)
             .attach('file', textFilePath)
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(response.status).toBe(400);
         expect(response.body.errors.error).toContain("Mimetype is not supported");
@@ -154,11 +151,11 @@ describe('Integration: Licks endpoint', () => {
      * Test getLick()
      */
     it('should be able to GET private lick by id as owner', async () => {
-        const tokenParams = jwtDecode(identityToken);
+        const tokenParams = jwtDecode(IDENTITY_TOKEN);
 
         const response: request.Response = await request(app.callback())
             .get('/api/licks/' + privateID)
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
 
             expect(response.status).toBe(200);
             expect(response.body.id).toBeGreaterThan(0);
@@ -175,7 +172,7 @@ describe('Integration: Licks endpoint', () => {
     it('should NOT be able to GET lick which doesnt exist', async () => {
         const response: request.Response = await request(app.callback())
         .get('/api/licks/' + 0) // no lick with id = 0
-        .set("Cookie", "ti="+identityToken);
+        .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(response.status).toBe(400);
         expect(response.body.errors.error).toContain("doesn't exist");
@@ -207,7 +204,7 @@ describe('Integration: Licks endpoint', () => {
 
     //     const response: request.Response = await request(app.callback())
     //         .get('/api/licks/audio/' + privateID)
-    //         .set("Cookie", "ti="+identityToken);
+    //         .set("Cookie", "ti="+IDENTITY_TOKEN);
 
     //         expect(response.status).toBe(200);
     //         // compare contents of buffer
@@ -216,7 +213,7 @@ describe('Integration: Licks endpoint', () => {
     it('should NOT be able to GET lick audio which doesnt exist', async () => {
         const response: request.Response = await request(app.callback())
         .get('/api/licks/audio/' + 0) // no lick with id = 0
-        .set("Cookie", "ti="+identityToken);
+        .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(response.status).toBe(400);
         expect(response.body.errors.error).toContain("doesn't exist");
@@ -234,7 +231,7 @@ describe('Integration: Licks endpoint', () => {
     it('should NOT be able to DELETE lick which doesnt exist', async () => {
         const response: request.Response = await request(app.callback())
             .delete('/api/licks/' + 0)
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(response.status).toBe(400);
         expect(response.body.errors.error).toContain("doesn't exist");
@@ -242,7 +239,7 @@ describe('Integration: Licks endpoint', () => {
     it('should be able to DELETE private lick by id as owner', async () => {
         const deleteResponse: request.Response = await request(app.callback())
         .delete('/api/licks/' + privateID)
-        .set("Cookie", "ti="+identityToken);
+        .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(deleteResponse.status).toBe(200);
         expect(deleteResponse.body.name).toBe(lickBody.name);
@@ -253,7 +250,7 @@ describe('Integration: Licks endpoint', () => {
         // ensure that lick with id doesn't exist anymore
         const getResponse: request.Response = await request(app.callback())
             .delete('/api/licks/' + privateID)
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(getResponse.status).toBe(400);
         expect(getResponse.body.errors.error).toContain("doesn't exist");
@@ -274,7 +271,7 @@ describe('Integration: Licks endpoint', () => {
     it('should be able to POST new public lick with valid data and mp3 file', async () => {
         const audioFilePath = testDataDir + '700KB_mp3_file_27s.mp3';
 
-        const tokenParams = jwtDecode(identityToken);
+        const tokenParams = jwtDecode(IDENTITY_TOKEN);
 
         // create lick with the same attributes as lickBody except isPublic = "true"
         const response: request.Response = await request(app.callback())
@@ -286,7 +283,7 @@ describe('Integration: Licks endpoint', () => {
             .field('skipTabbing', "true")
             .field('isPublic', "true")
             .attach('file', audioFilePath)
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
 
             expect(response.status).toBe(201);
             expect(response.body.id).toBeGreaterThan(0);
@@ -308,7 +305,7 @@ describe('Integration: Licks endpoint', () => {
      * Test getLick()
      */
     it('should be able to GET public lick by id without being logged in', async () => {
-        const tokenParams = jwtDecode(identityToken);
+        const tokenParams = jwtDecode(IDENTITY_TOKEN);
 
         const response: request.Response = await request(app.callback())
             .get('/api/licks/' + publicID)
@@ -349,7 +346,7 @@ describe('Integration: Licks endpoint', () => {
     it('should NOT be able to DELETE public lick if not owner', async () => {
         const deleteResponse: request.Response = await request(app.callback())
         .delete('/api/licks/' + publicID)
-        .set("Cookie", "ti="+testUserToken);
+        .set("Cookie", "ti="+TEST_USER_TOKEN);
 
         expect(deleteResponse.status).toBe(403);
         expect(deleteResponse.body.errors.error).toContain("only be deleted by its owner");
@@ -358,7 +355,7 @@ describe('Integration: Licks endpoint', () => {
     it('should be able to DELETE public lick by id as owner', async () => {
         const deleteResponse: request.Response = await request(app.callback())
         .delete('/api/licks/' + publicID)
-        .set("Cookie", "ti="+identityToken);
+        .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(deleteResponse.status).toBe(200);
         expect(deleteResponse.body.name).toBe(lickBody.name);
@@ -369,7 +366,7 @@ describe('Integration: Licks endpoint', () => {
         // ensure that lick with id doesn't exist anymore
         const getResponse: request.Response = await request(app.callback())
             .delete('/api/licks/' + privateID)
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(getResponse.status).toBe(400);
         expect(getResponse.body.errors.error).toContain("doesn't exist");
