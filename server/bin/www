@@ -4,8 +4,10 @@
  * Module dependencies.
  */
 
+require('dotenv').config();
 var appModule = require("../dist/src/index");
 var dbModule = require("../dist/src/database/dbclient");
+
 
 /**
  * Initialize database before creating HTTP server.

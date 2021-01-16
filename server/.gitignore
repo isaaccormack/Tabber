@@ -12,5 +12,5 @@ uploads/*
 !uploads/.gitkeep
 crepe/*
 !crepe/.gitkeep
-.env.development
+.env
 **/ormconfig-prod.json

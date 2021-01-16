@@ -5,7 +5,7 @@ services:
         image: tabber
         container_name: tabber
         env_file:
-            - ./.env.development
+            - .env
         ports:
             - "3000:3000"
         volumes:
