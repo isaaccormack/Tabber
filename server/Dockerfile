@@ -41,7 +41,7 @@ COPY bin /app/bin
 COPY dist /app/dist
 COPY tabbing /app/tabbing
 COPY views /app/views
-COPY ormconfig.json /app/
+COPY ormconfig.js /app/
 
 # dont need this now, but will in future...
 ENV NODE_ENV=production

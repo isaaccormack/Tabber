@@ -6,6 +6,8 @@ services:
         container_name: tabber
         env_file:
             - .env
+        environment:
+            - NODE_ENV=local_docker
         ports:
             - "3000:3000"
         volumes:
