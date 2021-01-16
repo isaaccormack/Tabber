@@ -3,11 +3,10 @@ import Koa from 'koa'
 import request from 'supertest'
 import { Connection } from 'typeorm';
 
-import * as keys from "../../keys/keys.json";
+import * as keys from "./oauth_tokens.json";
 import * as appModule from "../../src/index";
 import * as dbModule from "../../src/database/dbclient";
 const fs = require('fs');
-import * as util from 'util';
 
 const identityToken = keys.YOUR_TEST_IDENTITY_TOKEN;
 if (!identityToken) {
@@ -24,7 +23,7 @@ const testDataDir = __dirname + '/../../../test/data/';
 describe('Integration: Licks endpoint', () => {
     let app: Koa
     let db: Connection
-    
+
     let privateID: Number // this will change when shcema does
     let publicID: Number // this will change when shcema does
 
@@ -51,7 +50,7 @@ describe('Integration: Licks endpoint', () => {
     afterAll((done) => {
         db.close().then(done())
     });
-    
+
     ////////////////// TEST WITH PRIVATE LICK //////////////////
     /**
      * Test createLick()
@@ -70,7 +69,7 @@ describe('Integration: Licks endpoint', () => {
             .field('isPublic', lickBody.isPublic)
             .attach('file', audioFilePath)
             .set("Cookie", "ti="+identityToken);
-            
+
             expect(response.status).toBe(201);
             expect(response.body.id).toBeGreaterThan(0);
             expect(response.body.name).toBe(lickBody.name);
@@ -177,21 +176,21 @@ describe('Integration: Licks endpoint', () => {
         const response: request.Response = await request(app.callback())
         .get('/api/licks/' + 0) // no lick with id = 0
         .set("Cookie", "ti="+identityToken);
-        
+
         expect(response.status).toBe(400);
         expect(response.body.errors.error).toContain("doesn't exist");
     });
     it('should NOT be able to GET private lick when not logged in', async () => {
         const response: request.Response = await request(app.callback())
         .get('/api/licks/' + privateID)
-        
+
         expect(response.status).toBe(403);
         expect(response.body.errors.error).toContain("You do not have permission");
     });
     it('should NOT be able to GET lick which doesnt exist with user not logged in', async () => {
         const response: request.Response = await request(app.callback())
         .get('/api/licks/' + 0) // no lick with id = 0
-        
+
         expect(response.status).toBe(400);
         expect(response.body.errors.error).toContain("doesn't exist");
     });
@@ -218,14 +217,14 @@ describe('Integration: Licks endpoint', () => {
         const response: request.Response = await request(app.callback())
         .get('/api/licks/audio/' + 0) // no lick with id = 0
         .set("Cookie", "ti="+identityToken);
-        
+
         expect(response.status).toBe(400);
         expect(response.body.errors.error).toContain("doesn't exist");
     });
     it('should NOT be able to GET private lick audio when not logged in', async () => {
         const response: request.Response = await request(app.callback())
         .get('/api/licks/audio/' + privateID)
-        
+
         expect(response.status).toBe(403);
         expect(response.body.errors.error).toContain("You do not have permission");
     });
@@ -244,7 +243,7 @@ describe('Integration: Licks endpoint', () => {
         const deleteResponse: request.Response = await request(app.callback())
         .delete('/api/licks/' + privateID)
         .set("Cookie", "ti="+identityToken);
-        
+
         expect(deleteResponse.status).toBe(200);
         expect(deleteResponse.body.name).toBe(lickBody.name);
 
@@ -333,7 +332,7 @@ describe('Integration: Licks endpoint', () => {
     /**
      * Test getLickAudio()
      */
-    // DOES NOT actually test whether files are equal, just that file can be received 
+    // DOES NOT actually test whether files are equal, just that file can be received
     // Rely on the other getLickAudio test to test that audio is uploaded correctly
     it('should be able to GET public lick audio by id', async () => {
         const response: request.Response = await request(app.callback())
@@ -351,7 +350,7 @@ describe('Integration: Licks endpoint', () => {
         const deleteResponse: request.Response = await request(app.callback())
         .delete('/api/licks/' + publicID)
         .set("Cookie", "ti="+testUserToken);
-        
+
         expect(deleteResponse.status).toBe(403);
         expect(deleteResponse.body.errors.error).toContain("only be deleted by its owner");
 
@@ -360,7 +359,7 @@ describe('Integration: Licks endpoint', () => {
         const deleteResponse: request.Response = await request(app.callback())
         .delete('/api/licks/' + publicID)
         .set("Cookie", "ti="+identityToken);
-        
+
         expect(deleteResponse.status).toBe(200);
         expect(deleteResponse.body.name).toBe(lickBody.name);
 

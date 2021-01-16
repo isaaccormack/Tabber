@@ -41,6 +41,7 @@
     "dependencies": {
         "class-validator": "^0.12.0",
         "csv-parse": "^4.10.1",
+        "dotenv": "^8.2.0",
         "fluent-ffmpeg": "^2.1.2",
         "get-audio-duration": "^2.0.2-beta.0",
         "googleapis": "^51.0.0",

@@ -1,3 +1,5 @@
+require('dotenv').config(); // must be imported first so env vars are available to all imported modules
+
 import {createMockContext, createMockCookies} from "@shopify/jest-koa-mocks";
 import { createSandbox, SinonSandbox } from 'sinon'
 import {authValidator, isAuthenticated} from "../../src/middleware/auth-validator";

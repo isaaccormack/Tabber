@@ -5,7 +5,7 @@ import Koa from 'koa'
 import * as appModule from "../../src/index";
 import * as dbModule from "../../src/database/dbclient";
 
-import * as keys from "../../keys/keys.json";
+import * as keys from "./oauth_tokens.json";
 const identityToken = keys.YOUR_TEST_IDENTITY_TOKEN;
 
 if (!identityToken) {
@@ -16,11 +16,11 @@ const testDataDir = __dirname + '/../../../test/data/';
 
 /**
  * Get user's licks test.
- * 
- * This test was broken into its own test unit as it depends on functionality 
+ *
+ * This test was broken into its own test unit as it depends on functionality
  * in the lick endpoint (ie. uploading and deleting licks) and therefore shouldnt
  * be grouped into the user tests as this would increase coupling.
- * 
+ *
  * LAST MODIFIED: Aug 24 2020
  */
 describe('Integration: Users licks', () => {
@@ -90,12 +90,12 @@ describe('Integration: Users licks', () => {
             done()
         })
     });
-    
+
     it('should GET auth users licks', async () => {
         const response: request.Response = await request(app.callback())
             .get('/api/user/licks')
             .set("Cookie", "ti="+identityToken);
-        
+
         expect(response.status).toBe(200);
         expect(response.body.length).toBeGreaterThanOrEqual(2);
         expect(response.body).toEqual(
