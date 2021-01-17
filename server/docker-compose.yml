@@ -1,6 +1,26 @@
 version: '3.2'
 
 services:
+    tabber-dev:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        image: tabber-dev
+        container_name: tabber-dev
+        env_file:
+            - .env
+        environment:
+            - NODE_ENV=local_docker
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./bin:/app/bin
+            - ./dist:/app/dist
+            - ./tabbing:/app/tabbing
+            - ./views:/app/views
+            - ./ormconfig.js:/app/ormconfig.js
+            - uploads:/app/uploads
+
     tabber:
         image: tabber
         container_name: tabber

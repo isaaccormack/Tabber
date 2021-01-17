@@ -25,6 +25,8 @@ dbModule.initDb(err => {
     /* Create the Express server object. */
     const app = appModule.startApp()
 
+    // throw Error('uh oh')
+
     /* Get port from environment and listen. */
     const port = 3000;
     app.listen(port);

@@ -1,5 +1,6 @@
-# MUST run 'npm update-views' before building image to build most up-to-date react app
-# MUST compile typescript to js to get most up to date changes - this shouldnt be a problem, just a note
+# NOTES:
+#   - this Dockerfile is intended for production builds
+#   - 'npm build' MUST be run before building image to get newest views and compiled typescript
 
 FROM ubuntu:18.04
 
@@ -50,4 +51,5 @@ EXPOSE 3000
 
 USER tabber
 
+# TODO: change this to use forever
 CMD [ "node", "bin/www" ]
