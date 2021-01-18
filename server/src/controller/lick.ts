@@ -22,6 +22,13 @@ import {
     assertUserIsNotRequester,
     assertLickValid
 } from "./lickAssertions";
+
+import {
+    getLickFromDbById,
+    getLickCountFromDb,
+    saveLickToDb,
+    deleteLickFromDb
+} from "../dao/lick";
 import { getManager, Repository } from "typeorm";
 
 export class LickController {
@@ -72,7 +79,7 @@ export class LickController {
      */
     public static async getLick(ctx: Context): Promise<void> {
 
-        const lick: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+        const lick: Lick | undefined = await getLickFromDbById(+ctx.params.id || 0);
 
         if (!assertLickExists(ctx, lick) || !assertRequesterCanAccessLick(ctx, lick)) { return; }
 
@@ -88,7 +95,7 @@ export class LickController {
      */
     public static async getLickAudio(ctx: Context): Promise<void> {
 
-        const lick: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+        const lick: Lick | undefined = await getLickFromDbById(+ctx.params.id || 0);
 
         if (!assertLickExists(ctx, lick) || !assertRequesterCanAccessLick(ctx, lick)) { return; }
 
@@ -111,7 +118,7 @@ export class LickController {
     public static async getLickCount(ctx: Context): Promise<void> {
         try {
             ctx.status = StatusCodes.OK;
-            ctx.body = await LickController.getLickCountFromDb();
+            ctx.body = await getLickCountFromDb();
         } catch (err) {
             logger.error('couldn\'t get lick count\n' + err.stack)
             ctx.status = StatusCodes.BAD_REQUEST;
@@ -127,7 +134,7 @@ export class LickController {
      */
     public static async updateLickSharedWith(ctx: Context): Promise<void> {
 
-        const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+        const lickToUpdate: Lick | undefined = await getLickFromDbById(+ctx.params.id || 0);
 
         if (!assertLickExists(ctx, lickToUpdate) || !assertRequesterIsLickOwner(ctx, lickToUpdate)) {
             return;
@@ -158,7 +165,7 @@ export class LickController {
      */
     public static async unfollowLick(ctx: Context): Promise<void> {
 
-        const lickToUnfollow: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+        const lickToUnfollow: Lick | undefined = await getLickFromDbById(+ctx.params.id || 0);
 
         if (!assertLickExists(ctx, lickToUnfollow)) { return; }
 
@@ -177,7 +184,7 @@ export class LickController {
      */
     public static async updateLick(ctx: Context): Promise<void> {
 
-        const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+        const lickToUpdate: Lick | undefined = await getLickFromDbById(+ctx.params.id || 0);
 
         if (!assertLickExists(ctx, lickToUpdate) || !assertRequesterIsLickOwner(ctx, lickToUpdate)) { return; }
 
@@ -207,7 +214,7 @@ export class LickController {
      */
     public static async updateTab(ctx: Context): Promise<void> {
 
-        const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+        const lickToUpdate: Lick | undefined = await getLickFromDbById(+ctx.params.id || 0);
 
         if (!assertLickExists(ctx, lickToUpdate) ||  !assertRequesterIsLickOwner(ctx, lickToUpdate)) { return; }
 
@@ -226,7 +233,7 @@ export class LickController {
      */
     public static async reTabLick(ctx: Context): Promise<void> {
 
-        const lickToUpdate: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+        const lickToUpdate: Lick | undefined = await getLickFromDbById(+ctx.params.id || 0);
 
         if (!assertLickExists(ctx, lickToUpdate) ||  !assertRequesterIsLickOwner(ctx, lickToUpdate)) { return; }
 
@@ -254,7 +261,7 @@ export class LickController {
      */
     public static async deleteLick(ctx: Context): Promise<void> {
 
-        const lickToRemove: Lick | undefined = await LickController.getLickFromDbById(+ctx.params.id || 0);
+        const lickToRemove: Lick | undefined = await getLickFromDbById(+ctx.params.id || 0);
 
         if (!assertLickExists(ctx, lickToRemove) ||  !assertRequesterIsLickOwner(ctx, lickToRemove)) { return; }
 
@@ -277,38 +284,9 @@ export class LickController {
     /**
      * HELPERS
      */
-    // TODO: this should really go in DAO layer, not here
-    public static async getLickFromDbById(lickId: number): Promise<Lick | undefined> {
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-        return await lickRepository.findOne({ where: {id: (lickId)}, relations: ['owner', 'sharedWith']});
-    }
-
-    public static async getLickCountFromDb(): Promise<number> {
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-
-        const { count } = await lickRepository
-            .createQueryBuilder("lick")
-            .select("COUNT(lick.id)", "count")
-            .getRawOne();
-
-        return count;
-    }
-
-    // TODO: this should really go in DAO layer, not here
-    public static async saveLickToDb(lick: Lick): Promise<Lick | undefined> {
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-        return await lickRepository.save(lick);
-    }
-
-    // TODO: this should really go in DAO layer, not here
-    public static async deleteLickFromDb(lick: Lick): Promise<Lick | undefined> {
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-        return await lickRepository.remove(lick);
-    }
-
     public static async trySaveLickAndSetResponse(ctx: Context, lick: Lick): Promise<boolean> {
         try {
-            const updatedLick: Lick = await LickController.saveLickToDb(lick);
+            const updatedLick: Lick = await saveLickToDb(lick);
 
             ctx.status = StatusCodes.OK;
             ctx.body = updatedLick;
@@ -323,7 +301,7 @@ export class LickController {
 
     public static async tryRemoveLickAndSetResponse(ctx: Context, lick: Lick) {
         try {
-            const removedLick: Lick = await LickController.deleteLickFromDb(lick);
+            const removedLick: Lick = await deleteLickFromDb(lick);
 
             ctx.status = StatusCodes.OK;
             ctx.body = removedLick;
