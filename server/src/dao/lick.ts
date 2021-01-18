@@ -1,28 +1,31 @@
 import { Lick } from "../entity/lick";
 import { getManager, Repository } from "typeorm";
 
-export const getLickFromDbById = async (lickId: number): Promise<Lick | undefined> => {
-    const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-    return await lickRepository.findOne({ where: {id: (lickId)}, relations: ['owner', 'sharedWith']});
-}
+export class LickDAO {
 
-export const getLickCountFromDb = async (): Promise<number> => {
-    const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+    public static async getLickFromDbById(lickId: number): Promise<Lick | undefined> {
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        return await lickRepository.findOne({where: {id: (lickId)}, relations: ['owner', 'sharedWith']});
+    }
 
-    const { count } = await lickRepository
-        .createQueryBuilder("lick")
-        .select("COUNT(lick.id)", "count")
-        .getRawOne();
+    public static async getLickCountFromDb(): Promise<number> {
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
 
-    return count;
-}
+        const {count} = await lickRepository
+            .createQueryBuilder("lick")
+            .select("COUNT(lick.id)", "count")
+            .getRawOne();
 
-export const saveLickToDb = async (lick: Lick): Promise<Lick | undefined> => {
-    const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-    return await lickRepository.save(lick);
-}
+        return count;
+    }
 
-export const deleteLickFromDb = async (lick: Lick): Promise<Lick | undefined> => {
-    const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-    return await lickRepository.remove(lick);
+    public static async saveLickToDb(lick: Lick): Promise<Lick | undefined> {
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        return await lickRepository.save(lick);
+    }
+
+    public static async deleteLickFromDb(lick: Lick): Promise<Lick | undefined> {
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+        return await lickRepository.remove(lick);
+    }
 }

@@ -4,18 +4,14 @@ import { StatusCodes } from "http-status-codes";
 
 import { User } from "../entity/user";
 const logger = require('../winston/winston');
-import {
-    getUserByEmail,
-    saveUserToDb,
-    getUserById
-} from "../dao/user";
+import { UserDAO } from "../dao/user";
 
 export class UserController {
 
     // Called in middleware every request
     public static async getOrCreateUser(payload: TokenPayload): Promise<User> {
 
-        let user: User | undefined = await getUserByEmail(payload.email);
+        let user: User | undefined = await UserDAO.getUserByEmail(payload.email);
 
         // create user if doesn't exist
         if (!user) {
@@ -27,7 +23,7 @@ export class UserController {
             user.family_name = payload.family_name;
 
             try {
-                user = await saveUserToDb(user);
+                user = await UserDAO.saveUserToDb(user);
             } catch (err) {
                 // Most likely error case to be caught here is when the jwt token provided
                 // does not provide information required by the user entity, such as
@@ -48,7 +44,7 @@ export class UserController {
 
         try {
             // should return the currently authenticated user
-            let authUser: User | undefined = await getUserById(ctx.state.user.id);
+            let authUser: User | undefined = await UserDAO.getUserById(ctx.state.user.id);
 
             if (!authUser) { throw new Error('auth user not found in db'); }
             ctx.status = StatusCodes.OK;
@@ -69,7 +65,7 @@ export class UserController {
 
         try {
             // should return the currently authenticated user
-            let authUser: User | undefined = await getUserById(ctx.state.user.id);
+            let authUser: User | undefined = await UserDAO.getUserById(ctx.state.user.id);
 
             if (!authUser) { throw new Error('auth user not found in db'); }
             ctx.status = StatusCodes.OK;

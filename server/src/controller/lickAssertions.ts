@@ -5,7 +5,7 @@ import { User } from "../entity/user";
 import { validate, ValidationError } from "class-validator";
 import { LickController } from "./lick";
 import * as audioDuration from "get-audio-duration";
-import { getUserByEmail } from "../dao/user";
+import { UserDAO } from "../dao/user";
 const logger = require('../winston/winston');
 const TabModule = require('../tabbing/tabLick');
 
@@ -108,7 +108,7 @@ export const assertRequesterIsLickOwner = (ctx: Context, lick: Lick | undefined)
 }
 
 export const getUserByEmailOrErrorResponse = async (ctx: Context): Promise<User | undefined> => {
-    const userByEmail: User | undefined = await getUserByEmail(ctx.request.body.userEmail || "");
+    const userByEmail: User | undefined = await UserDAO.getUserByEmail(ctx.request.body.userEmail || "");
 
     if (userByEmail) { return userByEmail; }
 

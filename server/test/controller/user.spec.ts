@@ -1,28 +1,14 @@
 import { createSandbox, SinonSandbox } from 'sinon'
-import * as typeorm from 'typeorm'
-import {createMockContext } from '@shopify/jest-koa-mocks';
+
 import { User } from "../../src/entity/user";
 import { UserController } from '../../src/controller/user';
+import { UserDAO } from "../../src/dao/user";
 
 
 describe('Unit test: User endpoint', () => {
     let sandbox: SinonSandbox
-
-    function stubGetUserRepository(fakeMethod: any): void {
-        sandbox.stub(typeorm, "getManager").callsFake(() => {
-            return {
-                getRepository: sandbox.stub().withArgs(User).returns(fakeMethod)
-            };
-        });
-    }
-
-    beforeEach(() => {
-        sandbox = createSandbox()
-    })
-
-    afterEach(() => {
-        sandbox.restore()
-    })
+    beforeEach(() => { sandbox = createSandbox() })
+    afterEach(() => { sandbox.restore() })
 
     it('should CREATE new user if no account with email exists', async () => {
         const payload = {
@@ -50,10 +36,8 @@ describe('Unit test: User endpoint', () => {
             sharedWithMe: []
         }
 
-        stubGetUserRepository({
-            findOne: function(email: string) { return false }, // assume no account with email exists
-            save: function(user: any) { return userFromPayload } // assume save successful
-        });
+        sandbox.stub(UserDAO, "getUserByEmail").returns(undefined);
+        sandbox.stub(UserDAO, "saveUserToDb").returns(userFromPayload);
 
         const res = await UserController.getOrCreateUser(payload)
 
@@ -85,9 +69,7 @@ describe('Unit test: User endpoint', () => {
             sharedWithMe: []
         }
 
-        stubGetUserRepository({
-            findOne: function(email: string) { return userFromPayload }, // assume account found with same email
-        });
+        sandbox.stub(UserDAO, "getUserByEmail").returns(userFromPayload);
 
         const res = await UserController.getOrCreateUser(payload)
 
