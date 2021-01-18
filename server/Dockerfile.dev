@@ -23,10 +23,13 @@ RUN apt-get install -y ffmpeg
 RUN apt-get install -y curl
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - &&  apt-get install -y nodejs
 
+
 # must restart when new npm dependencies are added
 WORKDIR /app
 COPY package*.json /app/
 RUN npm install
+
+RUN mkdir /app/crepe
 
 EXPOSE 3000
 

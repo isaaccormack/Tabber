@@ -9,6 +9,14 @@ import { Lick } from '../../src/entity/lick';
 describe('Unit test: User shared licks endpoint', () => {
     let sandbox: SinonSandbox
 
+    function stubGetUserRepository(fakeMethod: any): void {
+        sandbox.stub(typeorm, "getManager").callsFake(() => {
+            return {
+                getRepository: sandbox.stub().withArgs(User).returns(fakeMethod),
+            };
+        });
+    }
+
     function stubGetLickRepository(fakeMethod: any): void {
         sandbox.stub(typeorm, "getManager").callsFake(() => {
             return {
@@ -35,7 +43,10 @@ describe('Unit test: User shared licks endpoint', () => {
         const lickToBeShared: Lick = new Lick()
         lickToBeShared.owner = lickOwner;
 
-        sandbox.stub(UserController, "getUserByEmail").returns(lickOwner);
+        stubGetUserRepository({
+            findOne: function() { return lickOwner }
+        });
+
         stubGetLickRepository({
             findOne: function() { return lickToBeShared }
         });
@@ -140,13 +151,14 @@ describe('Unit test: User shared licks endpoint', () => {
         lickToBeShared.owner = lickOwner;
         lickToBeShared.sharedWith = [];
 
+        stubGetUserRepository({
+            findOne: function() { return null }
+        });
+
         stubGetLickRepository({
             findOne: function() { return lickToBeShared },
             save: function() { return lickToBeShared }
         });
-
-        sandbox.stub(UserController, "getUserByEmail").returns(null);
-        sandbox.stub(UserController, "getUserByID").returns(null);
 
         const ctx: any = createMockContext();
         ctx.request.body = { share: true };
@@ -176,12 +188,14 @@ describe('Unit test: User shared licks endpoint', () => {
         lickToBeUnshared.owner = lickOwner;
         lickToBeUnshared.sharedWith = [userLickSharedWith, anotherUser];
 
+        stubGetUserRepository({
+            findOne: function() { return anotherUser }
+        });
+
         stubGetLickRepository({
             findOne: function() { return lickToBeUnshared },
             save: function(lick) { return lick }
         });
-
-        sandbox.stub(UserController, "getUserByEmail").returns(anotherUser);
 
         const ctx: any = createMockContext();
         ctx.request.body = { share: false };
@@ -249,13 +263,14 @@ describe('Unit test: User shared licks endpoint', () => {
         lickToBeShared.owner = lickOwner;
         lickToBeShared.sharedWith = [];
 
+        stubGetUserRepository({
+            findOne: function() { return null }
+        });
+
         stubGetLickRepository({
             findOne: function() { return lickToBeShared },
             save: function() { return lickToBeShared }
         });
-
-        sandbox.stub(UserController, "getUserByEmail").returns(null);
-        sandbox.stub(UserController, "getUserByID").returns(null);
 
         const ctx: any = createMockContext();
         ctx.request.body = { share: false };

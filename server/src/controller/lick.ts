@@ -266,8 +266,7 @@ export class LickController {
         if (!assertLickExists(ctx, lickToRemove) ||  !assertRequesterIsLickOwner(ctx, lickToRemove)) { return; }
 
         try {
-            const deleteFile = util.promisify(fs.unlink);
-            await deleteFile(lickToRemove.audioFileLocation);
+            await LickController.unlinkAsync(lickToRemove.audioFileLocation);
         } catch (err) {
             // ENOENT == file doesn't exist, let that case fail silently
             if (err.code !== 'ENOENT') {
@@ -369,5 +368,11 @@ export class LickController {
         } catch (err) {
             logger.error('couldn\'t delete file\n' + err.stack)
         }
+    }
+
+    // Made this a private class function so it could be easily stubbed when testing
+    private static async unlinkAsync(filePath: string) : Promise<NodeJS.ErrnoException> {
+        const deleteFile = util.promisify(fs.unlink);
+        return await deleteFile(filePath);
     }
 }

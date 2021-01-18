@@ -24,5 +24,5 @@ export const saveLickToDb = async (lick: Lick): Promise<Lick | undefined> => {
 
 export const deleteLickFromDb = async (lick: Lick): Promise<Lick | undefined> => {
     const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-return await lickRepository.remove(lick);
+    return await lickRepository.remove(lick);
 }

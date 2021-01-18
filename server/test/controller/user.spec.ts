@@ -24,39 +24,6 @@ describe('Unit test: User endpoint', () => {
         sandbox.restore()
     })
 
-    it('should GET user by id', async () => {
-        const user = {
-            name: 'john',
-            email: 'john@doe.com'
-        }
-
-        // assume that findOne always finds user
-        stubGetUserRepository({ findOne: function(id: number) { return user } });
-
-        let params = {
-            id: 1
-        }
-        const ctx = createMockContext();
-        ctx.params = params
-        await UserController.getUser(ctx)
-
-        expect(ctx.status).toBe(200)
-        expect(ctx.body).toEqual(user)
-    })
-    it('should not GET user given invalid id', async () => {
-        // assume that findOne never finds user
-        stubGetUserRepository({ findOne: function(id: number) { return undefined } });
-
-        let params = {
-            id: 0 // there is no user with id 0
-        }
-        const ctx = createMockContext();
-        ctx.params = params
-        await UserController.getUser(ctx)
-
-        expect(ctx.status).toBe(400)
-        expect(ctx.body.errors.error).toContain("doesn't exist")
-    })
     it('should CREATE new user if no account with email exists', async () => {
         const payload = {
             // must contain iss, sub, aud, iat, and exp to match TokenPayload type
@@ -125,28 +92,5 @@ describe('Unit test: User endpoint', () => {
         const res = await UserController.getOrCreateUser(payload)
 
         expect(res).toBe(userFromPayload);
-    })
-    it('should DELETE the currently authenticated user', async () => {
-        const user = {
-            name: "test"
-        }
-
-        const state = {
-            user: {
-                id: 1
-            }
-        }
-
-        // assume that findOne always finds user by id
-        stubGetUserRepository({
-            findOne: function() { return user },
-            remove: function() { return name }
-        });
-
-        const ctx = createMockContext();
-        ctx.state = state;
-        await UserController.deleteAuthUser(ctx)
-
-        expect(ctx.status).toBe(204)
     })
 })

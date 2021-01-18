@@ -2,10 +2,10 @@ import { Context } from "koa";
 import { Lick } from "../entity/lick";
 import { StatusCodes } from "http-status-codes";
 import { User } from "../entity/user";
-import { UserController } from "./user";
 import { validate, ValidationError } from "class-validator";
 import { LickController } from "./lick";
 import * as audioDuration from "get-audio-duration";
+import { getUserByEmail } from "../dao/user";
 const logger = require('../winston/winston');
 const TabModule = require('../tabbing/tabLick');
 
@@ -108,7 +108,7 @@ export const assertRequesterIsLickOwner = (ctx: Context, lick: Lick | undefined)
 }
 
 export const getUserByEmailOrErrorResponse = async (ctx: Context): Promise<User | undefined> => {
-    const userByEmail: User | undefined = await UserController.getUserByEmail(ctx.request.body.userEmail || "");
+    const userByEmail: User | undefined = await getUserByEmail(ctx.request.body.userEmail || "");
 
     if (userByEmail) { return userByEmail; }
 
