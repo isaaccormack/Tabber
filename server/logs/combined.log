@@ -1,0 +1,84 @@
+2021-01-18T00:34:17.429Z: [[31merror[39m] could not try: TypeError: Cannot read property 'b' of undefined
+2021-01-18T00:34:44.709Z: [[31merror[39m] could not try: TypeError: Cannot read property 'b' of undefined --- TypeError: Cannot read property 'b' of undefined
+    at /app/dist/src/controller/lick.js:131:31
+    at Generator.next (<anonymous>)
+    at /app/dist/src/controller/lick.js:27:71
+    at new Promise (<anonymous>)
+    at __awaiter (/app/dist/src/controller/lick.js:23:12)
+    at getLickCount (/app/dist/src/controller/lick.js:126:16)
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)
+    at next (/app/node_modules/koa-router/node_modules/koa-compose/index.js:45:18)
+    at /app/node_modules/koa-router/lib/router.js:346:16
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)
+2021-01-18T00:35:10.870Z: [[31merror[39m] could not try: TypeError: Cannot read property 'b' of undefined --- TypeError: Cannot read property 'b' of undefined
+    at /app/dist/src/controller/lick.js:131:31
+    at Generator.next (<anonymous>)
+    at /app/dist/src/controller/lick.js:27:71
+    at new Promise (<anonymous>)
+    at __awaiter (/app/dist/src/controller/lick.js:23:12)
+    at getLickCount (/app/dist/src/controller/lick.js:126:16)
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)
+    at next (/app/node_modules/koa-router/node_modules/koa-compose/index.js:45:18)
+    at /app/node_modules/koa-router/lib/router.js:346:16
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)
+2021-01-18T00:35:13.692Z: [[31merror[39m] could not try: TypeError: Cannot read property 'b' of undefined
+    at /app/dist/src/controller/lick.js:131:31
+    at Generator.next (<anonymous>)
+    at /app/dist/src/controller/lick.js:27:71
+    at new Promise (<anonymous>)
+    at __awaiter (/app/dist/src/controller/lick.js:23:12)
+    at getLickCount (/app/dist/src/controller/lick.js:126:16)
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)
+    at next (/app/node_modules/koa-router/node_modules/koa-compose/index.js:45:18)
+    at /app/node_modules/koa-router/lib/router.js:346:16
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)
+2021-01-18T00:35:33.871Z: [[31merror[39m] could not try:
+TypeError: Cannot read property 'b' of undefined
+    at /app/dist/src/controller/lick.js:131:31
+    at Generator.next (<anonymous>)
+    at /app/dist/src/controller/lick.js:27:71
+    at new Promise (<anonymous>)
+    at __awaiter (/app/dist/src/controller/lick.js:23:12)
+    at getLickCount (/app/dist/src/controller/lick.js:126:16)
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)
+    at next (/app/node_modules/koa-router/node_modules/koa-compose/index.js:45:18)
+    at /app/node_modules/koa-router/lib/router.js:346:16
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)
+2021-01-18T00:39:13.989Z: [[31merror[39m] couldn't get lick count
+TypeError: Cannot read property 'b' of undefined
+TypeError: Cannot read property 'b' of undefined
+    at /app/dist/src/controller/lick.js:131:31
+    at Generator.next (<anonymous>)
+    at /app/dist/src/controller/lick.js:27:71
+    at new Promise (<anonymous>)
+    at __awaiter (/app/dist/src/controller/lick.js:23:12)
+    at getLickCount (/app/dist/src/controller/lick.js:126:16)
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)
+    at next (/app/node_modules/koa-router/node_modules/koa-compose/index.js:45:18)
+    at /app/node_modules/koa-router/lib/router.js:346:16
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)
+2021-01-18T00:41:10.188Z: [[31merror[39m] couldn't get lick count
+TypeError: Cannot read property 'b' of undefined
+TypeError: Cannot read property 'b' of undefined
+    at /app/dist/src/controller/lick.js:131:31
+    at Generator.next (<anonymous>)
+    at /app/dist/src/controller/lick.js:27:71
+    at new Promise (<anonymous>)
+    at __awaiter (/app/dist/src/controller/lick.js:23:12)
+    at getLickCount (/app/dist/src/controller/lick.js:126:16)
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)
+    at next (/app/node_modules/koa-router/node_modules/koa-compose/index.js:45:18)
+    at /app/node_modules/koa-router/lib/router.js:346:16
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)
+2021-01-18T00:41:13.455Z: [[31merror[39m] couldn't get lick count
+Error: uh oh
+    at /app/dist/src/controller/lick.js:128:23
+    at Generator.next (<anonymous>)
+    at /app/dist/src/controller/lick.js:27:71
+    at new Promise (<anonymous>)
+    at __awaiter (/app/dist/src/controller/lick.js:23:12)
+    at getLickCount (/app/dist/src/controller/lick.js:126:16)
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)
+    at next (/app/node_modules/koa-router/node_modules/koa-compose/index.js:45:18)
+    at /app/node_modules/koa-router/lib/router.js:346:16
+    at dispatch (/app/node_modules/koa-router/node_modules/koa-compose/index.js:44:32)

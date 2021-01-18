@@ -1,4 +1,5 @@
 const fs = require('fs');
+const logger = require('../winston/winston');
 import { Context } from "koa";
 import { v4 as uuidv4 } from "uuid";
 import * as util from 'util';
@@ -113,8 +114,8 @@ export class LickController {
 
             ctx.status = StatusCodes.OK;
             ctx.body = { count };
-        } catch (error) {
-            console.error(error)
+        } catch (err) {
+            logger.error('couldn\'t get lick count\n' + err.stack)
             ctx.status = StatusCodes.BAD_REQUEST;
             ctx.body = { errors: {error: "Error: Could not count number of licks in db."}}
         }
@@ -264,6 +265,7 @@ export class LickController {
         } catch (err) {
             // ENOENT == file doesn't exist, let that case fail silently
             if (err.code !== 'ENOENT') {
+                logger.error('couldn\'t delete lick audio\n' + err.stack);
                 ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
                 ctx.body = { errors: {error: "Error: Cant unlink lick from file system."}}
                 return
@@ -296,10 +298,10 @@ export class LickController {
 
     public static async trySaveLickAndSetResponse(ctx: Context, lick: Lick): Promise<boolean> {
         const updatedLick: Lick | undefined = await LickController.saveLickToDb(lick);
-
         if (!updatedLick) {
+            logger.error('couldn\'t update lick ' + lick.id + 'in db')
             ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
-            ctx.body = { errors: {error: "Error: Could not update lick in db"}} // should change this to could not save
+            ctx.body = { errors: {error: "Error: Could not update lick in db"}}
             return false;
         }
 
@@ -311,6 +313,7 @@ export class LickController {
     public static async tryRemoveLickAndSetResponse(ctx: Context, lick: Lick) {
         const removedLick: Lick | undefined = await LickController.deleteLickFromDb(lick);
         if (!removedLick) {
+            logger.error('couldn\'t remove lick ' + lick.id + 'from db')
             ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
             ctx.body = { errors: {error: "Error: Cant remove lick from database."}}
             return;
@@ -326,9 +329,12 @@ export class LickController {
     // TODO: make all these methods protected and add lick assertions to same package
     public static validateAudioFile(audioFile: any): Error | null {
 
+        const MAX_FILE_SIZE_MB = 2;
+        const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1000 * 1000;
+
         if (!audioFile) return new Error("Error: No file sent.")
         if (!audioFile.size) return new Error("Error: File is empty.")
-        if (audioFile.size > 25000000) return new Error("Error: File must be less than 25MB.")
+        if (audioFile.size > MAX_FILE_SIZE_BYTES) return new Error("Error: File must be less than " + MAX_FILE_SIZE_MB + "MB.")
 
         // ffmpeg can convert most types of audio files, let it fail if it can't convert the audio file
         if (!audioFile.type.startsWith("audio/"))  return new Error("Error: Mimetype is not supported.");
@@ -370,8 +376,8 @@ export class LickController {
         const deleteFile = util.promisify(fs.unlink);
         try {
             await deleteFile(filePath);
-        } catch (e) {
-            console.error(e)
+        } catch (err) {
+            logger.error('couldn\'t delete file\n' + err.stack)
         }
     }
 

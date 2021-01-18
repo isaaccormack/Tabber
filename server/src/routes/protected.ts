@@ -13,7 +13,6 @@ protectedRouter.get("/user", UserController.getAuthUser);
 protectedRouter.get("/user/licks", UserController.getAuthUserLicks);
 protectedRouter.get("/user/licks-shared-with-me", UserController.getLicksSharedWithAuthUser);
 protectedRouter.delete("/user", UserController.deleteAuthUser);
-protectedRouter.get("/users", UserController.getUsers);
 protectedRouter.get("/users/:id", UserController.getUser);
 protectedRouter.put("/users/:id", UserController.updateUser);
 

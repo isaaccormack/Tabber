@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+const logger = require('../winston/winston');
 
 export const useLoginURL = (setLoginURL: Function) => {
   useEffect(() => {
@@ -6,7 +7,7 @@ export const useLoginURL = (setLoginURL: Function) => {
       .then(response => response.text())
       .then(data => setLoginURL(data))
       .catch((err: Error) => {
-        console.error('Could not get oauth login URL' + err);
+        logger.error('couldn\'t get oauth login URL\n' + err.stack)
       });
   }, [])
 }

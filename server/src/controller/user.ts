@@ -4,6 +4,7 @@ import { TokenPayload } from "google-auth-library";
 import { getManager, Repository, Not, Equal } from "typeorm";
 
 import { User } from "../entity/user";
+const logger = require('../winston/winston');
 
 export class UserController {
 
@@ -28,6 +29,7 @@ export class UserController {
     public static async getOrCreateUser(payload: TokenPayload): Promise<User> {
         const userRepository: Repository<User> = getManager().getRepository(User);
 
+        // todo: move this to DAO
         let user: User = await userRepository.findOne(
             {
                 where:
@@ -49,7 +51,8 @@ export class UserController {
             user.family_name = family_name;
             try {
                 user = await userRepository.save(user);
-            } catch {
+            } catch (err) {
+                logger.error('couldn\'t create new user in db\n' + err.stack)
                 // Most likely error case to be caught here is when the jwt token provided
                 // does not provide information required by the user entity, such as
                 // email, given_name, or family_name
@@ -57,25 +60,6 @@ export class UserController {
             }
         }
         return user;
-    }
-
-    // For testing
-    /**
-     * GET /users
-     *
-     * Find all users.
-     */
-    public static async getUsers(ctx: Context): Promise<void> {
-
-        // get a user repository to perform operations with user
-        const userRepository: Repository<User> = getManager().getRepository(User);
-
-        // load all users
-        const users: User[] = await userRepository.find();
-
-        // return OK status code and loaded users array
-        ctx.status = 200;
-        ctx.body = users;
     }
 
     // For development

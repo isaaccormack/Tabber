@@ -1,4 +1,3 @@
-import { Lick } from "../entity/lick";
 import PitchData from "./data/pitchData";
 import OnsetData from "./data/onsetData";
 import TabData from "./data/tabData";
@@ -8,6 +7,7 @@ import OnsetDetector from "./onsetDetector";
 import TabCalculator from "./tabCalculator";
 import TabGenerator from "./tabGenerator";
 import Capo from "./data/capo";
+import { debugLogger } from "./debugLogger";
 
 // The purpose of this file is to provide a single interface to convert lick -> tab string.
 // Should only ever require the "audioFileLocation", "tuning", "capo", and "audioLength" lick members to be valid;
@@ -18,34 +18,34 @@ async function tabLick(audioFilePath: string, tuningStr: string, capoNum: number
     const tuning: Tuning = Tuning.fromString(tuningStr); // 6-element array; e.g. standard: [64, 59, 55, 50, 45, 40]
     const capo: Capo = new Capo(capoNum);
 
-    console.log("tabbing lick with crepe.");
-    console.log(audioFilePath);
+    debugLogger("tabbing lick with crepe.");
+    debugLogger(audioFilePath);
 
     // Get data from audio file as javascript objects. This involves tabbing with CREPE and another
     // external python script for getting frequency & amplitude data for every 10 ms section of the audio.
     const pitchData: PitchData = await PitchDetector.getPitchData(audioFilePath);
-    console.log("pitch data:");
-    console.log(pitchData);
+    debugLogger("pitch data:");
+    debugLogger(pitchData);
 
     // Get note onset times from audio file. Requires use of external python library & script as of now.
     const onsetData: OnsetData = await OnsetDetector.getOnsetData(audioFilePath);
-    console.log("onset data:");
-    console.log(onsetData);
+    debugLogger("onset data:");
+    debugLogger(onsetData);
 
     // Get tabbable data, taking tuning & capo into account
     const tabData: TabData = await TabCalculator.getTabData(pitchData, onsetData, tuning, capo);
-    console.log("tab data:");
-    console.log(tabData);
+    debugLogger("tab data:");
+    debugLogger(tabData);
 
     // Generate tab string from tabbable data
     const tab: string = await TabGenerator.generateTab(tabData, tuning, capo);
-    console.log("tab:");
-    console.log(tab);
+    debugLogger("tab:");
+    debugLogger(tab);
 
     // Display calculated data for each note found in the audio file
-    console.log("Processed tab data:");
-    //console.log("Time\tIndex\tFrequency\tConfidence\tAmplitude\tNote\tString\tFret")
-    console.log("Time\tIndex\tFrequency\tConfidence\tNote\tString\tFret")
+    debugLogger("Processed tab data:");
+    //debugLogger("Time\tIndex\tFrequency\tConfidence\tAmplitude\tNote\tString\tFret")
+    debugLogger("Time\tIndex\tFrequency\tConfidence\tNote\tString\tFret")
     for (var idx = 0; idx < tabData.totalSamples; ++idx) {
         if (tabData.playedStringFrets[idx]) {
             const str: string = pitchData.time[idx] + "\t"
@@ -56,11 +56,11 @@ async function tabLick(audioFilePath: string, tuningStr: string, capoNum: number
                                 + Math.round(69 + 12 * Math.log2(pitchData.frequency[idx] / 440.0))  + "\t" // print note
                                 + tabData.playedStringFrets[idx].stringIdx + "\t"
                                 + tabData.playedStringFrets[idx].fret;
-            console.log(str);
+            debugLogger(str);
         }
     }
 
-    console.log("done tabbing lick.");
+    debugLogger("done tabbing lick.");
     return tab;
 }
 

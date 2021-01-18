@@ -4,6 +4,7 @@ import path from "path";
 import parse from "csv-parse/lib/sync";
 import fs from "fs";
 import util from "util";
+import { debugLogger } from "./debugLogger";
 
 // These are necessary because async fs functions are unavailable for some reason
 const readFile = util.promisify(fs.readFile);
@@ -26,20 +27,20 @@ export default class OnsetDetector {
         // merge it with crepe's data analysis so that we don't spawn multiple shells and read the file
         // multiple times. if we could find an effective .wav file reader, then this would all be thoroughly
         // doable. (or, if we could modify crepe to take mp3 or other data formats, then a reader for those)
-        console.log("getting onset data");
+        debugLogger("getting onset data");
 
         const crepeOutputDirectory: string = "crepe"; // TODO: remove this asap; use a tmp file
         const onsetFilePath: string = crepeOutputDirectory + "/" + path.basename(audioFilePath) + "-amplitude.csv";
         const execString: string = "python3 tabbing/onset_detect.py --input " + audioFilePath + " --output " + onsetFilePath;
 
-        console.log("executing string:");
-        console.log(execString);
+        debugLogger("executing string:");
+        debugLogger(execString);
 
         await shell.exec(execString);
 
-        console.log("onset data extraction complete for " + audioFilePath);
+        debugLogger("onset data extraction complete for " + audioFilePath);
 
-        console.log("output file: " + onsetFilePath);
+        debugLogger("output file: " + onsetFilePath);
 
         return onsetFilePath;
     }

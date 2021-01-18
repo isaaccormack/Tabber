@@ -16,8 +16,8 @@ export function startApp(): Koa {
     const app: Koa = new Koa()
     const router: Router = new Router();
 
-    // Logs all endpoint requests
-    app.use(logger());
+    // Logs all endpoint requests in development
+    if (process.env.NODE_ENV !== 'prod') { app.use(logger()); }
 
     // Provides important security headers to make your app more secure
     app.use(helmet());

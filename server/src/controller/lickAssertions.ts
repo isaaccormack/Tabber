@@ -6,6 +6,7 @@ import { UserController } from "./user";
 import { validate, ValidationError } from "class-validator";
 import { LickController } from "./lick";
 import * as audioDuration from "get-audio-duration";
+const logger = require('../winston/winston');
 const TabModule = require('../tabbing/tabLick');
 
 export const assertAudioFileValid = (ctx: Context, audioFile: any): boolean  => {
@@ -35,6 +36,7 @@ export const assertLickAudioSaved =  async(ctx: Context, lick: Lick, audioFile: 
     try {
         lick.audioFileLocation = await LickController.saveAudioFile(audioFile);
     } catch (err) {
+        logger.error('couldn\'t get save audio file\n' + err.stack)
         ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
         ctx.body = { errors: {error: err.message}}
         return false
@@ -47,17 +49,18 @@ export const assertLickAudioLengthValid = async(ctx: Context, lick: Lick): Promi
     try {
         lick.audioLength = await audioDuration.getAudioDurationInSeconds(lick.audioFileLocation)
     } catch (err) {
+        logger.error('couldn\'t get audio duration of file\n' + err.stack)
         await LickController.attemptToDeleteFile(lick.audioFileLocation);
         ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
         ctx.body = { errors: {error: "Error: Cant get length of audio file."}}
         return false;
     }
 
-    const maxLickLength = 30;
-    if (lick.audioLength > maxLickLength) { // lick is too long
+    const MAX_AUDIO_LENGTH = 15; // seconds
+    if (lick.audioLength > MAX_AUDIO_LENGTH) {
         await LickController.attemptToDeleteFile(lick.audioFileLocation);
         ctx.status = StatusCodes.BAD_REQUEST;
-        ctx.body = { errors: {error: "Error: Audio file is longer than " + maxLickLength + " seconds."}}
+        ctx.body = { errors: {error: "Error: Audio file is longer than " + MAX_AUDIO_LENGTH + " seconds."}}
     return false;
     }
 
@@ -69,7 +72,7 @@ export const assertLickTabbed = async(ctx: Context, lick: Lick): Promise<boolean
         // Generate tab for lick after other data is handled
         lick.tab = await TabModule.tabLick(lick.audioFileLocation, lick.tuning, lick.capo);
     } catch (err) {
-        console.error(err);
+        logger.error('couldn\'t tab lick\n' + err.stack)
         await LickController.attemptToDeleteFile(lick.audioFileLocation);
         ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
         ctx.body = { errors: {error: "Error: Failed to tab audio file."}};
@@ -109,22 +112,11 @@ export const getUserByEmailOrErrorResponse = async (ctx: Context): Promise<User 
 
     if (userByEmail) { return userByEmail; }
 
+    logger.error('couldn\'t get user from db\n' + err.stack);
     ctx.status = StatusCodes.PRECONDITION_FAILED;
     ctx.body = { errors: {error: "Error: The user you are trying to (un)share with doesn't exist in the db"}}
     return undefined;
 }
-
-// export const assertUserExists = async (ctx: Context): Promise<User | undefined> => {
-//     const userByEmail: User | undefined = await UserController.getUserByEmail(ctx.request.body.userEmail || "");
-//     const userById: User | undefined = await UserController.getUserByID(+ctx.request.body.userID || 0);
-//
-//     if (userByEmail) { return userByEmail; }
-//     if (userById) { return userById; }
-//
-//     ctx.status = StatusCodes.BAD_REQUEST;
-//     ctx.body = { errors: {error: "Error: The user you are trying to (un)share with doesn't exist in the db"}}
-//     return undefined;
-// }
 
 export const assertUserIsNotRequester = async (ctx: Context, user: User): Promise<boolean> => {
     if (user.id === ctx.state.user.id) {

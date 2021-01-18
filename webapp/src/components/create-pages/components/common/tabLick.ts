@@ -34,7 +34,6 @@ export const tabLick = (history: any,
       }
   })
     .catch((error) => {
-      console.error(error)
       history.push({ pathname: redirectURL,  state: { from: 'uploading', msg: error.message } });
     })
 }

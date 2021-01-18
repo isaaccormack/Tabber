@@ -4,6 +4,7 @@ import parse from "csv-parse/lib/sync";
 import fs from "fs";
 import util from "util";
 import PitchData from "./data/pitchData";
+import { debugLogger } from "./debugLogger";
 
 // These are necessary because async fs functions are unavailable for some reason
 const readFile = util.promisify(fs.readFile);
@@ -32,19 +33,19 @@ export default class PitchDetector {
         // convert a bunch of scipy/numpy code into js; most crucially we need to find an effective
         // .wav file reader [crepe uses scipy.wavFile.read()] to get data from the audio file for
         // inputting into the tensorflow model).
-        console.log("running crepe model");
+        debugLogger("running crepe model");
 
         const execString: string = "python3 -m crepe " + "--output " + PitchDetector.CrepeOutputDirectory + " --model-capacity full " + audioFilePath;
 
-        console.log("executing string:");
-        console.log(execString);
+        debugLogger("executing string:");
+        debugLogger(execString);
 
         await shell.exec(execString);
 
-        console.log("crepe output complete for " + audioFilePath);
+        debugLogger("crepe output complete for " + audioFilePath);
         const crepeFilePath: string = PitchDetector.CrepeOutputDirectory + "/" + path.basename(audioFilePath)
 
-        console.log("output file: " + crepeFilePath);
+        debugLogger("output file: " + crepeFilePath);
         return crepeFilePath;
     }
 
