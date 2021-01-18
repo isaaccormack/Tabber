@@ -49,7 +49,7 @@ describe('Unit test: Lick endpoint', () => {
         fakeLick.owner = lickOwner;
         fakeLick.sharedWith = [];
         fakeLick.audioFileLocation = "my/fake/path";
-        fakeLick.audioLength = 27;
+        fakeLick.audioLength = 12;
 
         // Pass in just the user defined parameters
         let body = {
@@ -278,7 +278,7 @@ describe('Unit test: Lick endpoint', () => {
         fakeLick.owner = lickOwner;
         fakeLick.sharedWith = [];
 
-        sandbox.stub(LickController, "unlinkAsync").returns(null);
+        sandbox.stub(LickController, "attemptToDeleteFile").returns(null);
         stubGetLickRepository({
             findOne: function() { return fakeLick },
             remove: function() { return fakeLick },

@@ -16,6 +16,8 @@ export function startApp(): Koa {
     const app: Koa = new Koa()
     const router: Router = new Router();
 
+    // TODO: add in route which logs all errors to error.log
+
     // Logs all endpoint requests in development
     if (process.env.NODE_ENV !== 'prod') { app.use(logger()); }
 

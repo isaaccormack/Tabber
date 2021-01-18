@@ -32,7 +32,7 @@ export const assertLickMetadataValid = async (ctx: Context, lick: Lick): Promise
     return true;
 }
 
-export const assertLickAudioSaved =  async(ctx: Context, lick: Lick, audioFile: any): Promise<boolean> => {
+export const assertLickAudioSaved = async(ctx: Context, lick: Lick, audioFile: any): Promise<boolean> => {
     try {
         lick.audioFileLocation = await LickController.saveAudioFile(audioFile);
     } catch (err) {
@@ -112,7 +112,6 @@ export const getUserByEmailOrErrorResponse = async (ctx: Context): Promise<User 
 
     if (userByEmail) { return userByEmail; }
 
-    logger.error('couldn\'t get user from db\n' + err.stack);
     ctx.status = StatusCodes.PRECONDITION_FAILED;
     ctx.body = { errors: {error: "Error: The user you are trying to (un)share with doesn't exist in the db"}}
     return undefined;

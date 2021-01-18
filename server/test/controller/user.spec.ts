@@ -24,16 +24,6 @@ describe('Unit test: User endpoint', () => {
         sandbox.restore()
     })
 
-    it('should GET array of users', async () => {
-        // stub find method with array to simulate users being returned
-        stubGetUserRepository({ find: function() { return [1, 2, 3] } });
-
-        const ctx = createMockContext();
-        await UserController.getUsers(ctx)
-        
-        expect(ctx.status).toBe(200)
-        expect(ctx.body.length).toBeGreaterThanOrEqual(2)
-    })
     it('should GET user by id', async () => {
         const user = {
             name: 'john',
@@ -146,7 +136,7 @@ describe('Unit test: User endpoint', () => {
                 id: 1
             }
         }
-        
+
         // assume that findOne always finds user by id
         stubGetUserRepository({
             findOne: function() { return user },

@@ -92,9 +92,15 @@ export class LickController {
 
         if (!assertLickExists(ctx, lick) || !assertRequesterCanAccessLick(ctx, lick)) { return; }
 
-        ctx.status = StatusCodes.OK;
-        const readFile = util.promisify(fs.readFile);
-        ctx.body = await readFile(lick.audioFileLocation);
+        try {
+            ctx.status = StatusCodes.OK;
+            const readFile = util.promisify(fs.readFile);
+            ctx.body = await readFile(lick.audioFileLocation);
+        } catch (err) {
+            logger.error('couldn\'t get lick audio from file\n' + err.stack)
+            ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
+            ctx.body = { errors: {error: "Error: Could not get lick audio from file."}}
+        }
     }
 
     /**
@@ -103,17 +109,9 @@ export class LickController {
      * Get the total number of licks in the db.
      */
     public static async getLickCount(ctx: Context): Promise<void> {
-
-        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
-
         try {
-            const { count } = await lickRepository
-                .createQueryBuilder("lick")
-                .select("COUNT(lick.id)", "count")
-                .getRawOne();
-
             ctx.status = StatusCodes.OK;
-            ctx.body = { count };
+            ctx.body = await LickController.getLickCountFromDb();
         } catch (err) {
             logger.error('couldn\'t get lick count\n' + err.stack)
             ctx.status = StatusCodes.BAD_REQUEST;
@@ -261,11 +259,12 @@ export class LickController {
         if (!assertLickExists(ctx, lickToRemove) ||  !assertRequesterIsLickOwner(ctx, lickToRemove)) { return; }
 
         try {
-            await LickController.unlinkAsync(lickToRemove.audioFileLocation);
+            const deleteFile = util.promisify(fs.unlink);
+            await deleteFile(lickToRemove.audioFileLocation);
         } catch (err) {
             // ENOENT == file doesn't exist, let that case fail silently
             if (err.code !== 'ENOENT') {
-                logger.error('couldn\'t delete lick audio\n' + err.stack);
+                logger.error('couldn\'t delete file\n' + err.stack)
                 ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
                 ctx.body = { errors: {error: "Error: Cant unlink lick from file system."}}
                 return
@@ -284,6 +283,17 @@ export class LickController {
         return await lickRepository.findOne({ where: {id: (lickId)}, relations: ['owner', 'sharedWith']});
     }
 
+    public static async getLickCountFromDb(): Promise<number> {
+        const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
+
+        const { count } = await lickRepository
+            .createQueryBuilder("lick")
+            .select("COUNT(lick.id)", "count")
+            .getRawOne();
+
+        return count;
+    }
+
     // TODO: this should really go in DAO layer, not here
     public static async saveLickToDb(lick: Lick): Promise<Lick | undefined> {
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
@@ -297,30 +307,31 @@ export class LickController {
     }
 
     public static async trySaveLickAndSetResponse(ctx: Context, lick: Lick): Promise<boolean> {
-        const updatedLick: Lick | undefined = await LickController.saveLickToDb(lick);
-        if (!updatedLick) {
-            logger.error('couldn\'t update lick ' + lick.id + 'in db')
+        try {
+            const updatedLick: Lick = await LickController.saveLickToDb(lick);
+
+            ctx.status = StatusCodes.OK;
+            ctx.body = updatedLick;
+            return true;
+        } catch (err) {
+            logger.error('couldn\'t update lick in db\n' + err.stack)
             ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
             ctx.body = { errors: {error: "Error: Could not update lick in db"}}
             return false;
         }
-
-        ctx.status = StatusCodes.OK;
-        ctx.body = updatedLick;
-        return true;
     }
 
     public static async tryRemoveLickAndSetResponse(ctx: Context, lick: Lick) {
-        const removedLick: Lick | undefined = await LickController.deleteLickFromDb(lick);
-        if (!removedLick) {
+        try {
+            const removedLick: Lick = await LickController.deleteLickFromDb(lick);
+
+            ctx.status = StatusCodes.OK;
+            ctx.body = removedLick;
+        } catch (err) {
             logger.error('couldn\'t remove lick ' + lick.id + 'from db')
             ctx.status = StatusCodes.INTERNAL_SERVER_ERROR;
             ctx.body = { errors: {error: "Error: Cant remove lick from database."}}
-            return;
         }
-
-        ctx.status = StatusCodes.OK;
-        ctx.body = removedLick;
     }
 
     /**
@@ -365,8 +376,9 @@ export class LickController {
 
         // The owner and sharedWith relations MUST exist be loaded on the lick passed in
         if (!lick.owner || !lick.sharedWith) {
-            throw new Error('The owner and sharedWith relations MUST be loaded on lick parameter')
+            throw new Error('The owner and sharedWith relations MUST be loaded on lick');
         }
+
         return lick.isPublic ||
                 (user && (user.id == lick.owner.id)) ||
                 (lick.sharedWith.some(user => user.id === user.id));
@@ -379,11 +391,5 @@ export class LickController {
         } catch (err) {
             logger.error('couldn\'t delete file\n' + err.stack)
         }
-    }
-
-    // Made this a private class function so it could be easily stubbed when testing
-    private static async unlinkAsync(filePath: string) : Promise<NodeJS.ErrnoException> {
-        const deleteFile = util.promisify(fs.unlink);
-        return await deleteFile(filePath);
     }
 }

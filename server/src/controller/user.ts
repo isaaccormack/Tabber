@@ -201,6 +201,7 @@ export class UserController {
         const userRepository = getManager().getRepository(User);
         return await userRepository.findOne(id);
     }
+
     public static async getUserByEmail(email: string): Promise<User> {
         const userRepository = getManager().getRepository(User);
         return await userRepository.findOne({where: {email: (email)}});
