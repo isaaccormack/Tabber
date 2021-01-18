@@ -8,15 +8,13 @@ export class LickDAO {
         return await lickRepository.findOne({where: {id: (lickId)}, relations: ['owner', 'sharedWith']});
     }
 
-    public static async getLickCountFromDb(): Promise<number> {
+    public static async getLickCountFromDb(): Promise<{string: number}> {
         const lickRepository: Repository<Lick> = getManager().getRepository(Lick);
 
-        const {count} = await lickRepository
+        return await lickRepository
             .createQueryBuilder("lick")
             .select("COUNT(lick.id)", "count")
             .getRawOne();
-
-        return count;
     }
 
     public static async saveLickToDb(lick: Lick): Promise<Lick | undefined> {

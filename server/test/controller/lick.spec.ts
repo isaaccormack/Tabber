@@ -6,6 +6,8 @@ import { User } from "../../src/entity/user";
 import { LickController } from '../../src/controller/lick'
 import { Lick } from '../../src/entity/lick';
 import { LickDAO } from "../../src/dao/lick";
+import { LickAssertions } from "../../src/controller/lickAssertions";
+import { LickUtils } from "../../src/controller/lickUtils";
 const TabModule = require('../../src/tabbing/tabLick');
 
 describe('Unit test: Lick endpoint', () => {
@@ -46,8 +48,8 @@ describe('Unit test: Lick endpoint', () => {
         }
 
         // TODO: fix coupling between lick assertions and this
-        sandbox.stub(LickController, "validateAudioFile").returns(null);
-        sandbox.stub(LickController, "saveAudioFile").returns(mockSavedLick.audioFileLocation);
+        sandbox.stub(LickUtils, "validateAudioFile").returns(null);
+        sandbox.stub(LickUtils, "saveAudioFile").returns(mockSavedLick.audioFileLocation);
         sandbox.stub(audioDuration, "getAudioDurationInSeconds").returns(mockSavedLick.audioLength);
         sandbox.stub(TabModule, "tabLick").returns("");
         sandbox.stub(LickDAO, "saveLickToDb").returns(mockSavedLick);
@@ -71,7 +73,7 @@ describe('Unit test: Lick endpoint', () => {
             capo: 0,
         }
 
-        sandbox.stub(LickController, "validateAudioFile").returns(null);
+        sandbox.stub(LickUtils, "validateAudioFile").returns(null);
 
         const ctx: any = createMockContext();
         ctx.request.body = body;
@@ -101,10 +103,10 @@ describe('Unit test: Lick endpoint', () => {
             capo: 0,
         }
 
-        sandbox.stub(LickController, "validateAudioFile").returns(null);
-        sandbox.stub(LickController, "saveAudioFile").returns(null);
+        sandbox.stub(LickUtils, "validateAudioFile").returns(null);
+        sandbox.stub(LickUtils, "saveAudioFile").returns(null);
         sandbox.stub(audioDuration, "getAudioDurationInSeconds").returns(1000);
-        sandbox.stub(LickController, "attemptToDeleteFile").returns(null);
+        sandbox.stub(LickUtils, "attemptToDeleteFile").returns(null);
 
         const ctx: any = createMockContext();
         ctx.request.body = body;
@@ -261,7 +263,7 @@ describe('Unit test: Lick endpoint', () => {
         mockLick.sharedWith = [];
 
         sandbox.stub(LickDAO, "getLickFromDbById").returns(mockLick);
-        sandbox.stub(LickController, "unlinkAsync").returns(null);
+        sandbox.stub(LickUtils, "unlinkAsync").returns(null);
         sandbox.stub(LickDAO, "deleteLickFromDb").returns(mockLick);
 
         const ctx = createMockContext();
