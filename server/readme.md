@@ -8,6 +8,8 @@ A live-reloading environment is provided for ease of development. Steps to get s
 
 ## Getting Started
 Optional - checkout `develop` branch for most up-to-date code.
+
+1. Either install `mysql` locally, or access to a remote mysql instance. Modify the `ormconfig.js` file so the app can connect to your db
 1. Create a `.env` file in `/server/` which mirrors variables defined in `.env.test`
 2. Install npm dependencies in __both__ `/server/` and `/webapp/`
    ``` npm i && cd ../webapp && npm i ```
