@@ -1,7 +1,7 @@
 import {createConnection, Connection} from "typeorm"
 
 let db: Connection;
-  
+
 /**
  * Initialize database connection
  *
@@ -16,14 +16,13 @@ export function initDb(callback: (err: Error | null, db: Connection) => void): v
         return callback(new Error("Cannot initialize database twice"), undefined);
     }
 
+    // do any necessary database initialization here
     function onConnected(conn: Connection) {
         db = conn;
-
-        // do any necessary database initialization here
-
         callback(null, db)
     }
 
-    createConnection().then((conn: Connection) => onConnected(conn))
+    createConnection()
+        .then((conn: Connection) => onConnected(conn))
         .catch(err => callback(err, db))
 }

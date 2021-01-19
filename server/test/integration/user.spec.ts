@@ -42,9 +42,6 @@ describe('Integration: Users endpoint', () => {
     });
 
     it('should GET currently authenticated user', async () => {
-        console.log('IDENTITY_TOKEN')
-        console.log(IDENTITY_TOKEN)
-
         // since the user is initialzed with the data in the jwt,
         // the user returned is guaranteed to have at least as much
         // data as that in the jwt token

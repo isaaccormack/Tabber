@@ -29,12 +29,14 @@ RUN npm install
 
 # create directories app uses to save files
 RUN mkdir /app/crepe
+RUN mkdir /app/logs
 RUN mkdir /app/uploads
 
 # create user to run app with and give necessary ownership
 RUN addgroup -gid 10001 tabber && \
     adduser -uid 10000 --gid 10001 --home /home/tabber --disabled-password --gecos '' tabber && \
     chown -R tabber:tabber /app/crepe && \
+    chown -R tabber:tabber /app/logs && \
     chown -R tabber:tabber /app/uploads
 
 # copy only necessary files
@@ -43,9 +45,6 @@ COPY dist /app/dist
 COPY tabbing /app/tabbing
 COPY views /app/views
 COPY ormconfig.js /app/
-
-# dont need this now, but will in future...
-ENV NODE_ENV=production
 
 EXPOSE 3000
 

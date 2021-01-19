@@ -16,6 +16,7 @@ services:
         volumes:
             - ./bin:/app/bin
             - ./dist:/app/dist
+            - ./logs:/app/logs
             - ./tabbing:/app/tabbing
             - ./views:/app/views
             - ./ormconfig.js:/app/ormconfig.js
@@ -31,6 +32,7 @@ services:
         ports:
             - "3000:3000"
         volumes:
+            - ./logs:/app/logs
             -  uploads:/app/uploads
 
 volumes:

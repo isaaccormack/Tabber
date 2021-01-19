@@ -1,23 +1,16 @@
 // must be imported first so env vars are available to all imported modules -- use .env.test
 require('dotenv').config({ path: './.env.test' });
-
 import { createSandbox, SinonSandbox } from 'sinon'
 import { createMockContext } from '@shopify/jest-koa-mocks';
-import OAuth2Controller from "../../src/controller/oauth2";
 import * as googleApis from "googleapis";
+
+import OAuth2Controller from "../../src/controller/oauth2";
 import { UserController } from '../../src/controller/user';
 
 describe('Unit test: User endpoint', () => {
-
     let sandbox: SinonSandbox
-
-    beforeEach(() => {
-        sandbox = createSandbox()
-    })
-
-    afterEach(() => {
-        sandbox.restore()
-    })
+    beforeEach(() => { sandbox = createSandbox() })
+    afterEach(() => { sandbox.restore() })
 
     const mockTicket = {
         getPayload(): any {

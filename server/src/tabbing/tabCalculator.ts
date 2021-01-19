@@ -4,6 +4,7 @@ import TabData from "./data/tabData";
 import Tuning from "./data/tuning";
 import StringFret from "./data/stringFret";
 import Capo from "./data/capo";
+import { debugLogger } from "./debugLogger";
 
 // The purpose of this class is to handle conversion from frequency & onset data,
 // as well as tuning + capo + (currently-unimplemented) user input, to a series of
@@ -16,10 +17,10 @@ export default class TabCalculator {
 
     public static async getTabData(pitch: PitchData, onsets: OnsetData, tuning: Tuning, capo: Capo): Promise<TabData> {
         const tabData: TabData = new TabData();
-        console.log("tuning:");
-        console.log(tuning.getNotes());
-        console.log("capo:");
-        console.log(capo.getCapo());
+        debugLogger("tuning:");
+        debugLogger(tuning.getNotes());
+        debugLogger("capo:");
+        debugLogger(capo.getCapo());
 
         tabData.totalSamples = pitch.time.length;
         const onsetIndices: number[] = TabCalculator.onsetsToIndices(onsets.time, pitch.time);
