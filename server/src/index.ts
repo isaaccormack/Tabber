@@ -8,6 +8,8 @@ import Router from "koa-router";
 import serve from "koa-static";
 import * as path from "path";
 
+const winstonLogger = require('./winston/winston');
+
 import { unprotectedRouter } from "./routes/unprotected";
 import { protectedRouter } from "./routes/protected";
 import { authValidator } from "./middleware/auth-validator";
@@ -16,7 +18,14 @@ export function startApp(): Koa {
     const app: Koa = new Koa()
     const router: Router = new Router();
 
-    // TODO: add in route which logs all errors to error.log
+    // Log all uncaught errors in winston
+    app.use(async (ctx, next) => {
+        try {
+            await next();
+        } catch (err) {
+            winstonLogger.error('uncaught error found at server root\n' + err.stack);
+        }
+    });
 
     // Logs all endpoint requests in development
     if (process.env.NODE_ENV !== 'prod') { app.use(logger()); }

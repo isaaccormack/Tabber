@@ -1,5 +1,4 @@
 const fs = require('fs');
-const logger = require('../winston/winston');
 import { Context } from "koa";
 import * as util from 'util';
 import { StatusCodes } from "http-status-codes";
@@ -9,6 +8,7 @@ import { User } from "../entity/user";
 import { LickAssertions } from "./lickAssertions";
 import { LickDAO } from "../dao/lick";
 import { LickUtils } from "./lickUtils";
+const logger = require('../winston/winston');
 
 export class LickController {
 
