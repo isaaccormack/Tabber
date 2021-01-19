@@ -1,5 +1,8 @@
 # Server
-The server is developed locally using `docker` and `docker-compose`. Install these if you haven't already. This is a single page app using client side routing. Upon initial request, the server sends a bundle of React views to the client. These views are built in `/webapp/` and saved into `/server/views/`.
+The server is developed locally using `docker` and `docker-compose`. Install these if you haven't already. The server is responsible for:
+- Tabbing guitar licks via `Crepe`, a Python based ML library for pitch and onset detection
+- Handling CRUD operations on `user` and `lick` entities
+- Serving the single page React app to the client. This app is built in `/webapp/` and saved in `/server/views/`
 
 A live-reloading environment is provided for ease of development. Steps to get started are below.
 
