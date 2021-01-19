@@ -41,7 +41,7 @@ The following steps should be completed in the home directory.
 The server should be running on localhost:3000. The server can be stopped with ` docker-compose down `.
 
 ### Nginx Setup
-The below steps are summarized from a [simple tutorial](https://winstonkotzan.com/blog/2019/03/09/production-https-setup-for-ruby-on-rails-app-with-docker.html) outling how to use nginx with certbot as a reverse proxy using https.
+The below steps are summarized from a [simple tutorial](https://winstonkotzan.com/blog/2019/03/09/production-https-setup-for-ruby-on-rails-app-with-docker.html) outlining how to use nginx with certbot as a reverse proxy using https. An example of the resultant nginx file can be seen in the repo under `/server/nginx/`
 1. Ensure the firewall is configured to allow inbound http (port 80) and https (port 443) traffic.
 2. Modify the default nginx server being run in `/etc/nginx/sites-available/default` to proxy all requests to
    tabber running on localhost:3000. Delete the `root` and `index` fields in the server. The resulting server should look something like this:
