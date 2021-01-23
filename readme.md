@@ -58,10 +58,3 @@ Just some easy ones.
 
 ### As a Beginner, I want to:
 1. Use a _pretty_ website so all my friends will be jealous.
-
-[contributors-shield]: https://img.shields.io/github/contributors/isaaccormack/tabber.svg
-[contributors-url]: https://github.com/isaaccormack/tabber/graphs/contributors
-[issues-shield]: https://img.shields.io/github/issues/isaaccormack/tabber.svg
-[issues-url]: https://github.com/othneildrew/isaaccormack/tabber/issues
-[coverage-shield]: https://codecov.io/gh/isaaccormack/Tabber/branch/develop/graph/badge.svg?token=V131OTWNTG
-[coverage-url]: https://codecov.io/gh/isaaccormack/Tabber
