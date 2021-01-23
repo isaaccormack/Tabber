@@ -1,9 +1,15 @@
-![Version](https://img.shields.io/github/package-json/v/isaaccormack/tabber/develop/server?style=flat-square) <br/>
-![Version](https://img.shields.io/github/package-json/v/isaaccormack/tabber/develop/webapp?style=flat-square) <br/>
-![Dependencies](https://img.shields.io/david/isaaccormack/tabber?path=server&style=flat-square) <br/>
-![Contributors](https://img.shields.io/github/contributors/isaaccormack/tabber?style=flat-square)  <br/>
-![Issues](https://img.shields.io/github/issues-raw/isaaccormack/tabber?style=flat-square) <br/>
-![Code Coverage](https://img.shields.io/codecov/c/github/isaaccormack/tabber/develop?style=flat-square) <br/>
+<p align="center">
+    <img src="https://github.com/isaaccormack/Tabber/blob/develop/webapp/public/logo.png" height="130">
+</p>
+
+<p align="center">
+    <img src="https://img.shields.io/github/package-json/v/isaaccormack/tabber/develop/server?style=flat-square" />
+    <img src="https://img.shields.io/github/package-json/v/isaaccormack/tabber/develop/webapp?style=flat-square" />
+    <img src="https://img.shields.io/david/isaaccormack/tabber?path=server&style=flat-square" />
+    <img src="https://img.shields.io/github/contributors/isaaccormack/tabber?style=flat-square" />
+    <img src="https://img.shields.io/github/issues-raw/isaaccormack/tabber?style=flat-square" />
+    <img src="https://img.shields.io/codecov/c/github/isaaccormack/tabber/develop?style=flat-square" />
+</p>
 
 # Tabber
 Play licks, get tabs.
