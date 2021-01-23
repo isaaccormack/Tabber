@@ -1,5 +1,7 @@
 <p align="center">
-    <img src="https://github.com/isaaccormack/Tabber/blob/develop/webapp/public/logo.png" height="130">
+    <a href="https://tabber1.icormack.com/" >
+        <img src="https://github.com/isaaccormack/Tabber/blob/develop/webapp/public/logo.png" height="130">
+    </a>
 </p>
 
 <p align="center">
@@ -11,56 +13,23 @@
     <img src="https://img.shields.io/codecov/c/github/isaaccormack/tabber/develop?style=flat-square" />
 </p>
 
-# Tabber
-Play licks, get tabs.
+<h1 align="center">Play Licks, Get Tabs</h1>
 
-## What's a Lick? 
-We define a lick as a short musical phrase in which only one note is played at a time.
+:musical_score:	__Tabber__ is a simple web app which automatically tabs guitar licks. <music icon> <br/> <br/>
+:guitar:	__Licks__ are short musical phrases where only a single note is played at a time. <br/> <br/>
+:studio_microphone:	Simply __upload__ or __record__ a lick into your computers microphone and get tabs in seconds. <br/> <br/>
+:revolving_hearts:	Licks are then __saved__ to your library where they can be __shared__ with friends.
+    
+<p align="right"><em>Check it out: <a href="https://tabber1.icormack.com">tabber1.icormack.com</a></em></p>
 
-## Ok, Well Whats Tabber?
-Tabber is a web app which generates tablature for licks played from an instrument (guitar, bass, piano, etc) into the computers microphone. Along with this, Tabber proides musicians a play to store and share their original licks, or licks from popular songs.
+# How Does it Work?
+Tabber uses a pre-trained machine learning model for both pitch and onset detection to determine which note was played and when. A heuristic is then used to estimate where the notes were likely played on the fretboard. Tabs are generated from these locations as raw text. 
 
-## How do we Make Tabber?
-Tabber takes advantage of an existing machine learning model, such as ml5's pitch detection, to classify notes. The location of these notes on the instrument (say, guitar neck) is then determined using a heuristic considering past and (future?) notes and the likelihood of their proximity. The heuristic could possibly be machine learning based. 
+# About
+Tabber started as a UVic capstone project written in the summer of 2020 by three UVic students interested in solving new problems with machine learning. Since its initial implementaion, new features have been implemented periodically. Feedback or suggestions for new features are welcome! 
 
-Tabber also consists of an online app platform which implements many features (listed below) using standard web technologies.
 
-## Why Bother?
-- Writing down tabs is slow, Tabber is fast
-- Getting tabs is easy, just play
-- Lots of great licks are just that... _licks_
+<br/>Tabber is currently an _alpha_ release. Please submit any bugs found as github issues.
 
-## Lets Talk Requirements
-Just to feel out the app, a couple requirements are given below.
-
-### Core Requirement
-- Abilty to generate tablature in a .txt format during, or after, a lick is played into the computers microphone via a guitar, bass, or piano.
-
-### App Features
-- Ability to create an account
-    - A user is able to save their recorded licks with tablature
-    - _*maybe_ A user is able to play the tabs back through a different instrument (ie. synth tones, piano, etc.)
-- Ability to share tabs between users (Share links or direct to user)
-- Ability to export tabs to pdf
-- _*maybe_ Ability to upload licks to be tabbed in a variety of formats 
-
-### Quality Requirements
-- _Usability_ - Simple and intuitive to use, minimal interface, attractive.
-- _Responsiveness_ - User requests are handled immediately. (ie. stop recording)
-- _Performance_ - Low latency in tab generation
-
-## Maybe a Couple Use Cases Too
-Just some easy ones.
-
-### As a Song Writer, I want to:
-1. Have my licks tabbed automatically to save time.
-2. Store my licks for future reference.
-3. Have my licks and tabs stored in the same place for convenience.
-4. Be able to download my tabs in a _pretty_ .pdf format to showcase my work.
-
-### As a Guitar Player, I want to:
-1. Tab a famous guitar lick so I can send it to my friend to help him learn the lick.
-2. Share my lick publicly so everyone can hear it
-
-### As a Beginner, I want to:
-1. Use a _pretty_ website so all my friends will be jealous.
+# Contributing
+Community additions are welcomed! Please see the readmes in `/webapp` and `/server` to get started developing the front or back-end. Feel free to reach out to me personally to discuss feature development, or submit a PR.
