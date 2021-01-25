@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://tabber1.icormack.com/" >
+    <a href="https://tabber.icormack.com/" >
         <img src="https://github.com/isaaccormack/Tabber/blob/develop/webapp/public/logo.png" height="130">
     </a>
 </p>
@@ -20,7 +20,7 @@
 :studio_microphone:	Simply __upload__ or __record__ a lick into your computers microphone and get tabs in seconds. <br/> <br/>
 :revolving_hearts:	Licks are then __saved__ to your library where they can be __shared__ with friends.
     
-<p align="right"><em>Check it out: <a href="https://tabber1.icormack.com">tabber1.icormack.com</a></em></p>
+<p align="right"><em>Check it out: <a href="https://tabber.icormack.com">tabber.icormack.com</a></em></p>
 
 # How Does it Work?
 Tabber uses a pre-trained machine learning model for both pitch and onset detection to determine which note was played and when. A heuristic is then used to estimate where the notes were likely played on the fretboard. Tabs are generated from these locations as raw text. 

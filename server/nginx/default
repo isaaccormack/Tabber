@@ -40,7 +40,7 @@ server {
   #
   # include snippets/snakeoil.conf;
 
-  server_name tabber1.icormack.com  www.tabber1.icormack.com;
+  server_name tabber.icormack.com  www.tabber.icormack.com;
 
   location / {
     # First attempt to serve request as file, then
@@ -73,8 +73,8 @@ server {
 
   listen [::]:443 ssl ipv6only=on; # managed by Certbot
   listen 443 ssl; # managed by Certbot
-  ssl_certificate /etc/letsencrypt/live/tabber1.icormack.com/fullchain.pem; # managed by Certbot
-  ssl_certificate_key /etc/letsencrypt/live/tabber1.icormack.com/privkey.pem; # managed by Certbot
+  ssl_certificate /etc/letsencrypt/live/tabber.icormack.com/fullchain.pem; # managed by Certbot
+  ssl_certificate_key /etc/letsencrypt/live/tabber.icormack.com/privkey.pem; # managed by Certbot
   include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
   ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 }
@@ -100,12 +100,12 @@ server {
 #}
 
 server {
-    if ($host = www.tabber1.icormack.com) {
+    if ($host = www.tabber.icormack.com) {
         return 301 https://$host$request_uri;
     } # managed by Certbot
 
 
-    if ($host = tabber1.icormack.com) {
+    if ($host = tabber.icormack.com) {
         return 301 https://$host$request_uri;
     } # managed by Certbot
 
@@ -113,6 +113,6 @@ server {
   listen 80 default_server;
   listen [::]:80 default_server;
 
-  server_name tabber1.icormack.com  www.tabber1.icormack.com;
+  server_name tabber.icormack.com  www.tabber.icormack.com;
     return 404; # managed by Certbot
 }
