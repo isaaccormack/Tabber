@@ -57,7 +57,7 @@ export default function LandingPage() {
   const renderLandingPage = () => {
     return (
       <>
-        <TitleBlock title={"Play Licks, Get Tabs"} desc={"Upload or record a lick, have it tabbed automatically"}/>
+        <TitleBlock title={"Play Licks, Get Tabs"} desc={"Upload or record a guitar lick, have it tabbed automatically"}/>
         <Row style={{marginTop: '50px'}}>
           <Col xs={6}>
           <NavigationCard

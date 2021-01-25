@@ -29,9 +29,7 @@ export default function Footer() {
         }
         setLickCount(responseJson.count);
       })
-      .catch((err: Error) => {
-        console.error(err);
-      })
+      .catch((err) => console.error(err));
   }, []);
 
   const formatLickCount = (count: number | undefined): string => {

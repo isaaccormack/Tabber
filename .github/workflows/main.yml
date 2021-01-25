@@ -13,15 +13,13 @@ jobs:
     defaults:
       run: 
         working-directory: ./server
+    env:
+      OAUTH_CLIENT_ID: ${{secrets.OAUTH_CLIENT_ID}}
+      OAUTH_CLIENT_SECRET: ${{secrets.OAUTH_CLIENT_SECRET}}
+      OAUTH_REDIRECT_URL: ${{secrets.OAUTH_REDIRECT_URL}}
     steps:
       - name: checkout
         uses: actions/checkout@v2
-
-      - name: make keys.json
-        run: |
-          mkdir -p ./keys
-          touch ./keys/keys.json
-          echo '{ "YOUR_CLIENT_ID": "${{secrets.CLIENT_ID}}", "YOUR_CLIENT_SECRET": "${{secrets.CLIENT_SECRET}}", "YOUR_REDIRECT_URL": "${{secrets.REDIRECT_URL}}", "YOUR_TEST_IDENTITY_TOKEN": "token", "TEST_USER_IDENTITY_TOKEN": "token" }' > ./keys/keys.json
 
       - name: setup node.js
         uses: actions/setup-node@v1
@@ -33,3 +31,9 @@ jobs:
 
       - name: test
         run: npm test
+      
+      - name: upload to codecov
+        uses: codecov/codecov-action@v1
+        with:
+          fail_ci_if_error: true
+          verbose: true

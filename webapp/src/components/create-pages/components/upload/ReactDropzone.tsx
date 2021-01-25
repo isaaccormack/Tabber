@@ -8,6 +8,7 @@ export default function ReactDropzone(props: any) {
 
   const MAX_FILE_SIZE_MB = 2;
   const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1000 * 1000;
+  const MAX_AUDIO_LENGTH = 15; // seconds
 
   const [fileErrorMsg, setFileErrorMsg] = useState<string>();
 
@@ -16,7 +17,7 @@ export default function ReactDropzone(props: any) {
     if (errMsg.includes('must be audio')) {
       setFileErrorMsg("File must be mp3, wav, or mp4");
     } else if (errMsg.includes('larger than')) {
-      setFileErrorMsg("File must be less than 5 Mb");
+      setFileErrorMsg("File must be less than 2 Mb");
     } else {
       setFileErrorMsg("File is invalid");
     }
@@ -25,8 +26,8 @@ export default function ReactDropzone(props: any) {
   const onDropAccepted = useCallback(acceptedFiles => {
     let audio = new Audio();
     audio.addEventListener("loadedmetadata", () => {
-      if (!audio.duration || audio.duration > 30) {
-        setFileErrorMsg("File must be less than 30 seconds long");
+      if (!audio.duration || audio.duration > MAX_AUDIO_LENGTH) {
+        setFileErrorMsg("File must be less than" + MAX_AUDIO_LENGTH + " seconds long");
       } else {
         props.setFile(acceptedFiles[0])
       }

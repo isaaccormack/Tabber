@@ -1,22 +1,18 @@
 {
-    "name": "tabber",
-    "version": "0.0.1",
-    "description": "Play licks, get tabs",
+    "name": "tabber-server",
+    "version": "1.0.0",
+    "private": true,
     "scripts": {
         "start": "tsc && node bin/www",
         "build": "(cd ../webapp && npm run build) && tsc",
-        "dev": "nodemon -e js bin/www",
+        "dev": "nodemon -L -e js bin/www",
         "test": "tsc && jest --coverage dist/test/controller/*.spec.js dist/test/middleware/*.spec.js",
-        "integration-jest": "tsc && jest --coverage dist/test/integration/index.spec.js && jest --coverage dist/test/integration/user.spec.js && jest --coverage dist/test/integration/lick.spec.js && jest --coverage dist/test/integration/userLicks.spec.js && jest --coverage dist/test/integration/userSharedLicks.spec.js",
-        "update-views": "(cd ../webapp && npm run build)",
-        "clean": "rm -rf node_modules",
-        "fully-rebuild": "npm run clean && npm install && npm run build"
+        "integration": "tsc && jest --coverage dist/test/integration/index.spec.js && jest --coverage dist/test/integration/user.spec.js && jest --coverage dist/test/integration/lick.spec.js && jest --coverage dist/test/integration/userLicks.spec.js && jest --coverage dist/test/integration/userSharedLicks.spec.js"
     },
     "repository": {
         "type": "git",
         "url": "git+https://github.com/isaaccormack/Tabber.git"
     },
-    "author": "",
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/isaaccormack/Tabber/issues"
@@ -33,7 +29,7 @@
         "@types/uuid": "^8.0.0",
         "jest": "^26.0.1",
         "jwt-decode": "^2.2.0",
-        "nodemon": "^2.0.4",
+        "nodemon": "^2.0.7",
         "sinon": "^9.0.2",
         "supertest": "^4.0.2",
         "typescript": "^3.9.1"
@@ -41,6 +37,7 @@
     "dependencies": {
         "class-validator": "^0.12.0",
         "csv-parse": "^4.10.1",
+        "dotenv": "^8.2.0",
         "fluent-ffmpeg": "^2.1.2",
         "get-audio-duration": "^2.0.2-beta.0",
         "googleapis": "^51.0.0",
@@ -55,6 +52,7 @@
         "mysql": "^2.18.1",
         "shelljs": "^0.8.4",
         "typeorm": "^0.2.0",
-        "uuid": "^8.1.0"
+        "uuid": "^8.1.0",
+        "winston": "^3.3.3"
     }
 }

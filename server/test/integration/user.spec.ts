@@ -1,3 +1,5 @@
+require('dotenv').config({ path: './.env.test' });
+
 import request from 'supertest'
 import { Connection } from 'typeorm';
 import Koa from 'koa'
@@ -7,21 +9,15 @@ import * as dbModule from "../../src/database/dbclient";
 
 var jwtDecode = require('jwt-decode');
 
-var jwtDecode = require('jwt-decode');
-
-import * as keys from "../../keys/keys.json";
-const identityToken = keys.YOUR_TEST_IDENTITY_TOKEN;
-
-if (!identityToken) {
-    console.log("MUST INSERT IDENTITY TOKEN FOR INTEGRATION TESTING");
-}
+const IDENTITY_TOKEN = process.env.YOUR_TEST_IDENTITY_TOKEN;
+if (!IDENTITY_TOKEN) throw new Error("MUST INSERT IDENTITY TOKEN FOR INTEGRATION TESTING");
 
 
 /**
  * User tests.
- * 
+ *
  * Testing of basic functionality in the user endpoint.
- * 
+ *
  * LAST MODIFIED: June 21 2020
  */
 describe('Integration: Users endpoint', () => {
@@ -29,7 +25,7 @@ describe('Integration: Users endpoint', () => {
     let db: Connection
     let id: Number
 
-    const token = jwtDecode(identityToken);
+    const token = jwtDecode(IDENTITY_TOKEN);
 
     beforeAll((done) => {
         dbModule.initDb((err, conn) => {
@@ -44,26 +40,26 @@ describe('Integration: Users endpoint', () => {
     afterAll((done) => {
         db.close().then(done())
     });
-    
+
     it('should GET currently authenticated user', async () => {
-        // since the user is initialzed with the data in the jwt, 
+        // since the user is initialzed with the data in the jwt,
         // the user returned is guaranteed to have at least as much
         // data as that in the jwt token
         const response: request.Response = await request(app.callback())
         .get('/api/user')
-        .set("Cookie", "ti="+identityToken);
-        
+        .set("Cookie", "ti="+IDENTITY_TOKEN);
+
         expect(response.status).toBe(200);
         expect(response.body.name).toEqual(token.name)
         expect(response.body.email).toEqual(token.email)
         expect(response.body.id).toBeGreaterThan(0)
-        
+
         id = response.body.id;
     });
     it('should GET all users', async () => {
         const response: request.Response = await request(app.callback())
             .get('/api/users')
-            .set("Cookie", "ti="+identityToken);
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
 
         expect(response.status).toBe(200);
         // since at least the account created above exists
@@ -72,8 +68,8 @@ describe('Integration: Users endpoint', () => {
     it('should GET user by id', async () => {
         const response: request.Response = await request(app.callback())
             .get('/api/users/' + id)
-            .set("Cookie", "ti="+identityToken);
-        
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
+
         expect(response.status).toBe(200);
         expect(response.body.name).toEqual(token.name)
         expect(response.body.email).toEqual(token.email)
@@ -82,15 +78,15 @@ describe('Integration: Users endpoint', () => {
     it('should DELETE the new user', async () => {
         const response: request.Response = await request(app.callback())
             .delete('/api/user')
-            .set("Cookie", "ti="+identityToken);
-        
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
+
         expect(response.status).toBe(204);
 
         // expect there to no longer exist a user with the deleted id
         const res: request.Response = await request(app.callback())
             .get('/api/users/' + id)
-            .set("Cookie", "ti="+identityToken);
-        
+            .set("Cookie", "ti="+IDENTITY_TOKEN);
+
         expect(res.status).toBe(400);
         expect(res.body.errors.error).toContain("doesn't exist in the db");
     });

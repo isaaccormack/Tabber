@@ -1,15 +1,34 @@
-## Getting Started
-To run the app:
-1. Set `"host": "localhost"` in `ormconfig.json`
-2. Add `keys.json` into the `keys/` folder. 
-3. `npm i` in the `/webapp` directory to install web app dependencies
-4. Back in `/server`, `npm i && npm run update-views && npm start`
-5. The app should be running on localhost:3000
+# Server
+The server is developed locally using `docker` and `docker-compose`. Install these if you haven't already. The server is responsible for:
+- Tabbing guitar licks via `Crepe`, a Python based ML library for pitch and onset detection
+- Handling CRUD operations on `user` and `lick` entities
+- Serving the single page React app to the client. This app is built in `/webapp/` and saved in `/server/views/`
 
-## Developing
-To develop the app with hot-reloading:
-1. In one terminal: `tsc -w`
-2. Concurrently in another: `npm run dev`
+A live-reloading environment is provided for ease of development. Steps to get started are below.
+
+## Getting Started
+Optional - checkout `develop` branch for most up-to-date code.
+
+1. Either install `mysql` locally, or access to a remote mysql instance. Modify the `ormconfig.js` file so the app can connect to your db
+1. Create a `.env` file in `/server/` which mirrors variables defined in `.env.test`
+2. Install npm dependencies in __both__ `/server/` and `/webapp/`
+   ``` npm i && cd ../webapp && npm i ```
+3. Transpile the typescript and create bundle of react views
+   ``` npm run build ```
+4. Build and run the docker image
+   ``` docker-compose up --build tabber-dev ```
+
+Use ``` docker-compose down ``` to take the app down.
+
+Tabber should be running on localhost:3000
+
+### Live-Reloading
+The docker-compose file creates a bind-mount between the source code directories on your local machine and within the container. To enable live-reloading, simply run `tsc -w` while the app is running in docker to have changes to the typescript automatically transpiled. The app is being run in docker with `nodemon`, so it will restart when changes to the javascript are made.
+
+### Not Using Docker
+If running the app on your local machine is preferred:
+- Use the `Dockerfile` as a guide to install all dependencies
+- Run `npm start` to start the server or `tsc -w` and `npm run dev` _concurrently_ to enable live-reloading via nodemon
 
 ## Testing
 Jest is used for testing.
@@ -19,23 +38,3 @@ Jest is used for testing.
 ## Updating React Views
 To refresh the React bundle sent from the server:
 - `npm run update-views` - then restart the server
-
-## Docker
-### Development Build
-To run the app in a docker image locally:
-1. Set `"host": "host.docker.internal"` in `ormconfig.json`.
-2. `npm run build`
-3. `docker build -t tabber:0.0.1 .`
-4. `docker-compose up`
-
-### Production Build
-To push the docker build to production server:
-1. rename `ormconfig-prod.json` to `ormconfig.json`
-2. rename `keys-prod.json` to `keys.json`
-3. `npm run build`
-4. `docker build -t mrvernonliu/tabber:0.0.1 .`
-5. `docker push mrvernonliu/tabber:0.0.1`
-
-On the server run:
-1. `docker pull mrvernonliu/tabber:0.0.1`
-2. `docker-compose up -d`

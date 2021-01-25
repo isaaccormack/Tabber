@@ -1,4 +1,0 @@
-numba == 0.48 # librosa requires exactly this version
-librosa >= 0.7.2, < 0.8 # librosa 0.8 is unreleased and untested
-tensorflow >= 2.0 # crepe requires tensorflow 2.0+
-crepe # latest

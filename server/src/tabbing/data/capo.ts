@@ -4,9 +4,8 @@ export default class Capo {
 
     constructor(capo: number) {
         this.capo = Math.round(capo);
-        if (capo < 0 || capo > 24) {
-            console.error("invalid capo")
-            throw new Error("Invalid capo");
+        if (capo < 0 || capo > 9) {
+            throw new Error("invalid capo");
         }
     }
 

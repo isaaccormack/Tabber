@@ -4,27 +4,28 @@
  * Module dependencies.
  */
 
+require('dotenv').config();
 var appModule = require("../dist/src/index");
 var dbModule = require("../dist/src/database/dbclient");
+
 
 /**
  * Initialize database before creating HTTP server.
  */
-
 dbModule.initDb(err => {
 
     /* We can only run the app if we have a working database. */
     if (err) {
-        console.log("Failed to connect to database. Cannot start the app.");
+        console.error("[tabber] failed to connect to db");
         throw err;
     }
-    console.log("Successfully connected to database. Starting app.");
+    console.log("[tabber] connected to db");
 
     /* Create the Express server object. */
-    var app = appModule.startApp()
+    const app = appModule.startApp()
 
     /* Get port from environment and listen. */
-    var port = +(process.env.PORT || "3000");
+    const port = 3000;
     app.listen(port);
-    console.log("Listening on port " + port);
+    console.log("[tabber] listening on port " + port);
 });

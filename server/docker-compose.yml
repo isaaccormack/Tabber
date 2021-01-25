@@ -1,12 +1,39 @@
-version: '3'
+version: '3.2'
 
 services:
-    tabber:
-#        should tag this, ie. tabber:0.0.1
-        image: tabber
+    tabber-dev:
+        build:
+            context: .
+            dockerfile: Dockerfile.dev
+        image: tabber-dev
+        container_name: tabber-dev
+        env_file:
+            - .env
+        environment:
+            - NODE_ENV=local_docker
         ports:
             - "3000:3000"
         volumes:
-            - type: bind
-              source: ./uploads
-              target: /app/uploads
+            - ./bin:/app/bin
+            - ./dist:/app/dist
+            - ./logs:/app/logs
+            - ./tabbing:/app/tabbing
+            - ./views:/app/views
+            - ./ormconfig.js:/app/ormconfig.js
+            - uploads:/app/uploads
+
+    tabber:
+        image: tabber
+        container_name: tabber
+        env_file:
+            - .env
+        environment:
+            - NODE_ENV=local_docker
+        ports:
+            - "3000:3000"
+        volumes:
+            - ./logs:/app/logs
+            -  uploads:/app/uploads
+
+volumes:
+    uploads:
