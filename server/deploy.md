@@ -31,14 +31,20 @@ The following steps should be completed in the home directory.
 3. Create a `docker-compose.yml` file and copy the `tabber` service into it from the docker-compose.yml file in the repo. __Update__ the image field to the latest tag to be pulled from docker hub. (ie. `image: icormack/tabber:X.Y.Z`)
 
 ### Docker Deploy
+If the server is already running, take it down ``` docker-compose down ```
+
 1. Pull the latest image from docker hub
    ``` sudo docker pull icormack/tabber:X.Y.Z ```
-2. Run the image using docker-compose (-d to run in background)
+2. Update the image field in the docker-compose.yml file on the sever to version `X.Y.Z`
+   ``` image: icormack/tabber:X.Y.Z ```
+3. Run the image using docker-compose (-d to run in background)
    ``` docker-compose up -d ```
 3. Check the logs to see if the server started successfully
    ``` docker-compose logs ```
 
-The server should be running on localhost:3000. The server can be stopped with ` docker-compose down `.
+The server should be running on localhost:3000.
+
+Good practice is then to check if the changes made are reflected on the server and non-breaking.
 
 ### Nginx Setup
 The below steps are summarized from a [simple tutorial](https://winstonkotzan.com/blog/2019/03/09/production-https-setup-for-ruby-on-rails-app-with-docker.html) outlining how to use nginx with certbot as a reverse proxy using https. An example of the resultant nginx file can be seen in the repo under `/server/nginx/`

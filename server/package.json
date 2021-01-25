@@ -1,7 +1,7 @@
 {
-    "name": "tabber",
-    "version": "0.0.3",
-    "description": "Play licks, get tabs",
+    "name": "tabber-server",
+    "version": "1.0.0",
+    "private": true,
     "scripts": {
         "start": "tsc && node bin/www",
         "build": "(cd ../webapp && npm run build) && tsc",
@@ -13,7 +13,6 @@
         "type": "git",
         "url": "git+https://github.com/isaaccormack/Tabber.git"
     },
-    "author": "",
     "license": "MIT",
     "bugs": {
         "url": "https://github.com/isaaccormack/Tabber/issues"
