@@ -83,6 +83,7 @@ export default class TabCalculator {
                 return { stringIdx: i, fret: note - notes[i] };
             }
         }
-        throw new Error("Could not determine string and fret of note (note index: " + note + ")");
+        debugLogger('couldn\'t determine string and fret of note (note index: ' + note + ')');
+        return null;
     }
 }
