@@ -24,16 +24,16 @@ export default function Footer() {
         throwFormattedError('Lick count could not be retrieved', response.status, response.statusText);
       })
       .then((responseJson: any) => {
-        if (!responseJson.count) {
+        if (responseJson.count === undefined) {
           throw new Error('No count attribute on response');
         }
         setLickCount(responseJson.count);
       })
       .catch((err) => console.error(err));
-  }, []);
+  }, [window.location.pathname]);
 
   const formatLickCount = (count: number | undefined): string => {
-    if (!count) return '';
+    if (count === undefined) return '';
 
     // from https://stackoverflow.com/a/2901298
     return count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -50,12 +50,10 @@ export default function Footer() {
           </Col>
           <Col>
             <Row className="justify-content-md-center">
-              {/*<img src={EnvelopeIcon} height={22} alt="envelope icon" style={{marginLeft: '10px', opacity: 0.4}}/>*/}
               <a href="https://github.com/isaacormack/Tabber" target="_blank">
                 <img src={GitHubIcon} height={22} alt="github icon" style={{marginLeft: '10px', opacity: 0.4}}/>
 
               </a>
-              {/*<img src={LinkedInIcon} height={22} alt="linkedin icon" style={{marginLeft: '10px', opacity: 0.4}}/>*/}
             </Row>
           </Col>
           <Col>

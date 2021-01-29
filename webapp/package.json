@@ -1,6 +1,6 @@
 {
   "name": "tabber-webapp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "private": true,
   "scripts": {
     "start": "PORT=3001 react-scripts start",
