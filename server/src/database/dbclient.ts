@@ -1,4 +1,5 @@
 import {createConnection, Connection} from "typeorm"
+import { LickCount } from "../entity/lickCount";
 
 let db: Connection;
 
@@ -17,9 +18,17 @@ export function initDb(callback: (err: Error | null, db: Connection) => void): v
     }
 
     // do any necessary database initialization here
-    function onConnected(conn: Connection) {
+    const onConnected = (conn: Connection) => {
         db = conn;
-        callback(null, db)
+
+        conn.getRepository(LickCount).findOne(1)
+            .then((lickCount) => {
+                if (!lickCount) {
+                    conn.getRepository(LickCount).insert({id: 1, count: 0})
+                }
+            })
+            .then(() => callback(null, db))
+            .catch(err => callback(err, db));
     }
 
     createConnection()
