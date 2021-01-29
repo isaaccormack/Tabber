@@ -80,7 +80,12 @@ export default class TabCalculator {
         const notes: number[] = tuning.getNotes().map(x => x + capo.getCapo());
         for (var i = 0; i < notes.length; ++i) {
             if (note >= notes[i]) {
-                return { stringIdx: i, fret: note - notes[i] };
+                const fret = note - notes[i];
+                if (fret > 19) {
+                    // something has gone wrong, ignore it for now
+                    return null;
+                }
+                return { stringIdx: i, fret: fret };
             }
         }
         debugLogger('couldn\'t determine string and fret of note (note index: ' + note + ')');

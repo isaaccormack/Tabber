@@ -8,6 +8,7 @@ import { User } from "../entity/user";
 import { LickAssertions } from "./lickAssertions";
 import { LickDAO } from "../dao/lick";
 import { LickUtils } from "./lickUtils";
+import { LickCountDAO } from "../dao/lickCount";
 const logger = require('../winston/winston');
 
 export class LickController {
@@ -39,15 +40,24 @@ export class LickController {
         if (!await LickAssertions.tabbedSuccessfully(ctx, lick)) { return; }
 
         if (user) {
-            if (!await LickAssertions.lickSaved(ctx, lick)) {
+            if (await LickAssertions.lickSaved(ctx, lick)) {
+                // Override default OK status
+                ctx.status = StatusCodes.CREATED;
+            } else {
                 await LickUtils.attemptToDeleteFile(lick.audioFileLocation);
             }
-            // Override default OK status
-            ctx.status = StatusCodes.CREATED;
         } else {
             await LickUtils.attemptToDeleteFile(lick.audioFileLocation);
             ctx.status = StatusCodes.CREATED;
             ctx.body = lick;
+        }
+
+        if (ctx.status === StatusCodes.CREATED) {
+            try {
+                await LickCountDAO.incrementLickCountInDB();
+            } catch (err) {
+                logger.error('couldn\'t update lick count in db\n' + err.stack)
+            }
         }
     }
 
@@ -97,7 +107,7 @@ export class LickController {
     public static async getLickCount(ctx: Context): Promise<void> {
         try {
             ctx.status = StatusCodes.OK;
-            ctx.body = await LickDAO.getLickCountFromDb();
+            ctx.body = await LickCountDAO.getLickCountFromDb();
         } catch (err) {
             logger.error('couldn\'t get lick count\n' + err.stack)
             ctx.status = StatusCodes.BAD_REQUEST;
